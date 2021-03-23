@@ -1,0 +1,30 @@
+
+apply plugin: 'com.android.application'
+
+repositories {
+    maven {
+        url 'file://home/iosusan/rosjava_minimal/devel/share/maven'
+    }
+}
+
+dependencies {
+    implementation 'com.github.rosjava.android_remocons:common_tools:0.3.0'
+    implementation 'org.ros.android_core:android_core_components:0.4.0'
+    implementation 'org.ros.rosjava_messages:tf2_msgs:0.5.20'
+//    implementation 'org.ros.rosjava_core:rosjava_tutorial_pubsub:0.2.2'
+    implementation 'org.ros.rosjava_messages:std_msgs:0.5.11'
+    implementation 'org.ros.rosjava_messages:geometry_msgs:1.12.7'
+    implementation 'org.ros.rosjava_messages:multilevel_navigation_msgs:0.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+
+}
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        minSdkVersion 28
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+    }
+}
