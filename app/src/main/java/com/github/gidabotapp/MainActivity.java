@@ -1,9 +1,13 @@
-package com.github.rosjava.android_apps.messages_test;
+package com.github.gidabotapp;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
+
+import com.github.rosjava.android_apps.messages_test.R;
 
 import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
@@ -21,8 +25,9 @@ public class MainActivity extends RosActivity {
     private RosTextView<geometry_msgs.PoseStamped> rosTextViewTalker;
 
 //    private TalkerPoseStamped talker;
-    private TalkerGoal talker;
+    private QNode talker;
     private CurrentPosListener listener;
+    NodeConfiguration nodeConfiguration;
 
     public MainActivity() {
         // The RosActivity constructor configures the notification title and ticker
@@ -35,6 +40,25 @@ public class MainActivity extends RosActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        final Button publishBtn = findViewById(R.id.publishBtn);
+        publishBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                talker.publishGoal();
+                showToast("Goal published");
+            }
+        });
+
+        final Button cancelBtn = findViewById(R.id.cancelBtn);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                talker.publishCancel();
+                showToast("Goal cancelled");
+            }
+        });
+
 
         // TALKER
         rosTextViewTalker = (RosTextView<geometry_msgs.PoseStamped>) findViewById(R.id.textTalker);
@@ -52,7 +76,7 @@ public class MainActivity extends RosActivity {
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
 //        talker = new TalkerPoseStamped();
-        talker = new TalkerGoal();
+        talker = new QNode();
         listener = new CurrentPosListener(this);
 
 
@@ -62,7 +86,7 @@ public class MainActivity extends RosActivity {
         // The user can easily use the selected ROS Hostname in the master chooser
         // activity.
 
-        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getRosHostname());
+        nodeConfiguration = NodeConfiguration.newPublic(getRosHostname());
         Log.i("HostName", getRosHostname());
         //NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
         nodeConfiguration.setMasterUri(getMasterUri());
@@ -97,7 +121,6 @@ public class MainActivity extends RosActivity {
     }
 
     public void showToast(String text){
-        Log.i("Toast","showToast()");
         Context context = getApplicationContext();
         int duration = Toast.LENGTH_SHORT;
 

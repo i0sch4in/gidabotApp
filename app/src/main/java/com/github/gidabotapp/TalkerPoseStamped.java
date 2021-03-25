@@ -1,4 +1,4 @@
-package com.github.rosjava.android_apps.messages_test;
+package com.github.gidabotapp;
 
 import org.ros.concurrent.CancellableLoop;
 import org.ros.message.MessageFactory;

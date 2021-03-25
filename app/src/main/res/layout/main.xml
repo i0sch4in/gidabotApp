@@ -10,9 +10,16 @@
         android:layout_height="318dp"
         android:textSize="20sp" />
 
-    <org.ros.android.view.RosTextView
-        android:id="@+id/textListener"
+    <Button
+        android:id="@+id/publishBtn"
         android:layout_width="match_parent"
-        android:layout_height="318dp"
-        android:textSize="20sp" />
+        android:layout_height="wrap_content"
+        android:text="Publish" />
+
+    <Button
+        android:id="@+id/cancelBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cancel" />
+
 </LinearLayout>

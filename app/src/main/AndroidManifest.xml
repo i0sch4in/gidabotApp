@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Android_apps"
         tools:replace="android:icon">
-        <activity android:name=".MainActivity">
+        <activity android:name="com.github.gidabotapp.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,4 +1,4 @@
-package com.github.rosjava.android_apps.messages_test;
+package com.github.gidabotapp;
 
 //import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
