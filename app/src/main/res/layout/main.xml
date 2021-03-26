@@ -7,8 +7,13 @@
     <org.ros.android.view.RosTextView
         android:id="@+id/textTalker"
         android:layout_width="match_parent"
-        android:layout_height="318dp"
+        android:layout_height="119dp"
         android:textSize="20sp" />
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="323dp" />
 
     <Button
         android:id="@+id/publishBtn"
@@ -21,5 +26,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cancel" />
+
+    <Button
+        android:id="@+id/CurrentPosBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Current Pos" />
 
 </LinearLayout>

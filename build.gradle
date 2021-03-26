@@ -27,6 +27,9 @@ apply plugin: 'catkin'
 allprojects {
     group 'com.github.gidabotapp'
     version = project.catkin.pkg.version
+    repositories{
+        google()
+    }
 }
 
 subprojects {

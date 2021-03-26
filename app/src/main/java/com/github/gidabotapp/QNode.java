@@ -4,8 +4,8 @@ import android.util.Log;
 
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
-import org.ros.internal.node.service.ServiceFactory;
 import org.ros.message.MessageFactory;
+import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
@@ -13,6 +13,8 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+
+import java.util.Locale;
 
 import geometry_msgs.Point;
 import geometry_msgs.PoseWithCovarianceStamped;
@@ -22,14 +24,13 @@ import multilevel_navigation_msgs.PendingGoals;
 import std_srvs.Empty;
 import std_srvs.EmptyRequest;
 import std_srvs.EmptyResponse;
-import std_srvs.Trigger;
 
 public class QNode extends AbstractNodeMain {
     final String GRAPH_NAME = "GidabotApp/QNode";
-    private int sequenceNumber;
     private final long timeStart;
 
     Publisher<Goal> pubGoal;
+    // TODO: ez dakit beharrezkoak diren Topic-ak
     Topic goal = new Topic("/multilevel_goal", Goal._TYPE);
     Publisher<CancelRequest> pubCancel;
     Topic cancel = new Topic("/cancel_request", CancelRequest._TYPE);
@@ -41,6 +42,7 @@ public class QNode extends AbstractNodeMain {
     Subscriber<std_msgs.Int8> subNavPhase;
 
     ConnectedNode connectedNode;
+    MapPosition currentPos;
 
     public QNode() {
         this.timeStart = System.nanoTime();
@@ -60,6 +62,14 @@ public class QNode extends AbstractNodeMain {
         pubCancel = connectedNode.newPublisher(cancel.name, cancel.type);
         pubCancel.setLatchMode(true);
 
+        subPosition = connectedNode.newSubscriber("/tartalo/amcl_pose", PoseWithCovarianceStamped._TYPE);
+        subPosition.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
+            @Override
+            public void onNewMessage(PoseWithCovarianceStamped message) {
+                currentPos = new MapPosition(message);
+            }
+        });
+
         try {
             clientClearCostmap = connectedNode.newServiceClient("/move_base/clear_costmaps", Empty._TYPE);
             Log.i("globalCostmap", "/move_base/clear_costmaps service client successfully created");
@@ -71,38 +81,42 @@ public class QNode extends AbstractNodeMain {
     }
 
     // TODO: get current position and add it to the message
-    public void publishGoal(){
+    // TODO: get position as parameter
+    // TODO: kontrolatu helburua solairu berdinean dagoen (long-term)
+    public void publishGoal(Room room){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
         // Clear Global costmap
         this.clearGlobalCostmap();
 
-        // FROM: 000 -> Hasiera
-        // TO: 006 -> Kopistegia
-
         Goal message = topicMessageFactory.newFromType(Goal._TYPE);
         long now = System.nanoTime() - timeStart;
 
         message.setGoalSeq(goal.getSequenceNumber());
-        message.setInitialFloor((float) 0.0);
+        message.setInitialFloor((float) 0.0); //osatzeko
 
         Point initial_pose = topicMessageFactory.newFromType(Point._TYPE);
-        initial_pose.setX(3.72289156914);
-        initial_pose.setY(-18.5215454102);
-        initial_pose.setZ(0.0);
+
+        // etengabe eguneratzen dagoenez, uneko posizioaren "kopia" tenporala
+        // QT interfazean --> azken initial_pose (ez oraingoa)
+        //TODO: uneko posizioa --> hurbilen dagoen kokalekua
+        MapPosition current = this.currentPos;
+        initial_pose.setX(current.getX());
+        initial_pose.setY(current.getY());
+        initial_pose.setZ(current.getZ());
         message.setInitialPose(initial_pose);
 
         Point goal_pose = topicMessageFactory.newFromType(Point._TYPE);
-        goal_pose.setX(-11.7704000473);
-        goal_pose.setY(-10.5290002823);
-        goal_pose.setZ(3.14159989357);
+        goal_pose.setX(room.getX());
+        goal_pose.setY(room.getY());
+        goal_pose.setZ(room.getZ());
         message.setGoalPose(goal_pose);
 
-        message.setIntermediateRobot(false);
-        message.setIntermediateFloor((float)0.0);
+        message.setIntermediateRobot(false); //TODO
+        message.setIntermediateFloor((float)0.0); //TODO
         message.setWay("None");
-        message.setStartId("000");
-        message.setGoalId("006");
+        message.setStartId("000"); //TODO
+        message.setGoalId(String.format(Locale.getDefault(),"%03d", room.getNum()));
         message.setLanguage("EU");
         message.setUserName("");
 
@@ -110,7 +124,7 @@ public class QNode extends AbstractNodeMain {
         goal.add();
     }
 
-    // TODO: get information from currentnav
+    // TODO: get cancel request info from current position and request
     public void publishCancel(){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
@@ -135,5 +149,9 @@ public class QNode extends AbstractNodeMain {
                 Log.e("globalCostmap", "globalCostmap reset failed");
             }
         });
+    }
+
+    public MapPosition getCurrentPos(){
+        return this.currentPos;
     }
 }

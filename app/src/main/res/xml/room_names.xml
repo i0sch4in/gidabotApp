@@ -1,0 +1,1299 @@
+<?xml version="1.0"?>
+<rooms>
+	<room>
+		<floor>0</floor>
+		<num>000</num>
+		<name>Fakultateko sarrera nagusia</name>
+		<x>3.5503</x>
+		<y>-18.4937</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>001</num>
+		<name>Magnasis (junior enpresa)</name>
+		<x>-4.8626</x>
+		<y>-21.2954</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>006</num>
+		<name>Kopistegia</name>
+		<x>-11.7704</x>
+		<y>-10.5290</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>008</num>
+		<name>Atezaintza</name>
+		<x>0.0357</x>
+		<y>-11.6329</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>009</num>
+		<name>0.1 laborategia</name>
+		<x>-4.5373</x>
+		<y>-0.4442</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>010</num>
+		<name>Lan gela</name>
+		<x>-11.2467</x>
+		<y>1.3095</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>011</num>
+		<name>24 orduko gela</name>
+		<x>-3.4320</x>
+		<y>0.6448</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>012</num>
+		<name>Atzeko sarrera</name>
+		<x>3.5218</x>
+		<y>1.0304</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>013</num>
+		<name>0.4 laborategia</name>
+		<x>13.5980</x>
+		<y>0.7969</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>014</num>
+		<name>Informatika Teknikariak 1</name>
+		<x>18.8687</x>
+		<y>2.6781</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>015</num>
+		<name>0.5 laborategia</name>
+		<x>26.8267</x>
+		<y>2.7543</y>
+		<yaw>0.0</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>016</num>
+		<name>0.6 laborategia</name>
+		<x>25.8580</x>
+		<y>2.8447</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>018</num>
+		<name>Informatika Teknikariak 2</name>
+		<x>19.1859</x>
+		<y>0.7415</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>020</num>
+		<name>WiFi gela</name>
+		<x>11.0375</x>
+		<y>-11.1660</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>023</num>
+		<name>Kafetegia</name>
+		<x>16.2539</x>
+		<y>-17.8156</y>
+		<yaw>0.0</yaw>
+	</room>
+	<room>
+		<floor>0</floor>
+		<num>024</num>
+		<name>Ikasle kontseilua</name>
+		<x>11.7374</x>
+		<y>-21.4401</y>
+		<yaw>0.0</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E1</num>
+		<name>E1 laborategia</name>
+		<x>-12.7111</x>
+		<y>0.8137</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E2</num>
+		<name>E2 laborategia</name>
+		<x>-20.2717</x>
+		<y>0.8137</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E3</num>
+		<name>E3 laborategia</name>
+		<x>-28.9503</x>
+		<y>0.8137</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E4</num>
+		<name>E4 laborategia</name>
+		<x>-15.3672</x>
+		<y>0.8137</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E5</num>
+		<name>E5 laborategia</name>
+		<x>-7.4444</x>
+		<y>1.0950</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E6</num>
+		<name>E6 laborategia</name>
+		<x>6.0907</x>
+		<y>0.7648</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E7</num>
+		<name>E7 laborategia</name>
+		<x>13.9458</x>
+		<y>0.7648</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E8</num>
+		<name>E8 laborategia</name>
+		<x>27.1072</x>
+		<y>0.7648</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E9</num>
+		<name>E9 laborategia</name>
+		<x>18.8669</x>
+		<y>0.7648</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>0.5</floor>
+		<num>E10</num>
+		<name>E10 laborategia</name>
+		<x>11.3584</x>
+		<y>0.7648</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>101</num>
+		<name>Idazkaritza</name>
+		<x>-18.9378</x>
+		<y>6.5881</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>104</num>
+		<name>Areto nagusia</name>
+		<x>-41.8524</x>
+		<y>5.2241</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>109</num>
+		<name>1.4 Gela</name>
+		<x>-42.2282</x>
+		<y>20.1793</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>110</num>
+		<name>1.2 Laborategia</name>
+		<x>-26.5177</x>
+		<y>20.3309</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>111</num>
+		<name>1.3 Laborategia</name>
+		<x>-16.2275</x>
+		<y>20.2770</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>112</num>
+		<name>1.4 Laborategia</name>
+		<x>-13.4866</x>
+		<y>20.4543</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>113</num>
+		<name>1.5 Laborategia</name>
+		<x>-13.4866</x>
+		<y>20.4543</y>
+		<yaw>0</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>114</num>
+		<name>1.6 Laborategia</name>
+		<x>-16.3946</x>
+		<y>15.4942</y>
+		<yaw>0</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>117</num>
+		<name>1.1 Laborategia</name>
+		<x>-26.5177</x>
+		<y>20.3309</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>122</num>
+		<name>Dekanotza</name>
+		<x>-16.2700</x>
+		<y>4.42812</y>
+		<yaw>0</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>132</num>
+		<name>1.1 Gela</name>
+		<x>-41.8524</x>
+		<y>15.9043</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>133</num>
+		<name>1.2 Gela</name>
+		<x>-42.2282</x>
+		<y>20.1793</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>1</floor>
+		<num>134</num>
+		<name>1.3 Gela</name>
+		<x>-42.2282</x>
+		<y>20.1793</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>201</num>
+		<name>Egongela</name>
+		<x>-0.9573</x>
+		<y>-36.8170</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>202</num>
+		<name>Juan A. JIMENEZ DE VICUÑA LERGA</name>
+		<x>-3.8823</x>
+		<y>-36.7923</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>203</num>
+		<name>Ana I. GONZÁLEZ ACUÑA \nEdurne LARRAZA MENDILUZE</name>
+		<x>-5.62298</x>
+		<y>-36.852</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>204</num>
+		<name>Clemente RODRÍGUEZ LAFUENTE</name>
+		<x>-8.5124</x>
+		<y>-36.7838</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>205</num>
+		<name>José MIGUEL ALONSO</name>
+		<x>-10.924</x>
+		<y>-36.6984</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>206</num>
+		<name>Carlos AMUCHASTEGUI URIARTE</name>
+		<x>-12.4749</x>
+		<y>-36.6814</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>207</num>
+		<name>Gonzalo ÁLVAREZ BALBÁS</name>
+		<x>-13.9677</x>
+		<y>-36.6417</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>208</num>
+		<name>Teresa MIQUELEZ ECHEGARAY</name>
+		<x>-10.924</x>
+		<y>-36.6984</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>209</num>
+		<name>Alexander MENDIBURU ALBERRO</name>
+		<x>-8.5124</x>
+		<y>-36.7838</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>210</num>
+		<name>Tim Smithers (BAILab)</name>
+		<x>-6.34298</x>
+		<y>-36.772</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>211</num>
+		<name>Andoni ARRUTI ILLARRAMENDI</name>
+		<x>-3.8823</x>
+		<y>-36.7923</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>212</num>
+		<name>J. Luis JIMÉNEZ JIMÉNEZ</name>
+		<x>-1.2573</x>
+		<y>-36.8170</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>213</num>
+		<name>2.1 Mintegia</name>
+		<x>1.0175</x>
+		<y>-18.2807</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>214</num>
+		<name>Txus PÉREZ DE LA FUENTE</name>
+		<x>-3.5789</x>
+		<y>-18.4280</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>215</num>
+		<name>Josu ARAMBERRI MIRANDA \nIbai GURRUTXAGA</name>
+		<x>-6.7392</x>
+		<y>-20.3141</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>216</num>
+		<name>Agustin ARRUABARRENA FRUTOS</name>
+		<x>-11.9792</x>
+		<y>-20.2642</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>217</num>
+		<name>Iñaki MORLAN SANTA CATALINA</name>
+		<x>-11.3896</x>
+		<y>-20.2671</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>218</num>
+		<name>J. Ignacio MARTÍN ARAMBURU \nJosé M. RIVADENEYRA SICILIA</name>
+		<x>-11.3896</x>
+		<y>-20.2671</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>219</num>
+		<name>Olatz ARBELAITZ GALLEGO</name>
+		<x>-6.3779</x>
+		<y>-18.1152</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>220</num>
+		<name>Javier MUGUERZA RIVERO</name>
+		<x>-4.1568</x>
+		<y>-17.9685</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>221</num>
+		<name>Iratxe SORALUZE ARRIOLA</name>
+		<x>-1.6749</x>
+		<y>-17.9385</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>222</num>
+		<name>Roberto CORTIÑAS RODRÍGUEZ</name>
+		<x>1.0198</x>
+		<y>-18.2356</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>223</num>
+		<name>Mikel LARREA ALAVA</name>
+		<x>3.7269</x>
+		<y>-18.4078</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>224</num>
+		<name>Luis GARDEAZABAL MONTÓN</name>
+		<x>6.0545</x>
+		<y>-18.1666</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>225</num>
+		<name>Myriam ARRUE RECONDO</name>
+		<x>8.9975</x>
+		<y>-18.2838</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>226</num>
+		<name>Néstor GARAY VITORIA</name>
+		<x>12.2558</x>
+		<y>-18.2753</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>227</num>
+		<name>Xabier ARTOLA ZUBILLAGA</name>
+		<x>14.8043</x>
+		<y>-18.3920</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>228</num>
+		<name>Paqui LUCIO CARRASCO</name>
+		<x>16.4042</x>
+		<y>-18.2904</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>229</num>
+		<name>Jesús BERMÚDEZ DE ANDRÉS</name>
+		<x>18.9171</x>
+		<y>-18.3147</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>230</num>
+		<name>Luis M. ALONSO GONZÁLEZ</name>
+		<x>21.4574</x>
+		<y>-18.2852</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>231</num>
+		<name>Blanca CASES GUTIÉRREZ</name>
+		<x>23.9556</x>
+		<y>-18.3147</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>232</num>
+		<name>Isabel FERNÁNDEZ DE CASTRO</name>
+		<x>27.7865</x>
+		<y>-18.4145</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>233</num>
+		<name>Marisa NAVARRO GÓMEZ</name>
+		<x>29.8681</x>
+		<y>-18.2797</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>234</num>
+		<name>José M. BLANCO ARBE</name>
+		<x>32.6955</x>
+		<y>-18.2249</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>235</num>
+		<name>Ana SÁNCHEZ ORTEGA</name>
+		<x>35.1131</x>
+		<y>-18.3210</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>236</num>
+		<name>J. Ángel VADILLO ZORITA</name>
+		<x>37.6579</x>
+		<y>-18.2409</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>237</num>
+		<name>Jesús IBÁÑEZ MARTÍNEZ-CONDE</name>
+		<x>39.6465</x>
+		<y>-18.2662</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>238</num>
+		<name>Xabier ARREGI IPARRAGIRRE</name>
+		<x>45.1879</x>
+		<y>-20.3906</y>
+		<yaw>0.0</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>239</num>
+		<name>Montse MARITXALAR ANGLADA</name>
+		<x>44.7162</x>
+		<y>-20.5506</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>240</num>
+		<name>Ana ARRUARTE LASA</name>
+		<x>42.1248</x>
+		<y>-20.5379</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>241</num>
+		<name>Rosa ARRUABARRENA SANTOS</name>
+		<x>39.3506</x>
+		<y>-20.2263</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>242</num>
+		<name>Julián GUTIÉRREZ SERRANO</name>
+		<x>37.0259</x>
+		<y>-18.3538</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>243</num>
+		<name>2.3 Mintegia</name>
+		<x>35.1131</x>
+		<y>-18.3210</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>244</num>
+		<name>2.2 Mintegia</name>
+		<x>24.1229</x>
+		<y>-18.4528</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>245</num>
+		<name>-</name>
+		<x>18.9171</x>
+		<y>-18.3147</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>246</num>
+		<name>J. Maria ARRIOLA \nInés PAGOLA</name>
+		<x>16.6829</x>
+		<y>-18.4264</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>247</num>
+		<name>Montserrat HERMO HUGUET</name>
+		<x>13.6648</x>
+		<y>-18.2715</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>248</num>
+		<name>Julio ABASCAL GONZÁLEZ</name>
+		<x>12.2558</x>
+		<y>-18.2753</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>249</num>
+		<name>Alberto LAFUENTE ROJO</name>
+		<x>8.9975</x>
+		<y>-18.2838</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>250</num>
+		<name>J. Miguel ARISTIZABAL</name>
+		<x>9.8101</x>
+		<y>-36.8625</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>251</num>
+		<name>Izaskun ETXEBERRIA UZTARROZ</name>
+		<x>11.6375</x>
+		<y>-36.7786</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>252</num>
+		<name>Olatz ARREGI URIARTE</name>
+		<x>14.0726</x>
+		<y>-36.8625</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>253</num>
+		<name>Maite URRETAVIZCAYA LOINAZ</name>
+		<x>16.5790</x>
+		<y>-36.8960</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>254</num>
+		<name>Arantza IRASTORZA GOÑI</name>
+		<x>19.9782</x>
+		<y>-36.9044</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>255</num>
+		<name>Eneko AGIRRE BENGOA</name>
+		<x>22.3463</x>
+		<y>-36.9798</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>256</num>
+		<name>Hubert CHEN</name>
+		<x>24.0773</x>
+		<y>-36.9714</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>257</num>
+		<name>M.Carmen HERNÁNDEZ GÓMEZ</name>
+		<x>35.3793</x>
+		<y>-36.8769</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>258</num>
+		<name>Miren BERMEJO LLOPIS</name>
+		<x>38.0788</x>
+		<y>-36.8685</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>259</num>
+		<name>Imanol USANDIZAGA LOMBANA</name>
+		<x>40.1915</x>
+		<y>-36.8433</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>260</num>
+		<name>J. Manuel PIKATZA ATXA</name>
+		<x>42.8827</x>
+		<y>-36.7343</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>261</num>
+		<name>Tomás PÉREZ FERNÁNDEZ</name>
+		<x>45.2468</x>
+		<y>-36.6086</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>262</num>
+		<name>Javier DOLADO COSÍN</name>
+		<x>47.4350</x>
+		<y>-36.6421</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>263</num>
+		<name>Jon ITURRIOZ SANCHEZ</name>
+		<x>47.1248</x>
+		<y>-36.6757</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>264</num>
+		<name>Begoña LOSADA PEREDA \nMaite ORONOZ ANCHORDOQUI</name>
+		<x>45.2468</x>
+		<y>-36.6086</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>265</num>
+		<name>Bertol ARRIETA CORTAJARENA \nAingeru MAYOR MARTINEZ</name>
+		<x>42.8827</x>
+		<y>-36.7343</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>266</num>
+		<name>Carmen OCARIZ SANZ \nJ. Ramón ZUBIZARRETA AIZPURU</name>
+		<x>40.1915</x>
+		<y>-36.8433</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>267</num>
+		<name>Óscar DÍAZ GARCÍA</name>
+		<x>36.9051</x>
+		<y>-36.6924</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>268</num>
+		<name>Jon Ander ELORRIAGA ARANDIA \nNerea EZEIZA RAMOS</name>
+		<x>35.0793</x>
+		<y>-36.8769</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>269</num>
+		<name>Alfredo GOÑI SARRIGUREN</name>
+		<x>32.8978</x>
+		<y>-36.8601</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>270</num>
+		<name>Ana ENDEMAÑO</name>
+		<x>24.0773</x>
+		<y>-36.9714</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>271</num>
+		<name>German RIGAU CLARAMUNT</name>
+		<x>22.3463</x>
+		<y>-36.9798</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>272</num>
+		<name>Arantza ILLARRAMENDI ECHAVE</name>
+		<x>19.9782</x>
+		<y>-36.9044</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>273</num>
+		<name>Arantza DIAZ DE ILARRAZA SANCHEZ</name>
+		<x>16.5790</x>
+		<y>-36.8960</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>274</num>
+		<name>Kepa SARASOLA GABIOLA</name>
+		<x>14.0726</x>
+		<y>-36.8625</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>275</num>
+		<name>Iñaki ALEGRIA LOINAZ</name>
+		<x>11.6375</x>
+		<y>-36.7786</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>2</floor>
+		<num>276</num>
+		<name>Amaya IBARRA LASA \nTxelo RUIZ VÁZQUEZ</name>
+		<x>9.8101</x>
+		<y>-36.8625</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>301</num>
+		<name>M2SI, SN</name>
+		<x>4.7415</x>
+		<y>-8.7494</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>302</num>
+		<name>DCI, Egokituz</name>
+		<x>-0.3069</x>
+		<y>-8.7494</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>303</num>
+		<name>Egokituz, DSG</name>
+		<x>-2.4453</x>
+		<y>-8.7494</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>304</num>
+		<name>ALDAPA, DSG</name>
+		<x>-2.4453</x>
+		<y>-8.7494</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>305</num>
+		<name>RSAIT</name>
+		<x>-0.3069</x>
+		<y>-8.7494</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>306</num>
+		<name>ISG</name>
+		<x>5.7722</x>
+		<y>8.0143</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>307</num>
+		<name>GIC</name>
+		<x>-0.4501</x>
+		<y>8.0143</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>308</num>
+		<name>GIC</name>
+		<x>-2.6946</x>
+		<y>8.0143</y>
+		<yaw>3.1416</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>309</num>
+		<name>ISG</name>
+		<x>1.5103</x>
+		<y>8.0143</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>310</num>
+		<name>ISG</name>
+		<x>6.2286</x>
+		<y>8.0143</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>311</num>
+		<name>BDI</name>
+		<x>11.3682</x>
+		<y>8.0143</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>312</num>
+		<name>GALAN</name>
+		<x>15.0835</x>
+		<y>8.0143</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>313</num>
+		<name>ONEKIN</name>
+		<x>19.9298</x>
+		<y>8.0143</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>314</num>
+		<name>IXA</name>
+		<x>27.3186</x>
+		<y>8.0143</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>315</num>
+		<name>IXA</name>
+		<x>36.2531</x>
+		<y>8.0143</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>316</num>
+		<name>3.1 Gela</name>
+		<x>37.8219</x>
+		<y>8.0143</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>317</num>
+		<name>3.2 Gela</name>
+		<x>46.2430</x>
+		<y>8.0143</y>
+		<yaw>0</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>318</num>
+		<name>IXA</name>
+		<x>37.6219</x>
+		<y>8.0143</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>319</num>
+		<name>ERABAKI</name>
+		<x>27.3186</x>
+		<y>8.0143</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>320</num>
+		<name>GHyM, MIG</name>
+		<x>19.9298</x>
+		<y>8.0143</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>321</num>
+		<name>3.2 Mintegia</name>
+		<x>15.0835</x>
+		<y>8.0143</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>322</num>
+		<name>Borja CALVO MOLINOS \nChristian BLUM</name>
+		<x>15.7425</x>
+		<y>-10.6951</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>323</num>
+		<name>M. Mar SEGURA LUZÓN</name>
+		<x>17.3226</x>
+		<y>-10.6951</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>324</num>
+		<name>Ana ZELAIA JAUREGI</name>
+		<x>19.8177</x>
+		<y>-10.6951</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>325</num>
+		<name>Itziar IRIGOIEN GARBIZU</name>
+		<x>22.5200</x>
+		<y>-10.6951</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>326</num>
+		<name>J. Antonio LOZANO ALONSO</name>
+		<x>25.9268</x>
+		<y>-10.6951</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>327</num>
+		<name>Alex GARCÍA-ALONSO MONTOYA</name>
+		<x>28.5674</x>
+		<y>-10.6951</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>328</num>
+		<name>Ander MURUA URIA \nYosu YURRAMENDI MENDIZABAL</name>
+		<x>30.0701</x>
+		<y>-10.6951</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>329</num>
+		<name>Darrell CONKLIN</name>
+		<x>41.4546</x>
+		<y>-8.88</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>330</num>
+		<name>M.Eugenia MARTÍNEZ CABREJAS</name>
+		<x>42.6684</x>
+		<y>-8.88</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>331</num>
+		<name>Aitor SOROA ECHAVE</name>
+		<x>46.5332</x>
+		<y>-8.88</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>332</num>
+		<name>Elena LAZKANO ORTEGA</name>
+		<x>47.93</x>
+		<y>-8.88</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>333</num>
+		<name>Fadi DORNAIKA</name>
+		<x>51.3227</x>
+		<y>-8.88</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>334</num>
+		<name>Joseba MAKAZAGA ODRIA</name>
+		<x>52.8456</x>
+		<y>-8.88</y>
+		<yaw>1.5708</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>335</num>
+		<name>Itziar BARAGAÑA GARATE</name>
+		<x>53.7759</x>
+		<y>-8.88</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>336</num>
+		<name>Alicia D'ANJOU D'ANJOU</name>
+		<x>51.3227</x>
+		<y>-8.88</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>337</num>
+		<name>Josune GALLEGO MERINO</name>
+		<x>47.93</x>
+		<y>-8.88</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>338</num>
+		<name>Victoria FERNÁNDEZ</name>
+		<x>46.5332</x>
+		<y>-8.88</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>339</num>
+		<name>Patxi ANGULO MARTIN</name>
+		<x>42.6684</x>
+		<y>-8.88</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>340</num>
+		<name>3.1 Mintegia</name>
+		<x>38.031</x>
+		<y>-8.88</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>341</num>
+		<name>Basilio SIERRA ARAUJO</name>
+		<x>30.0701</x>
+		<y>-10.6951</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>342</num>
+		<name>F. Xabier ALBIZURI IRIGOYEN \nUrtzi AYESTA</name>
+		<x>28.5674</x>
+		<y>-10.6951</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>343</num>
+		<name>Julián ZAPIAIN ALONSO</name>
+		<x>25.9268</x>
+		<y>-10.6951</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>344</num>
+		<name>Roberto SANTANA \nIgnacio ARGANDA</name>
+		<x>22.5200</x>
+		<y>-10.6951</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>345</num>
+		<name>Elena BIDONDO</name>
+		<x>19.8177</x>
+		<y>-10.6951</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>346</num>
+		<name>Iñaki INZA CANO</name>
+		<x>17.3226</x>
+		<y>-10.6951</y>
+		<yaw>4.7124</yaw>
+	</room>
+	<room>
+		<floor>3</floor>
+		<num>347</num>
+		<name>Montse HERMO HUGUET</name>
+		<x>15.7425</x>
+		<y>-10.6951</y>
+		<yaw>4.7124</yaw>
+	</room>
+</rooms>

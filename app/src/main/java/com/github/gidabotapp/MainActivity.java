@@ -2,18 +2,25 @@ package com.github.gidabotapp;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
-import com.github.rosjava.android_apps.messages_test.R;
+import com.github.gidabotapp.R;
 
 import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
 import org.ros.android.view.RosTextView;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import geometry_msgs.Point;
 import geometry_msgs.Pose;
@@ -25,15 +32,20 @@ public class MainActivity extends RosActivity {
     private RosTextView<geometry_msgs.PoseStamped> rosTextViewTalker;
 
 //    private TalkerPoseStamped talker;
-    private QNode talker;
-    private CurrentPosListener listener;
+    private QNode qNode;
     NodeConfiguration nodeConfiguration;
+    private Handler mHandler;
+    private ModelRooms modelRooms;
+    private Room selectedGoal;
 
+    // TODO: aplikaziotik ateratzen bada, erroreak ematen ditu eta aplikazioa "hilda" geratzen da --> viewModel horretarako
+    // TODO: strings.xml fitxategia erabili string-entzat
     public MainActivity() {
         // The RosActivity constructor configures the notification title and ticker
         // messages.
-        super("Messages test", "Messages test");
+        super("GidabotApp", "GidabotApp");
     }
+
 
     @SuppressWarnings("unchecked")
     @Override
@@ -41,11 +53,15 @@ public class MainActivity extends RosActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+//        MainViewModel model = new ViewModelProvider(this).get(MainViewModel.class);
+//        ViewModelProvider.Factory factory = new ViewModelProvider.NewInstanceFactory();
+//        MainViewModel viewmodel = new ViewModelProvider(this, factory).get(MainViewModel.class);
+
         final Button publishBtn = findViewById(R.id.publishBtn);
         publishBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                talker.publishGoal();
+                qNode.publishGoal(selectedGoal);
                 showToast("Goal published");
             }
         });
@@ -54,11 +70,36 @@ public class MainActivity extends RosActivity {
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                talker.publishCancel();
+                qNode.publishCancel();
                 showToast("Goal cancelled");
             }
         });
 
+        final Button CurrentPosBtn = findViewById(R.id.CurrentPosBtn);
+        CurrentPosBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MapPosition position = qNode.getCurrentPos();
+                showToast("Current pos: " + position);
+            }
+        });
+
+//        final String[] locationList = new String[]{"Sarrera", "Atezaintza", "Kopistegia", "0.1 laborategia"};
+        modelRooms = new ModelRooms();
+        final List<Room> locationList = modelRooms.getRooms();
+        List<String> locationNames = modelRooms.getRoomNames();
+        final ListView listview = findViewById(R.id.listView);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                R.layout.list_layout, locationNames);
+        listview.setAdapter(adapter);
+
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectedGoal = locationList.get(position);
+                showToast("Selected goal: " + selectedGoal.getName());
+            }
+        });
 
         // TALKER
         rosTextViewTalker = (RosTextView<geometry_msgs.PoseStamped>) findViewById(R.id.textTalker);
@@ -76,8 +117,7 @@ public class MainActivity extends RosActivity {
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
 //        talker = new TalkerPoseStamped();
-        talker = new QNode();
-        listener = new CurrentPosListener(this);
+        qNode = new QNode();
 
 
         // At this point, the user has already been prompted to either enter the URI
@@ -96,12 +136,9 @@ public class MainActivity extends RosActivity {
         // start displaying incoming messages.
 
         // TALKER:
-        nodeMainExecutor.execute(talker, nodeConfiguration);
+        nodeMainExecutor.execute(qNode, nodeConfiguration);
 //        nodeMainExecutor.execute(rosTextViewTalker, nodeConfiguration);
 
-        // LISTENER:
-        nodeMainExecutor.execute(listener, nodeConfiguration);
-//        nodeMainExecutor.execute(rosTextViewListener, nodeConfiguration);
 
     }
 
