@@ -1,23 +1,25 @@
 package com.github.gidabotapp;
 
+// TODO: floor -> double egin da, ez dakit arazoak eman ditzakeen
+// TODO: num -> String egin da, laborategiek letrak dituztelako
 public class Room {
-    private final int floor;
-    private final int num;
+    private final double floor;
+    private final String num;
     private final String name;
     private final MapPosition position;
 
-    public Room(int floor, int num, String name, MapPosition position){
+    public Room(double floor, String num, String name, MapPosition position){
         this.floor = floor;
         this.num = num;
         this.name = name;
         this.position = position;
     }
 
-    public int getFloor() {
+    public double getFloor() {
         return floor;
     }
 
-    public int getNum() {
+    public String getNum() {
         return num;
     }
 

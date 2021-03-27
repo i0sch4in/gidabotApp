@@ -116,7 +116,8 @@ public class QNode extends AbstractNodeMain {
         message.setIntermediateFloor((float)0.0); //TODO
         message.setWay("None");
         message.setStartId("000"); //TODO
-        message.setGoalId(String.format(Locale.getDefault(),"%03d", room.getNum()));
+//        message.setGoalId(String.format(Locale.getDefault(),"%03d", room.getNum()));
+        message.setGoalId(room.getNum());
         message.setLanguage("EU");
         message.setUserName("");
 

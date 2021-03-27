@@ -11,15 +11,14 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.github.gidabotapp.R;
-
 import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
 import org.ros.android.view.RosTextView;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
+import org.xmlpull.v1.XmlPullParserException;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
 import geometry_msgs.Point;
@@ -35,7 +34,7 @@ public class MainActivity extends RosActivity {
     private QNode qNode;
     NodeConfiguration nodeConfiguration;
     private Handler mHandler;
-    private ModelRooms modelRooms;
+    private RoomRepository modelRooms;
     private Room selectedGoal;
 
     // TODO: aplikaziotik ateratzen bada, erroreak ematen ditu eta aplikazioa "hilda" geratzen da --> viewModel horretarako
@@ -85,19 +84,25 @@ public class MainActivity extends RosActivity {
         });
 
 //        final String[] locationList = new String[]{"Sarrera", "Atezaintza", "Kopistegia", "0.1 laborategia"};
-        modelRooms = new ModelRooms();
+        try {
+            modelRooms = new RoomRepository(this);
+        } catch (IOException | XmlPullParserException e) {
+            e.printStackTrace();
+            Log.i("XMLParser", "error creating model");
+        }
         final List<Room> locationList = modelRooms.getRooms();
         List<String> locationNames = modelRooms.getRoomNames();
         final ListView listview = findViewById(R.id.listView);
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 R.layout.list_layout, locationNames);
         listview.setAdapter(adapter);
 
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                view.setSelected(true);
                 selectedGoal = locationList.get(position);
-                showToast("Selected goal: " + selectedGoal.getName());
+//                showToast("Selected goal: " + selectedGoal.getName());
             }
         });
 
