@@ -1,5 +1,6 @@
 package com.github.gidabotapp;
 
+import android.os.Message;
 import android.util.Log;
 
 import org.ros.exception.RemoteException;
@@ -14,6 +15,7 @@ import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import java.util.List;
 import java.util.Locale;
 
 import geometry_msgs.Point;
@@ -21,6 +23,7 @@ import geometry_msgs.PoseWithCovarianceStamped;
 import multilevel_navigation_msgs.CancelRequest;
 import multilevel_navigation_msgs.Goal;
 import multilevel_navigation_msgs.PendingGoals;
+import std_msgs.Int8;
 import std_srvs.Empty;
 import std_srvs.EmptyRequest;
 import std_srvs.EmptyResponse;
@@ -44,8 +47,14 @@ public class QNode extends AbstractNodeMain {
     ConnectedNode connectedNode;
     MapPosition currentPos;
 
-    public QNode() {
+    NavInfo currentNav;
+
+    RoomRepository modelRooms;
+
+    public QNode(RoomRepository modelRooms) {
         this.timeStart = System.nanoTime();
+        this.currentNav = new NavInfo();
+        this.modelRooms = modelRooms;
     }
 
     public GraphName getDefaultNodeName() {
@@ -66,7 +75,15 @@ public class QNode extends AbstractNodeMain {
         subPosition.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
             @Override
             public void onNewMessage(PoseWithCovarianceStamped message) {
-                currentPos = new MapPosition(message);
+                odometryCallback(message);
+            }
+        });
+
+        subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
+        subNavPhase.addMessageListener(new MessageListener<Int8>() {
+            @Override
+            public void onNewMessage(Int8 message) {
+                currentNav.setPhase(Phase.values()[message.getData()]);
             }
         });
 
@@ -78,6 +95,10 @@ public class QNode extends AbstractNodeMain {
             e.printStackTrace();
         }
 
+    }
+
+    private void odometryCallback(PoseWithCovarianceStamped position) {
+        this.currentPos = new MapPosition(position);
     }
 
     // TODO: get current position and add it to the message
@@ -152,7 +173,31 @@ public class QNode extends AbstractNodeMain {
         });
     }
 
-    public MapPosition getCurrentPos(){
-        return this.currentPos;
+    public String getCurrentPos(){
+        return this.getNearestRoom().getName();
+    }
+
+    public String getNavPhase() {
+        return this.currentNav.getPhase().name();
+    }
+
+    public Room getNearestRoom(){
+        List<Room> rooms = modelRooms.getFirstFloorRooms();
+        MapPosition current = currentPos;
+
+        // get first element of the roomlist
+        Room nearestRoom = rooms.get(0);
+        double nearestDistance = current.dSquare(nearestRoom.getPosition());
+
+        // iterate through other elements
+        for(Room r: rooms.subList(1,rooms.size())){
+            MapPosition pos = r.getPosition();
+            double distance = pos.dSquare(current);
+            if(distance < nearestDistance){
+                nearestDistance = distance;
+                nearestRoom = r;
+            }
+        }
+        return nearestRoom;
     }
 }

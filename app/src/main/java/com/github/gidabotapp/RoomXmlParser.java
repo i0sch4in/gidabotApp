@@ -91,14 +91,6 @@ public class RoomXmlParser {
         return floor;
     }
 
-    private int readNum(XmlPullParser parser) throws IOException, XmlPullParserException {
-        int num;
-        parser.require(XmlPullParser.START_TAG, ns, "num");
-        num = readInt(parser);
-        parser.require(XmlPullParser.END_TAG, ns, "num");
-        return num;
-    }
-
     private String readName(XmlPullParser parser) throws IOException, XmlPullParserException {
         String name;
         parser.require(XmlPullParser.START_TAG, ns, "name");

@@ -57,5 +57,13 @@ public class RoomRepository {
         this.roomList = readRooms;
     }
 
-
+    public List<Room> getFirstFloorRooms(){
+        List<Room> list = new ArrayList<>();
+        for(Room r: this.roomList){
+            if(r.getFloor() == 0){
+                list.add(r);
+            }
+        }
+        return list;
+    }
 }

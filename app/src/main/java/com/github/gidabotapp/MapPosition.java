@@ -52,6 +52,12 @@ public class MapPosition {
         return new double[] {this.x,this.y,this.z};
     }
 
+    public double dSquare(MapPosition other){
+        double dx = other.x - this.x;
+        double dy = other.y - this.y;
+        return dx * dx + dy * dy;
+    }
+
     @NonNull
     public String toString(){
         return String.format(Locale.getDefault(), "X:%.2f , Y %.2f: , Z:%.2f ", this.x, this.y, this.z);

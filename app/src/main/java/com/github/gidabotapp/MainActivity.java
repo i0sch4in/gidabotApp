@@ -28,12 +28,9 @@ import geometry_msgs.Quaternion;
 import std_msgs.Header;
 
 public class MainActivity extends RosActivity {
-    private RosTextView<geometry_msgs.PoseStamped> rosTextViewTalker;
 
-//    private TalkerPoseStamped talker;
     private QNode qNode;
     NodeConfiguration nodeConfiguration;
-    private Handler mHandler;
     private RoomRepository modelRooms;
     private Room selectedGoal;
 
@@ -78,8 +75,16 @@ public class MainActivity extends RosActivity {
         CurrentPosBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MapPosition position = qNode.getCurrentPos();
-                showToast("Current pos: " + position);
+                String name = qNode.getCurrentPos();
+                showToast("Robota " + name + "-n dago");
+            }
+        });
+
+        final Button navPhaseBtn = findViewById(R.id.navPhaseBtn);
+        navPhaseBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                showToast("Current nav phase: " + qNode.getNavPhase());
             }
         });
 
@@ -106,24 +111,12 @@ public class MainActivity extends RosActivity {
             }
         });
 
-        // TALKER
-        rosTextViewTalker = (RosTextView<geometry_msgs.PoseStamped>) findViewById(R.id.textTalker);
-        rosTextViewTalker.setTopicName("move_base_simple/goal");
-        rosTextViewTalker.setMessageType(geometry_msgs.PoseStamped._TYPE);
-        rosTextViewTalker.setMessageToStringCallable(new MessageCallable<String, geometry_msgs.PoseStamped>() {
-            @Override
-            public String call(geometry_msgs.PoseStamped message) {
-                Log.i("mezua", poseStampedToString(message));
-                return poseStampedToString(message);
-            }
-        });
     }
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
 //        talker = new TalkerPoseStamped();
-        qNode = new QNode();
-
+        qNode = new QNode(modelRooms);
 
         // At this point, the user has already been prompted to either enter the URI
         // of a master to use or to start a master locally.

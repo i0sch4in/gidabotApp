@@ -4,12 +4,6 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <org.ros.android.view.RosTextView
-        android:id="@+id/textTalker"
-        android:layout_width="match_parent"
-        android:layout_height="119dp"
-        android:textSize="20sp" />
-
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
@@ -34,5 +28,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Current Pos" />
+
+    <Button
+        android:id="@+id/navPhaseBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nav Phase" />
 
 </LinearLayout>
