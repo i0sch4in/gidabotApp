@@ -2,7 +2,6 @@ package com.github.gidabotapp;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -11,9 +10,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
-import org.ros.android.view.RosTextView;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.xmlpull.v1.XmlPullParserException;
@@ -32,10 +29,12 @@ public class MainActivity extends RosActivity {
     private QNode qNode;
     NodeConfiguration nodeConfiguration;
     private RoomRepository modelRooms;
-    private Room selectedGoal;
+    private Room non;
+    private Room nora;
 
-    // TODO: aplikaziotik ateratzen bada, erroreak ematen ditu eta aplikazioa "hilda" geratzen da --> viewModel horretarako
     // TODO: strings.xml fitxategia erabili string-entzat
+    // TODO: Intent = another activity -> MVVM pattern
+    // TODO: beste solairuetan funtzionatzeko -> beste robotekn?
     public MainActivity() {
         // The RosActivity constructor configures the notification title and ticker
         // messages.
@@ -57,8 +56,14 @@ public class MainActivity extends RosActivity {
         publishBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                qNode.publishGoal(selectedGoal);
-                showToast("Goal published");
+                if (non != null && nora != null) {
+                    qNode.publishGoal(non);
+                    qNode.publishGoal(nora);
+                    showToast("Ibilbidea zehaztuta:" + non.getName() + "-tik " + nora.getName() + "-ra.");
+                }
+                else{
+                    showToast("Errorea: ez duzu zehaztu non zauden edo nora joan nahi duzun");
+                }
             }
         });
 
@@ -97,20 +102,29 @@ public class MainActivity extends RosActivity {
         }
         final List<Room> locationList = modelRooms.getRooms();
         List<String> locationNames = modelRooms.getRoomNames();
-        final ListView listview = findViewById(R.id.listView);
+        final ListView listviewNon = findViewById(R.id.listViewNon);
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 R.layout.list_layout, locationNames);
-        listview.setAdapter(adapter);
+        listviewNon.setAdapter(adapter);
 
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listviewNon.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 view.setSelected(true);
-                selectedGoal = locationList.get(position);
+                non = locationList.get(position);
 //                showToast("Selected goal: " + selectedGoal.getName());
             }
         });
 
+        final ListView listViewNora = findViewById(R.id.listViewNora);
+        listViewNora.setAdapter(adapter);
+        listViewNora.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                view.setSelected(true);
+                nora = locationList.get(position);
+            }
+        });
     }
 
     @Override

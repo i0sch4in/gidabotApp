@@ -35,6 +35,16 @@ public class RoomRepository {
         return names;
     }
 
+    public List<String> getFirstFloorRoomNames(){
+        List<String> names = new ArrayList<>();
+        for (Room r: roomList){
+            if(r.getFloor() == 0) {
+                names.add(r.getNum() + " - " + r.getName());
+            }
+        }
+        return names;
+    }
+
     // TODO: get rooms from room_names.xml
     private void loadRooms() throws IOException, XmlPullParserException {
 //        Room sarrera = new Room(0, 0, "Fakultateko sarrera nagusia", new MapPosition(3.5503,-18.4937,1.5708));

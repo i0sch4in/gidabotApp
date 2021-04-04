@@ -121,7 +121,7 @@ public class QNode extends AbstractNodeMain {
         // etengabe eguneratzen dagoenez, uneko posizioaren "kopia" tenporala
         // QT interfazean --> azken initial_pose (ez oraingoa)
         //TODO: uneko posizioa --> hurbilen dagoen kokalekua
-        MapPosition current = this.currentPos;
+        Room current = this.getNearestRoom();
         initial_pose.setX(current.getX());
         initial_pose.setY(current.getY());
         initial_pose.setZ(current.getZ());
@@ -136,7 +136,7 @@ public class QNode extends AbstractNodeMain {
         message.setIntermediateRobot(false); //TODO
         message.setIntermediateFloor((float)0.0); //TODO
         message.setWay("None");
-        message.setStartId("000"); //TODO
+        message.setStartId(current.getNum()); //TODO
 //        message.setGoalId(String.format(Locale.getDefault(),"%03d", room.getNum()));
         message.setGoalId(room.getNum());
         message.setLanguage("EU");
@@ -147,6 +147,7 @@ public class QNode extends AbstractNodeMain {
     }
 
     // TODO: get cancel request info from current position and request
+    // TODO: uneko ibilbidea cancel (non eta nora), orain bakarrik bat egiten du.
     public void publishCancel(){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
@@ -176,6 +177,7 @@ public class QNode extends AbstractNodeMain {
     public String getCurrentPos(){
         return this.getNearestRoom().getName();
     }
+
 
     public String getNavPhase() {
         return this.currentNav.getPhase().name();

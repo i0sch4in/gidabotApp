@@ -4,35 +4,58 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <ListView
-        android:id="@+id/listView"
+    <TextView
+        android:id="@+id/textView2"
         android:layout_width="match_parent"
-        android:layout_height="323dp"
+        android:layout_height="wrap_content"
+        android:text="Non zaude?"
+        android:textSize="14sp" />
+
+    <ListView
+        android:id="@+id/listViewNon"
+        android:layout_width="match_parent"
+        android:layout_height="203dp"
         android:choiceMode="singleChoice"
-        android:listSelector="@color/pressed_color"/>
+        android:listSelector="@color/pressed_color" >
+
+    </ListView>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nora zoaz?"
+        android:textSize="14sp" />
+
+    <ListView
+        android:id="@+id/listViewNora"
+        android:layout_width="match_parent"
+        android:layout_height="203dp"
+        android:choiceMode="singleChoice"
+        android:listSelector="@color/pressed_color" />
 
     <Button
         android:id="@+id/publishBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Publish" />
+        android:layout_height="36dp"
+        android:text="Hasi bidaia" />
 
     <Button
         android:id="@+id/cancelBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="38dp"
         android:text="Cancel" />
 
     <Button
         android:id="@+id/CurrentPosBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Current Pos" />
+        android:layout_height="39dp"
+        android:text="Non dago robota?" />
 
     <Button
         android:id="@+id/navPhaseBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="37dp"
         android:text="Nav Phase" />
 
 </LinearLayout>

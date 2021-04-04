@@ -52,6 +52,8 @@ public class MapPosition {
         return new double[] {this.x,this.y,this.z};
     }
 
+    // Beste puntu batekiko distantzia euklidearra (karratua) kalkulatu
+    // ez da erro erabiltzen (horregatik izena du distance square)
     public double dSquare(MapPosition other){
         double dx = other.x - this.x;
         double dy = other.y - this.y;
