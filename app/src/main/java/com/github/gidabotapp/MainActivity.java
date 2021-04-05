@@ -8,6 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import org.ros.android.RosActivity;
@@ -102,27 +103,37 @@ public class MainActivity extends RosActivity {
         }
         final List<Room> locationList = modelRooms.getRooms();
         List<String> locationNames = modelRooms.getRoomNames();
-        final ListView listviewNon = findViewById(R.id.listViewNon);
+        final Spinner spinnerNon = findViewById(R.id.spinnerNon);
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 R.layout.list_layout, locationNames);
-        listviewNon.setAdapter(adapter);
+        spinnerNon.setAdapter(adapter);
 
-        listviewNon.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        spinnerNon.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 view.setSelected(true);
                 non = locationList.get(position);
 //                showToast("Selected goal: " + selectedGoal.getName());
             }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
         });
 
-        final ListView listViewNora = findViewById(R.id.listViewNora);
-        listViewNora.setAdapter(adapter);
-        listViewNora.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        final Spinner spinnerNora = findViewById(R.id.spinnerNora);
+        spinnerNora.setAdapter(adapter);
+        spinnerNora.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 view.setSelected(true);
                 nora = locationList.get(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
     }

@@ -1,6 +1,5 @@
 package com.github.gidabotapp;
 
-import android.support.annotation.NonNull;
 
 import java.util.Locale;
 
@@ -60,7 +59,6 @@ public class MapPosition {
         return dx * dx + dy * dy;
     }
 
-    @NonNull
     public String toString(){
         return String.format(Locale.getDefault(), "X:%.2f , Y %.2f: , Z:%.2f ", this.x, this.y, this.z);
     }
