@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">map</string>
+    <string name="app_name">Map</string>
+    <string name="title_activity_maps">Map</string>
+    <!--    <string name="google_maps_key">AIzaSyCgRT_xWYLCPhGEBmuP6KDhR-hywPMSqJA</string>-->
 </resources>

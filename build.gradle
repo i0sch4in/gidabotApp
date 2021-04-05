@@ -20,6 +20,9 @@ task wrapper(type: Wrapper) {
 */
 buildscript {
     apply from: "https://github.com/rosjava/android_core/raw/kinetic/buildscript.gradle"
+    repositories {
+//        maven { url "https://www.jitpack.io" }
+    }
 }
 
 apply plugin: 'catkin'
@@ -29,6 +32,7 @@ allprojects {
     version = project.catkin.pkg.version
     repositories{
         google()
+//        maven { url "https://www.jitpack.io" }
     }
 }
 
