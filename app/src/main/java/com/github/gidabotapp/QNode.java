@@ -29,6 +29,8 @@ import std_srvs.EmptyRequest;
 import std_srvs.EmptyResponse;
 
 public class QNode extends AbstractNodeMain {
+    private static QNode INSTANCE = null;
+
     final String GRAPH_NAME = "GidabotApp/QNode";
     private final long timeStart;
 
@@ -49,12 +51,16 @@ public class QNode extends AbstractNodeMain {
 
     NavInfo currentNav;
 
-    RoomRepository modelRooms;
-
-    public QNode(RoomRepository modelRooms) {
+    public QNode() {
         this.timeStart = System.nanoTime();
         this.currentNav = new NavInfo();
-        this.modelRooms = modelRooms;
+    }
+
+    public static synchronized QNode getInstance(){
+        if(INSTANCE == null){
+            INSTANCE = new QNode();
+        }
+        return INSTANCE;
     }
 
     public GraphName getDefaultNodeName() {
@@ -104,11 +110,11 @@ public class QNode extends AbstractNodeMain {
     // TODO: get current position and add it to the message
     // TODO: get position as parameter
     // TODO: kontrolatu helburua solairu berdinean dagoen (long-term)
-    public void publishGoal(Room room){
+    public void publishGoal(Room current, Room room){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
         // Clear Global costmap
-        this.clearGlobalCostmap();
+        clearGlobalCostmap();
 
         Goal message = topicMessageFactory.newFromType(Goal._TYPE);
         long now = System.nanoTime() - timeStart;
@@ -121,7 +127,6 @@ public class QNode extends AbstractNodeMain {
         // etengabe eguneratzen dagoenez, uneko posizioaren "kopia" tenporala
         // QT interfazean --> azken initial_pose (ez oraingoa)
         //TODO: uneko posizioa --> hurbilen dagoen kokalekua
-        Room current = this.getNearestRoom();
         initial_pose.setX(current.getX());
         initial_pose.setY(current.getY());
         initial_pose.setZ(current.getZ());
@@ -174,32 +179,9 @@ public class QNode extends AbstractNodeMain {
         });
     }
 
-    public String getCurrentPos(){
-        return this.getNearestRoom().getName();
-    }
-
-
     public String getNavPhase() {
         return this.currentNav.getPhase().name();
     }
 
-    public Room getNearestRoom(){
-        List<Room> rooms = modelRooms.getFirstFloorRooms();
-        MapPosition current = currentPos;
 
-        // get first element of the roomlist
-        Room nearestRoom = rooms.get(0);
-        double nearestDistance = current.dSquare(nearestRoom.getPosition());
-
-        // iterate through other elements
-        for(Room r: rooms.subList(1,rooms.size())){
-            MapPosition pos = r.getPosition();
-            double distance = pos.dSquare(current);
-            if(distance < nearestDistance){
-                nearestDistance = distance;
-                nearestRoom = r;
-            }
-        }
-        return nearestRoom;
-    }
 }

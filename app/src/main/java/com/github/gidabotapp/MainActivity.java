@@ -1,16 +1,19 @@
 package com.github.gidabotapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.lifecycle.ViewModelProvider;
+
+//import org.ros.android.RosActivity;
 import org.ros.android.RosActivity;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
@@ -26,7 +29,6 @@ import geometry_msgs.Quaternion;
 import std_msgs.Header;
 
 public class MainActivity extends RosActivity {
-
     private QNode qNode;
     NodeConfiguration nodeConfiguration;
     private RoomRepository modelRooms;
@@ -49,17 +51,15 @@ public class MainActivity extends RosActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-//        MainViewModel model = new ViewModelProvider(this).get(MainViewModel.class);
-//        ViewModelProvider.Factory factory = new ViewModelProvider.NewInstanceFactory();
-//        MainViewModel viewmodel = new ViewModelProvider(this, factory).get(MainViewModel.class);
+        this.qNode = QNode.getInstance();
 
         final Button publishBtn = findViewById(R.id.publishBtn);
         publishBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (non != null && nora != null) {
-                    qNode.publishGoal(non);
-                    qNode.publishGoal(nora);
+                    qNode.publishGoal(modelRooms.getNearestRoom(qNode.currentPos),non);
+                    qNode.publishGoal(modelRooms.getNearestRoom(qNode.currentPos),nora);
                     showToast("Ibilbidea zehaztuta:" + non.getName() + "-tik " + nora.getName() + "-ra.");
                 }
                 else{
@@ -81,7 +81,7 @@ public class MainActivity extends RosActivity {
         CurrentPosBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = qNode.getCurrentPos();
+                String name = modelRooms.getNearestRoom(qNode.currentPos).getName();
                 showToast("Robota " + name + "-n dago");
             }
         });
@@ -94,6 +94,15 @@ public class MainActivity extends RosActivity {
             }
         });
 
+        final Button mapBtn = findViewById(R.id.mapBtn);
+        mapBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), RouteSelectActivity.class);
+                startActivity(intent);
+            }
+        });
+
 //        final String[] locationList = new String[]{"Sarrera", "Atezaintza", "Kopistegia", "0.1 laborategia"};
         try {
             modelRooms = new RoomRepository(this);
@@ -101,19 +110,16 @@ public class MainActivity extends RosActivity {
             e.printStackTrace();
             Log.i("XMLParser", "error creating model");
         }
-        final List<Room> locationList = modelRooms.getRooms();
-        List<String> locationNames = modelRooms.getRoomNames();
-        final Spinner spinnerNon = findViewById(R.id.spinnerNon);
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                R.layout.list_layout, locationNames);
-        spinnerNon.setAdapter(adapter);
+        final List<Room> roomList = modelRooms.getRooms();
+        final ArrayAdapter<Room> adapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item, roomList);
 
+        final Spinner spinnerNon = findViewById(R.id.spinnerNon);
+        spinnerNon.setAdapter(adapter);
         spinnerNon.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                view.setSelected(true);
-                non = locationList.get(position);
-//                showToast("Selected goal: " + selectedGoal.getName());
+                non = roomList.get(position);
             }
 
             @Override
@@ -127,8 +133,7 @@ public class MainActivity extends RosActivity {
         spinnerNora.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                view.setSelected(true);
-                nora = locationList.get(position);
+                nora = roomList.get(position);
             }
 
             @Override
@@ -140,44 +145,18 @@ public class MainActivity extends RosActivity {
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-//        talker = new TalkerPoseStamped();
-        qNode = new QNode(modelRooms);
-
-        // At this point, the user has already been prompted to either enter the URI
-        // of a master to use or to start a master locally.
-
-        // The user can easily use the selected ROS Hostname in the master chooser
-        // activity.
 
         nodeConfiguration = NodeConfiguration.newPublic(getRosHostname());
         Log.i("HostName", getRosHostname());
-        //NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
+
         nodeConfiguration.setMasterUri(getMasterUri());
         Log.i("MasterUri", getMasterUri().toString());
 
-        // The RosTextView is also a NodeMain that must be executed in order to
-        // start displaying incoming messages.
-
-        // TALKER:
         nodeMainExecutor.execute(qNode, nodeConfiguration);
-//        nodeMainExecutor.execute(rosTextViewTalker, nodeConfiguration);
 
-
-    }
-
-    public String poseStampedToString(PoseStamped poseStamped) {
-        Header header = poseStamped.getHeader();
-        Pose pose = poseStamped.getPose();
-        Point position = pose.getPosition();
-        Quaternion orientation = pose.getOrientation();
-
-        String str =
-                "header: " + header.getSeq() + ", " + header.getStamp() + ", " + header.getFrameId() + System.lineSeparator();
-        str += "pose: " + System.lineSeparator();
-        str += "position: " + position.getX() + ", " + position.getY() + ", " + position.getZ() + System.lineSeparator();
-        str += "orientation: " + orientation.getX() + ", " + orientation.getY() + ", " + orientation.getZ() + ", " + orientation.getW() + ", " + System.lineSeparator();
-
-        return str;
+//        Intent intent = new Intent(this, RouteSelectActivity.class);
+//        intent.putExtra("message", "mezua jaso dut");
+//        startActivity(intent);
     }
 
     public void showToast(String text){

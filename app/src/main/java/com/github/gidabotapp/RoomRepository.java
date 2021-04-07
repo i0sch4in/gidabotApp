@@ -27,24 +27,6 @@ public class RoomRepository {
         return this.roomList;
     }
 
-    public List<String> getRoomNames(){
-        List<String> names = new ArrayList<>();
-        for (Room r: roomList){
-            names.add(r.getNum() + " - " + r.getName());
-        }
-        return names;
-    }
-
-    public List<String> getFirstFloorRoomNames(){
-        List<String> names = new ArrayList<>();
-        for (Room r: roomList){
-            if(r.getFloor() == 0) {
-                names.add(r.getNum() + " - " + r.getName());
-            }
-        }
-        return names;
-    }
-
     // TODO: get rooms from room_names.xml
     private void loadRooms() throws IOException, XmlPullParserException {
 //        Room sarrera = new Room(0, 0, "Fakultateko sarrera nagusia", new MapPosition(3.5503,-18.4937,1.5708));
@@ -75,5 +57,24 @@ public class RoomRepository {
             }
         }
         return list;
+    }
+
+    public Room getNearestRoom(MapPosition current){
+        List<Room> rooms = getFirstFloorRooms();
+
+        // get first element of the roomlist
+        Room nearestRoom = rooms.get(0);
+        double nearestDistance = current.dSquare(nearestRoom.getPosition());
+
+        // iterate through other elements
+        for(Room r: rooms.subList(1,rooms.size())){
+            MapPosition pos = r.getPosition();
+            double distance = pos.dSquare(current);
+            if(distance < nearestDistance){
+                nearestDistance = distance;
+                nearestRoom = r;
+            }
+        }
+        return nearestRoom;
     }
 }

@@ -24,33 +24,4 @@
         android:layout_width="match_parent"
         android:layout_height="454dp" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:background="@color/white"
-        android:orientation="vertical">
-
-        <CheckBox
-            android:id="@+id/fade_in_toggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:checked="true"
-            android:onClick="setFadeIn"
-            android:text="fade in" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="transparency"/>
-
-        <SeekBar
-            android:id="@+id/transparencySeekBar"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
 </RelativeLayout>

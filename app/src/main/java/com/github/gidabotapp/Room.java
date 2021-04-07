@@ -1,5 +1,7 @@
 package com.github.gidabotapp;
 
+import androidx.annotation.NonNull;
+
 // TODO: floor -> double egin da, ez dakit arazoak eman ditzakeen
 // TODO: num -> String egin da, laborategiek letrak dituztelako
 public class Room {
@@ -41,5 +43,11 @@ public class Room {
 
     public double getZ(){
         return position.getZ();
+    }
+
+    @NonNull
+    @Override
+    public String toString(){
+        return num + " - " + name;
     }
 }

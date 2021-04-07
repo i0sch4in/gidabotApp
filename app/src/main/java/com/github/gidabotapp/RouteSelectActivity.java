@@ -1,4 +1,14 @@
-package com.example.map;
+package com.github.gidabotapp;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -6,7 +16,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Tile;
@@ -15,38 +24,33 @@ import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.gms.maps.model.UrlTileProvider;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.CheckBox;
-import android.widget.SeekBar;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-
 import java.io.ByteArrayOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
-public class TileOverlayActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class RouteSelectActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     // TODO: use local resource
     private static final String FLOOR_MAP_URL_FORMAT=
-        "https://raw.githubusercontent.com/i0sch4in/floor_tiles/master/%s/%d/tile_%d_%d.png";
+            "https://raw.githubusercontent.com/i0sch4in/floor_tiles/master/%s/%d/tile_%d_%d.png";
 
     private TileOverlay floorTiles;
     private Marker robotMarker;
+    private static QNode qNode;
+
+    private final int mInterval = 1000;
+    private Handler mHandler;
+
+    public RouteSelectActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_route_select);
+
+        qNode = QNode.getInstance();
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -60,7 +64,7 @@ public class TileOverlayActivity extends AppCompatActivity implements OnMapReady
         Log.i("Zoom", "Max: "+ map.getMaxZoomLevel());
         Log.i("Zoom", "Position: "+ map.getCameraPosition());
 //        map.moveCamera(CameraUpdateFactory.zoomTo(0.0f));
-        map.setMaxZoomPreference(4.0f);
+//        map.setMaxZoomPreference(3.0f);
 
         map.setMapType(GoogleMap.MAP_TYPE_NONE);
 
@@ -71,7 +75,7 @@ public class TileOverlayActivity extends AppCompatActivity implements OnMapReady
 //        map.setLatLngBoundsForCameraTarget(bounds);
 
         TileProvider tileProvider = new UrlTileProvider(256, 256) {
-//        TileProvider tileProvider = new UrlTileProvider(64, 64) {
+            //        TileProvider tileProvider = new UrlTileProvider(64, 64) {
             @Override
             public synchronized URL getTileUrl(int x, int y, int zoom) {
 //                String CURRENT_FLOOR = "floor0"; // TODO
@@ -97,15 +101,18 @@ public class TileOverlayActivity extends AppCompatActivity implements OnMapReady
 
         TileProvider coordTileProvider = new CoordTileProvider(this.getApplicationContext());
         map.addTileOverlay(new TileOverlayOptions().tileProvider(coordTileProvider));
-//        LatLng robotLatLng = new LatLng(-30.33,-82.77);
-        LatLng robotLatLng = toLatLng();
+//        LatLng robotLatLng = new LatLng(-32.18,38.87);
+        LatLng robotLatLng = toLatLng(qNode.currentPos);
         robotMarker = map.addMarker(new MarkerOptions()
-            .position(robotLatLng)
-            .title("Tartalo")
-            .icon(BitmapDescriptorFactory.fromResource(R.drawable.tartalo))
+                .position(robotLatLng)
+                .title("Tartalo")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.tartalo))
         );
         // Move camera to robot's current location
         map.moveCamera(CameraUpdateFactory.newLatLng(robotLatLng));
+
+        mHandler = new Handler();
+        startRepeatingTask();
     }
 
     /*
@@ -131,29 +138,52 @@ public class TileOverlayActivity extends AppCompatActivity implements OnMapReady
         );
     }
 
-//    public void setFadeIn(View v) {
-//        if (floorTiles == null) {
-//            return;
-//        }
-//        floorTiles.setFadeIn(((CheckBox) v).isChecked());
-//
-//        LatLng current = robotMarker.getPosition();
-//        LatLng newPos = new LatLng(current.latitude-2, current.longitude);
-//        robotMarker.setPosition(newPos);
-//    }
-
-    private LatLng toLatLng(){
+    private LatLng toLatLng(MapPosition position){
         double FACTOR_X = 5.333;
         double FACTOR_Y = 3.3;
 
-        double x = 11.7374;
-        double y = -21.4401;
+        double x = position.getX();
+        double y = position.getY();
 
         double lng = FACTOR_X * (x+30) - 180;
         double lat = FACTOR_Y * (y+22.6) - 65;
 
         return new LatLng(lat,lng);
     }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopRepeatingTask();
+    }
+
+    Runnable mStatusChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                updateStatus();
+            }
+            finally {
+                mHandler.postDelayed(mStatusChecker, mInterval);
+            }
+        }
+    };
+
+    private void updateStatus() {
+        LatLng newPos = toLatLng(qNode.currentPos);
+        this.robotMarker.setPosition(newPos);
+    }
+
+    void startRepeatingTask(){
+        mStatusChecker.run();
+    }
+
+    void stopRepeatingTask(){
+        mHandler.removeCallbacks(mStatusChecker);
+    }
+
+
 
     private static class CoordTileProvider implements TileProvider {
 
@@ -206,4 +236,5 @@ public class TileOverlayActivity extends AppCompatActivity implements OnMapReady
             return copy;
         }
     }
+
 }
