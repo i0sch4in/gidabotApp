@@ -57,13 +57,16 @@ public class MainActivity extends RosActivity {
         publishBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (non != null && nora != null) {
-                    qNode.publishGoal(modelRooms.getNearestRoom(qNode.currentPos),non);
-                    qNode.publishGoal(modelRooms.getNearestRoom(qNode.currentPos),nora);
+                if (non != null && nora != null && !non.equals(nora)) {
+                    Room nearest = modelRooms.getNearestRoom(qNode.currentPos);
+                    if(!nearest.equals(non)) {
+                        qNode.publishGoal(nearest, non);
+                    }
+                    qNode.publishGoal(non,nora);
                     showToast("Ibilbidea zehaztuta:" + non.getName() + "-tik " + nora.getName() + "-ra.");
                 }
                 else{
-                    showToast("Errorea: ez duzu zehaztu non zauden edo nora joan nahi duzun");
+                    showToast("Errorea: ez duzu zehaztu non zauden edo nora joan nahi duzun, edo biak berdinak dira");
                 }
             }
         });

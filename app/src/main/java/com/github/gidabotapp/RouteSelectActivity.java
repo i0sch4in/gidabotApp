@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -22,11 +25,13 @@ import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
-import com.google.android.gms.maps.model.UrlTileProvider;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayOutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class RouteSelectActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -42,6 +47,9 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private final int mInterval = 1000;
     private Handler mHandler;
 
+    private ArrayList<Marker> roomMarkers;
+    private RoomRepository modelRooms;
+
     public RouteSelectActivity() {
     }
 
@@ -51,6 +59,11 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         setContentView(R.layout.activity_route_select);
 
         qNode = QNode.getInstance();
+        try {
+            modelRooms = new RoomRepository(this);
+        } catch (IOException | XmlPullParserException e) {
+            e.printStackTrace();
+        }
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -64,7 +77,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         Log.i("Zoom", "Max: "+ map.getMaxZoomLevel());
         Log.i("Zoom", "Position: "+ map.getCameraPosition());
 //        map.moveCamera(CameraUpdateFactory.zoomTo(0.0f));
-//        map.setMaxZoomPreference(3.0f);
+        map.setMaxZoomPreference(4.0f);
 
         map.setMapType(GoogleMap.MAP_TYPE_NONE);
 
@@ -74,45 +87,121 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 //        LatLngBounds bounds = new LatLngBounds(NORTHEAST_BOUND,SOUTHWEST_BOUND);
 //        map.setLatLngBoundsForCameraTarget(bounds);
 
-        TileProvider tileProvider = new UrlTileProvider(256, 256) {
-            //        TileProvider tileProvider = new UrlTileProvider(64, 64) {
+//        TileProvider tileProvider = new UrlTileProvider(256, 256) {
+//            //        TileProvider tileProvider = new UrlTileProvider(64, 64) {
+//            @Override
+//            public synchronized URL getTileUrl(int x, int y, int zoom) {
+////                String CURRENT_FLOOR = "floor0"; // TODO
+//                String CURRENT_FLOOR = "floor0";
+//                String s = String.format(Locale.US, FLOOR_MAP_URL_FORMAT, CURRENT_FLOOR, zoom, x, y);
+////                String s = String.format(Locale.US, FLOOR_MAP_URL_FORMAT, zoom, x, y);
+////                int reversedY = (1 << zoom) - y - 1;
+////                String s = String.format(Locale.US, MOON_MAP_URL_FORMAT, zoom, x, reversedY);
+//                URL url;
+//                if (!checkTileExists(x,y,zoom)){
+//                    return null;
+//                }
+//                try {
+//                    url = new URL(s);
+//                } catch (MalformedURLException e) {
+//                    throw new AssertionError(e);
+//                }
+//                return url;
+//            }
+//        };
+        TileProvider tileProvider = new TileProvider() {
+            final String FLOOR_MAP_URL_FORMAT =
+                    "map_tiles/floor%d/%d/tile_%d_%d.png";
+            final int CURRENT_FLOOR = 0;
+            final int TILE_SIZE_DP = 256;
+
             @Override
-            public synchronized URL getTileUrl(int x, int y, int zoom) {
-//                String CURRENT_FLOOR = "floor0"; // TODO
-                String CURRENT_FLOOR = "floor0";
-                String s = String.format(Locale.US, FLOOR_MAP_URL_FORMAT, CURRENT_FLOOR, zoom, x, y);
-//                String s = String.format(Locale.US, FLOOR_MAP_URL_FORMAT, zoom, x, y);
-//                int reversedY = (1 << zoom) - y - 1;
-//                String s = String.format(Locale.US, MOON_MAP_URL_FORMAT, zoom, x, reversedY);
-                URL url;
-                if (!checkTileExists(x,y,zoom)){
+            public Tile getTile(int x, int y, int zoom)
+            {
+                if(!checkTileExists(x,y,zoom)){
                     return null;
                 }
+                String s = String.format(Locale.US, FLOOR_MAP_URL_FORMAT,CURRENT_FLOOR,zoom,x,y);
                 try {
-                    url = new URL(s);
-                } catch (MalformedURLException e) {
-                    throw new AssertionError(e);
+                    InputStream is = getAssets().open(s);
+                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+                    return new Tile(TILE_SIZE_DP, TILE_SIZE_DP, stream.toByteArray());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                return url;
+                return null;
             }
         };
 
         floorTiles = map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProvider));
 
         TileProvider coordTileProvider = new CoordTileProvider(this.getApplicationContext());
-        map.addTileOverlay(new TileOverlayOptions().tileProvider(coordTileProvider));
-//        LatLng robotLatLng = new LatLng(-32.18,38.87);
+//        map.addTileOverlay(new TileOverlayOptions().tileProvider(coordTileProvider));
         LatLng robotLatLng = toLatLng(qNode.currentPos);
         robotMarker = map.addMarker(new MarkerOptions()
                 .position(robotLatLng)
-                .title("Tartalo")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.tartalo))
+                .title("Tartalo") // TODO
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.tartalo)) // TODO
+                .zIndex(0.9f)
         );
         // Move camera to robot's current location
         map.moveCamera(CameraUpdateFactory.newLatLng(robotLatLng));
 
+        final Marker[] lastOpened = {null};
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+//                // Check if there is an open info window
+//                if (lastOpened[0] != null) {
+//                    // Close the info window
+//                    lastOpened[0].hideInfoWindow();
+//
+//                    // Is the marker the same marker that was already open
+//                    if (lastOpened[0].equals(marker)) {
+//                        // Nullify the lastOpened object
+//                        lastOpened[0] = null;
+//                        // Return so that the info window isn't opened again
+//                        return true;
+//                    }
+//                }
+//
+//                // Open the info window for the marker
+//                marker.showInfoWindow();
+//                // Re-assign the last opened such that we can close it later
+//                lastOpened[0] = marker;
+//
+//                // Event was handled by our code do not launch default behaviour.
+                return true;
+            }
+        });
+
+//        map.setInfoWindowAdapter(new InfoAdapter(getLayoutInflater()));
+
         mHandler = new Handler();
         startRepeatingTask();
+
+        generateRoomMarkers(map);
+
+    }
+
+    private void generateRoomMarkers(GoogleMap map) {
+        roomMarkers = new ArrayList<>();
+
+        for(Room room: modelRooms.getFirstFloorRooms()){
+            LatLng latLng = this.toLatLng(room.getPosition());
+            Bitmap icon = this.textAsBitmap(room.getName());
+            Marker marker = map.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title(room.getName())
+                .icon(BitmapDescriptorFactory.fromBitmap(icon))
+                .zIndex(1.0f)
+            );
+            roomMarkers.add(marker);
+        }
+
     }
 
     /*
@@ -124,18 +213,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private boolean checkTileExists(int x, int y, int zoom) {
         int minZoom = 0;
         int maxZoom = 4;
-//        int minZoom = 12;
-//        int maxZoom = 16;
-//        int minX = 0;
-//        int maxX = 3;
-//        int minY = 0;
-//        int maxY = 3;
 
-        return (zoom >= minZoom && zoom <= maxZoom
-//                &&
-//                x >= minX && x<=maxX &&
-//                y >= minY && y<=maxY
-        );
+        return (zoom >= minZoom && zoom <= maxZoom);
     }
 
     private LatLng toLatLng(MapPosition position){
@@ -171,8 +250,16 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     };
 
     private void updateStatus() {
-        LatLng newPos = toLatLng(qNode.currentPos);
-        this.robotMarker.setPosition(newPos);
+        LatLng goal = toLatLng(qNode.currentPos);
+//        LatLng mid = midPoint(robotMarker.getPosition(),goal);
+//        this.robotMarker.setPosition(mid);
+        this.robotMarker.setPosition(goal);
+    }
+
+    LatLng midPoint(LatLng current, LatLng goal){
+        double midLat = (current.latitude + goal.latitude)/2;
+        double midLng = (current.longitude + goal.longitude)/2;
+        return new LatLng(midLat,midLng);
     }
 
     void startRepeatingTask(){
@@ -183,7 +270,23 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         mHandler.removeCallbacks(mStatusChecker);
     }
 
+    private Bitmap textAsBitmap(String text){
+        float scaleFactor = getApplicationContext().getResources().getDisplayMetrics().density;
+        float textSize = 17f * scaleFactor;
 
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTextSize(textSize);
+        paint.setColor(getColor(R.color.material_black));
+        paint.setTextAlign(Paint.Align.LEFT);
+        float baseLine = -paint.ascent();
+        int width = (int) (paint.measureText(text) + 1f); // round
+        int height = (int) (baseLine + paint.descent() + 0.5f);
+        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(image);
+        canvas.drawColor(Color.WHITE);
+        canvas.drawText(text, 0, baseLine, paint);
+        return image;
+    }
 
     private static class CoordTileProvider implements TileProvider {
 

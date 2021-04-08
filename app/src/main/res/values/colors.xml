@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="default_color">#ffffff</color>
     <color name="pressed_color">#4d90fe</color>
+    <color name="material_black">#070707</color>
 </resources>
