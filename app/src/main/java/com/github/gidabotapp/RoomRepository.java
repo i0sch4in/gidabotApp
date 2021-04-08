@@ -77,4 +77,8 @@ public class RoomRepository {
         }
         return nearestRoom;
     }
+
+    public Room getRoomByIndex(int i){
+        return this.roomList.get(i);
+    }
 }

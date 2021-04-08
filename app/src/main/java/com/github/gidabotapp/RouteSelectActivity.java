@@ -12,6 +12,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,10 +42,6 @@ import java.util.Locale;
 
 public class RouteSelectActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    // TODO: use local resource
-    private static final String FLOOR_MAP_URL_FORMAT=
-            "https://raw.githubusercontent.com/i0sch4in/floor_tiles/master/%s/%d/tile_%d_%d.png";
-
     private TileOverlay floorTiles;
     private Marker robotMarker;
     private static QNode qNode;
@@ -49,6 +51,9 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
     private ArrayList<Marker> roomMarkers;
     private RoomRepository modelRooms;
+
+    private Room non;
+    private Room nora;
 
     public RouteSelectActivity() {
     }
@@ -64,6 +69,63 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
         }
+
+        final Button publishBtn = findViewById(R.id.publishBtn);
+        publishBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (non != null && nora != null && !non.equals(nora)) {
+                    Room nearest = modelRooms.getNearestRoom(qNode.currentPos);
+                    if(!nearest.equals(non)) {
+                        qNode.publishGoal(nearest, non);
+                    }
+                    qNode.publishGoal(non,nora);
+                    showToast("Ibilbidea zehaztuta:" + non.getName() + "-tik " + nora.getName() + "-ra.");
+                }
+                else{
+                    showToast("Errorea: ez duzu zehaztu non zauden edo nora joan nahi duzun, edo biak berdinak dira");
+                }
+            }
+        });
+
+        final Button cancelBtn = findViewById(R.id.cancelBtn);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                qNode.publishCancel();
+                showToast("Goal cancelled");
+            }
+        });
+
+        final Spinner spinnerNon = findViewById(R.id.spinnerNon);
+        final ArrayAdapter<Room> adapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item, modelRooms.getRooms());
+        spinnerNon.setAdapter(adapter);
+        spinnerNon.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                non = modelRooms.getRoomByIndex(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        final Spinner spinnerNora = findViewById(R.id.spinnerNora);
+        spinnerNora.setAdapter(adapter);
+        spinnerNora.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                nora = modelRooms.getRoomByIndex(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -87,28 +149,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 //        LatLngBounds bounds = new LatLngBounds(NORTHEAST_BOUND,SOUTHWEST_BOUND);
 //        map.setLatLngBoundsForCameraTarget(bounds);
 
-//        TileProvider tileProvider = new UrlTileProvider(256, 256) {
-//            //        TileProvider tileProvider = new UrlTileProvider(64, 64) {
-//            @Override
-//            public synchronized URL getTileUrl(int x, int y, int zoom) {
-////                String CURRENT_FLOOR = "floor0"; // TODO
-//                String CURRENT_FLOOR = "floor0";
-//                String s = String.format(Locale.US, FLOOR_MAP_URL_FORMAT, CURRENT_FLOOR, zoom, x, y);
-////                String s = String.format(Locale.US, FLOOR_MAP_URL_FORMAT, zoom, x, y);
-////                int reversedY = (1 << zoom) - y - 1;
-////                String s = String.format(Locale.US, MOON_MAP_URL_FORMAT, zoom, x, reversedY);
-//                URL url;
-//                if (!checkTileExists(x,y,zoom)){
-//                    return null;
-//                }
-//                try {
-//                    url = new URL(s);
-//                } catch (MalformedURLException e) {
-//                    throw new AssertionError(e);
-//                }
-//                return url;
-//            }
-//        };
         TileProvider tileProvider = new TileProvider() {
             final String FLOOR_MAP_URL_FORMAT =
                     "map_tiles/floor%d/%d/tile_%d_%d.png";
@@ -150,35 +190,12 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         // Move camera to robot's current location
         map.moveCamera(CameraUpdateFactory.newLatLng(robotLatLng));
 
-        final Marker[] lastOpened = {null};
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-//                // Check if there is an open info window
-//                if (lastOpened[0] != null) {
-//                    // Close the info window
-//                    lastOpened[0].hideInfoWindow();
-//
-//                    // Is the marker the same marker that was already open
-//                    if (lastOpened[0].equals(marker)) {
-//                        // Nullify the lastOpened object
-//                        lastOpened[0] = null;
-//                        // Return so that the info window isn't opened again
-//                        return true;
-//                    }
-//                }
-//
-//                // Open the info window for the marker
-//                marker.showInfoWindow();
-//                // Re-assign the last opened such that we can close it later
-//                lastOpened[0] = marker;
-//
-//                // Event was handled by our code do not launch default behaviour.
                 return true;
             }
         });
-
-//        map.setInfoWindowAdapter(new InfoAdapter(getLayoutInflater()));
 
         mHandler = new Handler();
         startRepeatingTask();
@@ -271,22 +288,36 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
     private Bitmap textAsBitmap(String text){
-        float scaleFactor = getApplicationContext().getResources().getDisplayMetrics().density;
-        float textSize = 17f * scaleFactor;
+        final float scaleFactor = getApplicationContext().getResources().getDisplayMetrics().density;
+        final float TEXT_SIZE = 17f;
+        final float render_size = TEXT_SIZE * scaleFactor;
 
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setTextSize(textSize);
+        paint.setTextSize(render_size);
         paint.setColor(getColor(R.color.material_black));
         paint.setTextAlign(Paint.Align.LEFT);
+
         float baseLine = -paint.ascent();
         int width = (int) (paint.measureText(text) + 1f); // round
         int height = (int) (baseLine + paint.descent() + 0.5f);
+
         Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(image);
         canvas.drawColor(Color.WHITE);
         canvas.drawText(text, 0, baseLine, paint);
         return image;
     }
+
+    public void showToast(String text){
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+    }
+
+
+
 
     private static class CoordTileProvider implements TileProvider {
 
