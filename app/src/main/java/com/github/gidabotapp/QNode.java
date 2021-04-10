@@ -1,8 +1,10 @@
 package com.github.gidabotapp;
 
-import android.os.Message;
 import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
+
+import org.apache.commons.lang.mutable.Mutable;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.message.MessageFactory;
@@ -14,9 +16,6 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
-
-import java.util.List;
-import java.util.Locale;
 
 import geometry_msgs.Point;
 import geometry_msgs.PoseWithCovarianceStamped;
@@ -47,9 +46,8 @@ public class QNode extends AbstractNodeMain {
     Subscriber<std_msgs.Int8> subNavPhase;
 
     ConnectedNode connectedNode;
-    MapPosition currentPos;
 
-    NavInfo currentNav;
+    private NavInfo currentNav;
 
     public QNode() {
         this.timeStart = System.nanoTime();
@@ -70,7 +68,6 @@ public class QNode extends AbstractNodeMain {
     public void onStart(final ConnectedNode connectedNode) {
         this.connectedNode = connectedNode;
 
-        // Set Publishers
         pubGoal = connectedNode.newPublisher(goal.name, goal.type);
         pubGoal.setLatchMode(true);
 
@@ -81,7 +78,7 @@ public class QNode extends AbstractNodeMain {
         subPosition.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
             @Override
             public void onNewMessage(PoseWithCovarianceStamped message) {
-                odometryCallback(message);
+                currentNav.setCurrent(new MapPosition(message));
             }
         });
 
@@ -103,9 +100,6 @@ public class QNode extends AbstractNodeMain {
 
     }
 
-    private void odometryCallback(PoseWithCovarianceStamped position) {
-        this.currentPos = new MapPosition(position);
-    }
 
     // TODO: get current position and add it to the message
     // TODO: get position as parameter
@@ -179,9 +173,8 @@ public class QNode extends AbstractNodeMain {
         });
     }
 
-    public String getNavPhase() {
-        return this.currentNav.getPhase().name();
+    public NavInfo getCurrentNav(){
+        return this.currentNav;
     }
-
 
 }

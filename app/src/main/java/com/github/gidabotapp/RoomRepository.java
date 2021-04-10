@@ -4,22 +4,20 @@ import android.content.Context;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RoomRepository {
     private List<Room> roomList;
     private InputStream stream;
-    private Context context;
+    private Context appContext;
 
 
-    public RoomRepository(Context context) throws IOException, XmlPullParserException {
+    public RoomRepository(Context appContext) throws IOException, XmlPullParserException {
 //        this.stream = stream;
-        this.context = context;
+        this.appContext = appContext;
         this.loadRooms();
     }
 
@@ -38,7 +36,7 @@ public class RoomRepository {
         List<Room> readRooms;
         final String fName = "room_names.xml";
         try {
-            InputStream stream = context.getAssets().open(fName);
+            InputStream stream = appContext.getAssets().open(fName);
             RoomXmlParser roomXmlParser = new RoomXmlParser();
             readRooms = roomXmlParser.parse(stream);
         } finally {
@@ -49,10 +47,10 @@ public class RoomRepository {
         this.roomList = readRooms;
     }
 
-    public List<Room> getFirstFloorRooms(){
+    public List<Room> getRoomsByFloor(int floor){
         List<Room> list = new ArrayList<>();
         for(Room r: this.roomList){
-            if(r.getFloor() == 0){
+            if(r.getFloor() == floor){
                 list.add(r);
             }
         }
@@ -60,7 +58,7 @@ public class RoomRepository {
     }
 
     public Room getNearestRoom(MapPosition current){
-        List<Room> rooms = getFirstFloorRooms();
+        List<Room> rooms = getRoomsByFloor(0);
 
         // get first element of the roomlist
         Room nearestRoom = rooms.get(0);
@@ -78,7 +76,14 @@ public class RoomRepository {
         return nearestRoom;
     }
 
-    public Room getRoomByIndex(int i){
-        return this.roomList.get(i);
+    public Room getRoomByFloorIndex(int floor, int index) {
+        List<Room> floorList = new ArrayList<>();
+        for(Room r: this.roomList){
+            if(r.getFloor() == floor){
+                floorList.add(r);
+            }
+        }
+        return floorList.get(index);
     }
+
 }

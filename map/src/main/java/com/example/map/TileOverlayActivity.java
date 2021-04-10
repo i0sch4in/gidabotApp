@@ -97,12 +97,12 @@ public class TileOverlayActivity extends AppCompatActivity implements OnMapReady
 
         TileProvider coordTileProvider = new CoordTileProvider(this.getApplicationContext());
         map.addTileOverlay(new TileOverlayOptions().tileProvider(coordTileProvider));
-//        LatLng robotLatLng = new LatLng(-30.33,-82.77);
-        LatLng robotLatLng = toLatLng();
+        LatLng robotLatLng = new LatLng(68,0);
+//        LatLng robotLatLng = toLatLng();
         robotMarker = map.addMarker(new MarkerOptions()
             .position(robotLatLng)
             .title("Tartalo")
-            .icon(BitmapDescriptorFactory.fromResource(R.drawable.tartalo))
+//            .icon(BitmapDescriptorFactory.fromResource(R.drawable.tartalo))
         );
         // Move camera to robot's current location
         map.moveCamera(CameraUpdateFactory.newLatLng(robotLatLng));
