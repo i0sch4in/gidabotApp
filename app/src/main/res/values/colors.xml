@@ -10,4 +10,6 @@
     <color name="default_color">#ffffff</color>
     <color name="pressed_color">#4d90fe</color>
     <color name="material_black">#070707</color>
+    <color name="aero_blue">#8AC4FF</color>
+<!--    <color name="cultured_white">#F4F7F5</color>-->
 </resources>

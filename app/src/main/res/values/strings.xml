@@ -6,11 +6,27 @@
     <string name="publish_error_msg_same">"Errorea: bi kokalekuak berdinak dira.</string>
     <string name="publish_error_msg_empty">"Errorea: ataletako bat hutsik utzi duzu."</string>
     <string name="cancel_msg">"Ibilbidea bertan behera utzi da."</string>
+
+<!--    Phase Messages -->
+    <string name="WAIT_NAVIGATION_END">Ezin izan naiz helburura iritsi. Saiatu berriro.</string>
+    <string name="CONTINUE_GOAL">Jarraitu ondorengo helbururaino: %s</string>
+    <string name="GOAL_REACHED">Iritsi zara helburura.</string>
+    <string name="WAIT_ROBOT">Joan zaitez %d. solairura. Bertan itxaron beste robotari (aurretik %d eskaera ditu burutu gabe)</string>
+    <string name="GOAL_ERROR_TRY_AGAIN">Ezin izan naiz helburura iritsi. Saiatu berriro.</string>
+    <string name="GOAL_ERROR_GO_TO_GOAL_FLOOR">Ezin izan naiz helburura iritsi. Joan zaitez XX. solairura. Bertan ez dago robotik, beraz, zure kabuz aurkitu beharko duzu helburua.</string>
+    <string name="GOAL_ERROR_CANNOT_MEET_USER">Ezin izan naiz erabiltzailearengana iritsi.</string>
+    <string name="NAV_CANCELLED_OTHER_FLOOR">Erabiltzaileak nabigazioa gelditu du (jatorriko solairutik).</string>
+    <string name="NAV_REMOTELY_CANCELLED">Norbaitek nabigazioa gelditu du helburuko solairu honetan.</string>
+    <string name="NAV_CANCELLED_BY_USER">"Nabigazioa gelditu duzu.</string>
+    <string name="alert_title">Informazioa</string>
+    <string name="accept_btn">Onartu</string>
+
+    <!--    Floors shown on spinners -->
     <string-array name="floorArray">
         <item>0</item>
         <item>1</item>
-        <item>0.5</item>
         <item>2</item>
         <item>3</item>
+        <item>0.5</item>
     </string-array>
 </resources>

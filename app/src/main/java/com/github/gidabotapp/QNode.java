@@ -2,9 +2,6 @@ package com.github.gidabotapp;
 
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
-import org.apache.commons.lang.mutable.Mutable;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.message.MessageFactory;
@@ -44,10 +41,11 @@ public class QNode extends AbstractNodeMain {
     Subscriber<PoseWithCovarianceStamped> subPosition;
     Subscriber<PendingGoals> subPendingGoals;
     Subscriber<std_msgs.Int8> subNavPhase;
+    Subscriber<std_msgs.Int8> subdialogMessage;
 
     ConnectedNode connectedNode;
 
-    private NavInfo currentNav;
+    private final NavInfo currentNav;
 
     public QNode() {
         this.timeStart = System.nanoTime();
@@ -83,12 +81,15 @@ public class QNode extends AbstractNodeMain {
         });
 
         subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
-        subNavPhase.addMessageListener(new MessageListener<Int8>() {
-            @Override
-            public void onNewMessage(Int8 message) {
-                currentNav.setPhase(Phase.values()[message.getData()]);
-            }
-        });
+//        subNavPhase.addMessageListener(new MessageListener<Int8>() {
+//            @Override
+//            public void onNewMessage(Int8 message) {
+//                int i = message.getData();
+//                currentNav.setPhase(Phase.values()[i]);
+//            }
+//        });
+
+        subdialogMessage = connectedNode.newSubscriber("/dialog_qt_message", Int8._TYPE);
 
         try {
             clientClearCostmap = connectedNode.newServiceClient("/move_base/clear_costmaps", Empty._TYPE);
@@ -171,6 +172,16 @@ public class QNode extends AbstractNodeMain {
                 Log.e("globalCostmap", "globalCostmap reset failed");
             }
         });
+    }
+
+    public void setPhaseMsgListener(MessageListener<Int8> listener){
+        subdialogMessage.addMessageListener(listener);
+        Log.i("listener", "phase message listener set");
+    }
+
+    public void setNavPhaseListener(MessageListener<Int8> listener){
+        subNavPhase.addMessageListener(listener);
+        Log.i("listener", "nav phase listener set");
     }
 
     public NavInfo getCurrentNav(){

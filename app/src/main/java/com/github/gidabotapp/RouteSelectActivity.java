@@ -1,14 +1,16 @@
 package com.github.gidabotapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +28,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -33,6 +36,7 @@ import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,9 +51,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private Marker robotMarker;
     private ArrayList<Marker> roomMarkers;
 
-    private Room non;
-    private Room nora;
-
     private MapViewModel viewModel;
 
     private GoogleMap map;
@@ -57,7 +58,11 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
     private Handler mHandler;
     private Runnable mStatusChecker;
-    private final int MAP_UPDATE_INTERVAL = 1000; // milliseconds
+    private final int MAP_UPDATE_INTERVAL = 1000; // ms
+
+    private Button publishBtn, cancelBtn;
+    private Spinner spinnerNon, spinnerNora, spinnerFloor;
+    private FloatingActionButton locateRobotBtn;
 
     public RouteSelectActivity() {
     }
@@ -73,23 +78,29 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 drawNewTiles(floor);
             }
         });
-        viewModel.getToastMessageObserver().observe(this, new Observer<String>() {
+        viewModel.getToastObserver().observe(this, new Observer<String>() {
             @Override
             public void onChanged(String message) {
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
             }
         });
-
-
-        final Button publishBtn = findViewById(R.id.publishBtn);
-        publishBtn.setOnClickListener(new View.OnClickListener() {
+        viewModel.getAlertObserver().observe(this, new Observer<Integer>() {
             @Override
-            public void onClick(View v) {
-                viewModel.publishGoals(non,nora);
+            public void onChanged(Integer i) {
+                String message = getString(i);
+                showAlert(message);
             }
         });
 
-        final Button cancelBtn = findViewById(R.id.cancelBtn);
+        publishBtn = findViewById(R.id.publishBtn);
+        publishBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewModel.publishRoute();
+            }
+        });
+
+        cancelBtn = findViewById(R.id.cancelBtn);
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,32 +108,41 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
-        final Spinner spinnerNon = findViewById(R.id.spinnerNon);
+        locateRobotBtn = findViewById(R.id.locateRobotBtn);
+        locateRobotBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setCameraOnRobot();
+            }
+        });
+
+
+        spinnerNon = findViewById(R.id.spinnerNon);
         final ArrayAdapter<Room> adapterRooms = new ArrayAdapter<>(this, R.layout.spinner_item, viewModel.getCurrentFloorRooms());
         spinnerNon.setAdapter(adapterRooms);
         spinnerNon.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                non = viewModel.getRoom(position);
+                viewModel.selectOrigin(position);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        final Spinner spinnerNora = findViewById(R.id.spinnerNora);
+        spinnerNora = findViewById(R.id.spinnerNora);
         spinnerNora.setAdapter(adapterRooms);
         spinnerNora.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                nora = viewModel.getRoom(position);
+                viewModel.selectDestination(position);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) { }
         });
 
-        final Spinner spinnerFloor = findViewById(R.id.spinnerFloor);
+        spinnerFloor = findViewById(R.id.spinnerFloor);
         Log.i("Null", Arrays.toString(getResources().getStringArray((R.array.floorArray))));
         final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, getResources().getStringArray(R.array.floorArray));
         spinnerFloor.setAdapter(floorAdapter);
@@ -147,10 +167,56 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
+        viewModel.getNavPhaseObserver().observe(this,new Observer<NavPhase>(){
+            @Override
+            public void onChanged(NavPhase navPhase) {
+                enableButtons(navPhase);
+            }
+
+        });
+
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+    }
+
+    private void enableButtons(NavPhase navPhase) {
+        // disable spinners and publish button
+        // enable cancel button
+        if (navPhase == NavPhase.CONTINUE_NAVIGATION){
+            spinnerNora.setEnabled(false);
+            spinnerNon.setEnabled(false);
+            publishBtn.setEnabled(false);
+            cancelBtn.setEnabled(true);
+        }
+
+        // disable cancel button
+        // enable spinners and publish button
+        if (navPhase == NavPhase.WAIT_NAVIGATION){
+            spinnerNora.setEnabled(true);
+            spinnerNon.setEnabled(true);
+            publishBtn.setEnabled(true);
+            cancelBtn.setEnabled(false);
+        }
+    }
+
+    private void showAlert(String msg) {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle(getString(R.string.alert_title));
+        alertDialog.setMessage(msg);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.accept_btn),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
+
+    private void setCameraOnRobot() {
+        map.animateCamera(CameraUpdateFactory.newLatLng(robotMarker.getPosition()));
     }
 
     @Override
@@ -159,19 +225,40 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         map.setMaxZoomPreference(4.0f);
 
         // TODO: set camera bounds
-//        LatLng NORTHEAST_BOUND = new LatLng(-90,-180);
-//        LatLng SOUTHWEST_BOUND = new LatLng(90,180);
+//        LatLng NORTHEAST_BOUND = new LatLng(85,-180);
+//        LatLng SOUTHWEST_BOUND = new LatLng(-85,-180);
 //        LatLngBounds bounds = new LatLngBounds(NORTHEAST_BOUND,SOUTHWEST_BOUND);
 //        map.setLatLngBoundsForCameraTarget(bounds);
 
-//        LatLng robotLatLng = toLatLng(qNode.currentPos);
-        // Move camera to robot's current location
-        //TODO
-//        map.moveCamera(CameraUpdateFactory.newLatLng(robotLatLng));
-
+        /*
+         * Set custom onClickListener for all markers,
+         * so that it only shows Marker's information (if it has any),
+         * and hides Google's default buttons, which we don't want.
+         */
+        final Marker[] lastOpened = {null};
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                // Check if there is an open info window
+                if (lastOpened[0] != null) {
+                    // Close the info window
+                    lastOpened[0].hideInfoWindow();
+
+                    // Is the marker the same marker that was already open
+                    if (lastOpened[0].equals(marker)) {
+                        // Nullify the lastOpened object
+                        lastOpened[0] = null;
+                        // Return so that the info window isn't opened again
+                        return true;
+                    }
+                }
+
+                // Open the info window for the marker
+                marker.showInfoWindow();
+                // Re-assign the last opened such that we can close it later
+                lastOpened[0] = marker;
+
+                // Event was handled by our code, so do not launch default behaviour.
                 return true;
             }
         });
@@ -189,9 +276,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 }
             }
         };
-
-        // Draw map on floor 0
-        drawNewTiles(viewModel.DEFAULT_FLOOR);
 
         // Start redrawing robot every second
         mStatusChecker.run();
@@ -245,19 +329,24 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         LatLng latLng = toLatLng(position);
         int iconId = viewModel.getRobotIconId();
         BitmapDescriptor current_icon = BitmapDescriptorFactory.fromResource(iconId);
-//        String current_name = getResources().getResourceEntryName(iconId).split("_")[1];
-//        current_name = current_name.substring(0,1).toUpperCase() + current_name.substring(1);
+
+        // Get robot name and make first letter uppercase
+        String current_name = getResources().getResourceEntryName(iconId).split("_")[1];
+        current_name = current_name.substring(0,1).toUpperCase() + current_name.substring(1);
         if(robotMarker == null){
             robotMarker = map.addMarker(new MarkerOptions()
-//                    .title(current_name)
-                    .title("Tartalo")
+                    .title(current_name)
                     .icon(current_icon)
                     .position(latLng)
                     .zIndex(0.9f)
             );
-            map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            resetCamera();
         }
         robotMarker.setPosition(latLng);
+    }
+
+    private void resetCamera() {
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(robotMarker.getPosition(),0,0,0)));
     }
 
     private void generateRoomMarkers(GoogleMap map) {
@@ -277,7 +366,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             Bitmap textIcon = this.textAsBitmap(room.getName());
             Marker marker = map.addMarker(new MarkerOptions()
                 .position(latLng)
-                .title(room.getName())
+//                .title(room.getName())
                 .icon(BitmapDescriptorFactory.fromBitmap(textIcon))
                 .zIndex(1.0f)
             );
@@ -330,7 +419,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
         Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(image);
-        canvas.drawColor(Color.WHITE);
+        canvas.drawColor(ContextCompat.getColor(getApplicationContext(),R.color.aero_blue));
         canvas.drawText(text, 0, baseLine, paint);
         return image;
     }

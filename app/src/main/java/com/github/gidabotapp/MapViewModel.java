@@ -3,26 +3,31 @@ package com.github.gidabotapp;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
 
-import org.apache.commons.lang.mutable.Mutable;
+import org.ros.message.MessageListener;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.List;
 
+import std_msgs.Int8;
+
 public class MapViewModel extends AndroidViewModel {
     private static QNode qNode;
     private RoomRepository roomRepository;
-    private MutableLiveData<String> toastMessageObserver;
-    private MutableLiveData<Integer> currentFloorObserver;
-    private MutableLiveData<List<Room>> currentFloorRoomsObserver;
-    final int DEFAULT_FLOOR = 1;
 
+    private final MutableLiveData<String> toastObserver;
+    private final MutableLiveData<Integer> currentFloorObserver;
+    private final MutableLiveData<List<Room>> currentFloorRoomsObserver;
+    private final MutableLiveData<Integer> alertObserver;
+    private final MutableLiveData<NavPhase> navPhaseObserver;
+
+    private Room origin;
+    private Room destination;
+    private static PhaseMessageSingleton currentPhaseMessage;
+    final int STARTING_FLOOR = 0;
 
     public MapViewModel(@NonNull Application application) {
         super(application);
@@ -32,37 +37,59 @@ public class MapViewModel extends AndroidViewModel {
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
         }
-        this.currentFloorObserver = new MutableLiveData<>(DEFAULT_FLOOR);
-        this.toastMessageObserver = new MutableLiveData<>();
-        this.currentFloorRoomsObserver = new MutableLiveData<>();
+
+        this.currentFloorObserver = new MutableLiveData<>(STARTING_FLOOR);
+        this.toastObserver = new MutableLiveData<>();
+        this.currentFloorRoomsObserver = new MutableLiveData<>(roomRepository.getRoomsByFloor(STARTING_FLOOR));
+        this.alertObserver = new MutableLiveData<>();
+        this.navPhaseObserver = new MutableLiveData<>();
+        currentPhaseMessage = PhaseMessageSingleton.getInstance();
+
+        qNode.setPhaseMsgListener(new MessageListener<Int8>() {
+            @Override
+            public void onNewMessage(Int8 message) {
+                int i = message.getData();
+                currentPhaseMessage.setMessage(i);
+                alertObserver.postValue(currentPhaseMessage.getMessageId());
+            }
+        });
+
+        qNode.setNavPhaseListener(new MessageListener<Int8>() {
+            @Override
+            public void onNewMessage(Int8 message) {
+                int i = message.getData();
+                navPhaseObserver.postValue(NavPhase.values()[i]);
+            }
+        });
+
     }
 
     // TODO: Should not use context (leaks) --> locale change
-    public void publishGoals(Room non, Room nora) {
+    public void publishRoute() {
         String message;
-        if (non == null || nora == null) {
+        if (origin == null || destination == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_empty);
-        } else if (non.equals(nora)) {
+        } else if (origin.equals(destination)) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_same);
         } else {
             Room nearest = roomRepository.getNearestRoom(qNode.getCurrentNav().getCurrent());
-            if (!nearest.equals(non)) {
-                qNode.publishGoal(nearest, non);
+            if (!nearest.equals(origin)) {
+                qNode.publishGoal(nearest, origin);
             }
-            qNode.publishGoal(non, nora);
-            message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), non, nora);
+            qNode.publishGoal(origin, destination);
+            message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), origin, destination);
         }
-        toastMessageObserver.postValue(message);
+        toastObserver.postValue(message);
     }
 
 
     public void publishCancel() {
         qNode.publishCancel();
-        toastMessageObserver.postValue(getApplication().getApplicationContext().getString(R.string.cancel_msg));
+        toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.cancel_msg));
     }
 
-    public MutableLiveData<String> getToastMessageObserver() {
-        return toastMessageObserver;
+    public MutableLiveData<String> getToastObserver() {
+        return toastObserver;
     }
 
     public MutableLiveData<List<Room>> getCurrentFloorRoomsObserver() {
@@ -72,6 +99,10 @@ public class MapViewModel extends AndroidViewModel {
     public MutableLiveData<Integer> getCurrentFloorObserver() {
         return this.currentFloorObserver;
     }
+    public MutableLiveData<Integer> getAlertObserver() {
+        return this.alertObserver;
+    }
+    public MutableLiveData<NavPhase> getNavPhaseObserver(){return this.navPhaseObserver;}
 
     public Room getRoom(int listIndex) {
         return roomRepository.getRoomByFloorIndex(this.currentFloorObserver.getValue(), listIndex);
@@ -109,4 +140,13 @@ public class MapViewModel extends AndroidViewModel {
         }
         return iconId;
     }
+
+    public void selectOrigin(int spinnerIndex) {
+        this.origin = this.currentFloorRoomsObserver.getValue().get(spinnerIndex);
+    }
+
+    public void selectDestination(int spinnerIndex) {
+        this.destination = this.currentFloorRoomsObserver.getValue().get(spinnerIndex);
+    }
+
 }
