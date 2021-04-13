@@ -47,7 +47,7 @@ public class RoomRepository {
         this.roomList = readRooms;
     }
 
-    public List<Room> getRoomsByFloor(int floor){
+    public List<Room> getRoomsByFloor(double floor){
         List<Room> list = new ArrayList<>();
         for(Room r: this.roomList){
             if(r.getFloor() == floor){

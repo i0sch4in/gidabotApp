@@ -32,6 +32,7 @@ allprojects {
     version = project.catkin.pkg.version
     repositories{
         google()
+        jcenter()
 //        maven { url "https://www.jitpack.io" }
     }
 }

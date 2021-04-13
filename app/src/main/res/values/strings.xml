@@ -5,7 +5,7 @@
     <string name="publish_success_msg">"Ibilbidea hasi da: %s-tik %s-ra."</string>
     <string name="publish_error_msg_same">"Errorea: bi kokalekuak berdinak dira.</string>
     <string name="publish_error_msg_empty">"Errorea: ataletako bat hutsik utzi duzu."</string>
-    <string name="cancel_msg">"Ibilbidea bertan behera utzi da."</string>
+    <string name="cancel_msg_success">"Ibilbidea bertan behera utzi da."</string>
 
 <!--    Phase Messages -->
     <string name="WAIT_NAVIGATION_END">Ezin izan naiz helburura iritsi. Saiatu berriro.</string>
@@ -18,8 +18,12 @@
     <string name="NAV_CANCELLED_OTHER_FLOOR">Erabiltzaileak nabigazioa gelditu du (jatorriko solairutik).</string>
     <string name="NAV_REMOTELY_CANCELLED">Norbaitek nabigazioa gelditu du helburuko solairu honetan.</string>
     <string name="NAV_CANCELLED_BY_USER">"Nabigazioa gelditu duzu.</string>
+
     <string name="alert_title">Informazioa</string>
     <string name="accept_btn">Onartu</string>
+    <string name="master_error_msg">Ez duzu Masterrarekin konexioa zehaztu. Sakatu botoia aplikazioa berrabiarazteko.</string>
+    <string name="master_error_title">Errorea</string>
+    <string name="cancel_msg_error">Ezin izan da ibilbidea bertan behera utzi.</string>
 
     <!--    Floors shown on spinners -->
     <string-array name="floorArray">

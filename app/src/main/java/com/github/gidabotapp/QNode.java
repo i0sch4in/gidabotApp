@@ -9,10 +9,13 @@ import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
+import org.ros.node.Node;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+
+import java.util.UUID;
 
 import geometry_msgs.Point;
 import geometry_msgs.PoseWithCovarianceStamped;
@@ -27,7 +30,7 @@ import std_srvs.EmptyResponse;
 public class QNode extends AbstractNodeMain {
     private static QNode INSTANCE = null;
 
-    final String GRAPH_NAME = "GidabotApp/QNode";
+    final String GRAPH_NAME_BASE = "GidabotApp/QNode_";
     private final long timeStart;
 
     Publisher<Goal> pubGoal;
@@ -41,15 +44,18 @@ public class QNode extends AbstractNodeMain {
     Subscriber<PoseWithCovarianceStamped> subPosition;
     Subscriber<PendingGoals> subPendingGoals;
     Subscriber<std_msgs.Int8> subNavPhase;
-    Subscriber<std_msgs.Int8> subdialogMessage;
+    Subscriber<std_msgs.Int8> subDialogMessage;
 
     ConnectedNode connectedNode;
 
+    private final String userId;
+
     private final NavInfo currentNav;
 
-    public QNode() {
+    private QNode() {
         this.timeStart = System.nanoTime();
         this.currentNav = new NavInfo();
+        this.userId = UUID.randomUUID().toString().substring(0,4);
     }
 
     public static synchronized QNode getInstance(){
@@ -60,7 +66,7 @@ public class QNode extends AbstractNodeMain {
     }
 
     public GraphName getDefaultNodeName() {
-        return GraphName.of(GRAPH_NAME);
+        return GraphName.of(GRAPH_NAME_BASE + userId);
     }
 
     public void onStart(final ConnectedNode connectedNode) {
@@ -73,12 +79,12 @@ public class QNode extends AbstractNodeMain {
         pubCancel.setLatchMode(true);
 
         subPosition = connectedNode.newSubscriber("/tartalo/amcl_pose", PoseWithCovarianceStamped._TYPE);
-        subPosition.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
-            @Override
-            public void onNewMessage(PoseWithCovarianceStamped message) {
-                currentNav.setCurrent(new MapPosition(message));
-            }
-        });
+//        subPosition.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
+//            @Override
+//            public void onNewMessage(PoseWithCovarianceStamped message) {
+//                currentNav.setCurrent(new MapPosition(message));
+//            }
+//        });
 
         subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
 //        subNavPhase.addMessageListener(new MessageListener<Int8>() {
@@ -89,7 +95,9 @@ public class QNode extends AbstractNodeMain {
 //            }
 //        });
 
-        subdialogMessage = connectedNode.newSubscriber("/dialog_qt_message", Int8._TYPE);
+        subDialogMessage = connectedNode.newSubscriber("/dialog_qt_message", Int8._TYPE);
+
+        subPendingGoals = connectedNode.newSubscriber("tartalo/pending_requests", PendingGoals._TYPE);
 
         try {
             clientClearCostmap = connectedNode.newServiceClient("/move_base/clear_costmaps", Empty._TYPE);
@@ -100,11 +108,22 @@ public class QNode extends AbstractNodeMain {
         }
 
     }
+//
+//    public void onShutdown(Node node){
+//        super.onShutdown(node);
+//        Log.e("QNode", "QNode shut down");
+//    }
+//    public void onShutdownComplete(Node node) {
+//        super.onShutdownComplete(node);
+//        Log.e("QNode", "QNode shut down complete");
+//    }
+//
+//    public void onError(Node node, Throwable throwable) {
+//        super.onError(node, throwable);
+//        Log.e("QNode", "QNode error");
+//    }
 
 
-    // TODO: get current position and add it to the message
-    // TODO: get position as parameter
-    // TODO: kontrolatu helburua solairu berdinean dagoen (long-term)
     public void publishGoal(Room current, Room room){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
@@ -140,18 +159,26 @@ public class QNode extends AbstractNodeMain {
 //        message.setGoalId(String.format(Locale.getDefault(),"%03d", room.getNum()));
         message.setGoalId(room.getNum());
         message.setLanguage("EU");
-        message.setUserName("");
+        message.setUserName(this.userId);
 
         pubGoal.publish(message);
         goal.add();
     }
 
-    // TODO: get cancel request info from current position and request
-    // TODO: uneko ibilbidea cancel (non eta nora), orain bakarrik bat egiten du.
-    public void publishCancel(){
+
+    public void publishCancel(int goal_seq, boolean intermediateRobot, double...floors){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
         CancelRequest message = topicMessageFactory.newFromType(cancel.type);
+        message.setGoalSeq(goal_seq);
+        message.setInitialFloor((float) floors[0]);
+        message.setGoalFloor((float) floors[1]);
+        message.setIntermediateRobot(intermediateRobot);
+        if (intermediateRobot){
+            message.setIntermediateFloor((float) floors[2]);
+            message.setRequestFloor((float) floors[3]);
+        }
+
 
         pubCancel.publish(message);
     }
@@ -175,7 +202,7 @@ public class QNode extends AbstractNodeMain {
     }
 
     public void setPhaseMsgListener(MessageListener<Int8> listener){
-        subdialogMessage.addMessageListener(listener);
+        subDialogMessage.addMessageListener(listener);
         Log.i("listener", "phase message listener set");
     }
 
@@ -184,8 +211,20 @@ public class QNode extends AbstractNodeMain {
         Log.i("listener", "nav phase listener set");
     }
 
+    public void setPositionListener(MessageListener<PoseWithCovarianceStamped> listener){
+        subPosition.addMessageListener(listener);
+    }
+
+    public void setPendingGoalsListener(MessageListener<PendingGoals> listener){
+        subPendingGoals.addMessageListener(listener);
+    }
+
     public NavInfo getCurrentNav(){
         return this.currentNav;
+    }
+
+    public String getUserId(){
+        return this.userId;
     }
 
 }

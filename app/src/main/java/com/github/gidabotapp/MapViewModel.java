@@ -1,6 +1,8 @@
 package com.github.gidabotapp;
 
 import android.app.Application;
+import android.os.Handler;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -12,6 +14,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.List;
 
+import geometry_msgs.PoseWithCovarianceStamped;
+import multilevel_navigation_msgs.Goal;
+import multilevel_navigation_msgs.PendingGoals;
 import std_msgs.Int8;
 
 public class MapViewModel extends AndroidViewModel {
@@ -23,11 +28,13 @@ public class MapViewModel extends AndroidViewModel {
     private final MutableLiveData<List<Room>> currentFloorRoomsObserver;
     private final MutableLiveData<Integer> alertObserver;
     private final MutableLiveData<NavPhase> navPhaseObserver;
+    private final MutableLiveData<MapPosition> positionObserver;
 
     private Room origin;
     private Room destination;
-    private static PhaseMessageSingleton currentPhaseMessage;
+    private static PhaseMessage currentPhaseMessage;
     final int STARTING_FLOOR = 0;
+    private List<Goal> pendingGoals;
 
     public MapViewModel(@NonNull Application application) {
         super(application);
@@ -43,13 +50,14 @@ public class MapViewModel extends AndroidViewModel {
         this.currentFloorRoomsObserver = new MutableLiveData<>(roomRepository.getRoomsByFloor(STARTING_FLOOR));
         this.alertObserver = new MutableLiveData<>();
         this.navPhaseObserver = new MutableLiveData<>();
-        currentPhaseMessage = PhaseMessageSingleton.getInstance();
+        this.positionObserver = new MutableLiveData<>();
+
 
         qNode.setPhaseMsgListener(new MessageListener<Int8>() {
             @Override
             public void onNewMessage(Int8 message) {
                 int i = message.getData();
-                currentPhaseMessage.setMessage(i);
+                currentPhaseMessage = new PhaseMessage(i);
                 alertObserver.postValue(currentPhaseMessage.getMessageId());
             }
         });
@@ -62,6 +70,20 @@ public class MapViewModel extends AndroidViewModel {
             }
         });
 
+        qNode.setPositionListener(new MessageListener<PoseWithCovarianceStamped>() {
+            @Override
+            public void onNewMessage(PoseWithCovarianceStamped message) {
+                MapPosition position = new MapPosition(message);
+                positionObserver.postValue(position);
+            }
+        });
+
+        qNode.setPendingGoalsListener(new MessageListener<PendingGoals>() {
+            @Override
+            public void onNewMessage(PendingGoals message) {
+                pendingGoals = message.getGoals();
+            }
+        });
     }
 
     // TODO: Should not use context (leaks) --> locale change
@@ -72,7 +94,7 @@ public class MapViewModel extends AndroidViewModel {
         } else if (origin.equals(destination)) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_same);
         } else {
-            Room nearest = roomRepository.getNearestRoom(qNode.getCurrentNav().getCurrent());
+            Room nearest = roomRepository.getNearestRoom(positionObserver.getValue());
             if (!nearest.equals(origin)) {
                 qNode.publishGoal(nearest, origin);
             }
@@ -83,9 +105,31 @@ public class MapViewModel extends AndroidViewModel {
     }
 
 
+    // TODO: Should be without try/catch
     public void publishCancel() {
-        qNode.publishCancel();
-        toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.cancel_msg));
+        String userId = qNode.getUserId();
+
+            try {
+                Goal first = pendingGoals.get(0);
+                if(userId.compareTo(first.getUserName()) == 0){
+                    qNode.publishCancel(first.getGoalSeq(), false, 0, 0);
+                }
+
+                final Goal second = pendingGoals.get(1);
+                if(userId.compareTo(second.getUserName()) == 0) {
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            qNode.publishCancel(second.getGoalSeq(), false, 0, 0);
+                        }
+                    },5000);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+//        toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.cancel_msg_error));
     }
 
     public MutableLiveData<String> getToastObserver() {
@@ -103,49 +147,51 @@ public class MapViewModel extends AndroidViewModel {
         return this.alertObserver;
     }
     public MutableLiveData<NavPhase> getNavPhaseObserver(){return this.navPhaseObserver;}
+    public MutableLiveData<MapPosition> getPositionObserver(){return this.positionObserver;}
 
-    public Room getRoom(int listIndex) {
-        return roomRepository.getRoomByFloorIndex(this.currentFloorObserver.getValue(), listIndex);
-    }
 
     public List<Room> getCurrentFloorRooms() {
-        return roomRepository.getRoomsByFloor(this.currentFloorObserver.getValue());
+        List<Room> currentFloorRooms = null;
+
+        // Observer can be null
+        if(this.currentFloorObserver.getValue() != null){
+            currentFloorRooms = roomRepository.getRoomsByFloor(this.currentFloorObserver.getValue());
+        }
+        return currentFloorRooms;
     }
 
-    // TODO: Floors 0.5, 2, 3
     public void selectFloor(int floor) {
         this.currentFloorObserver.postValue(floor);
         this.currentFloorRoomsObserver.postValue(roomRepository.getRoomsByFloor(floor));
     }
 
 
-    public MapPosition getCurrentPos(){
-        return qNode.getCurrentNav().getCurrent();
-    }
-
-    public int getRobotIconId(){
-        int iconId;
-        switch (currentFloorObserver.getValue()){
-            case 1:
-                iconId = R.drawable.icon_kbot;
-                break;
-            case 2:
-                iconId = R.drawable.icon_galtxa;
-                break;
-            case 3:
-                iconId = R.drawable.icon_mari;
-                break;
-            default:
-                iconId = R.drawable.icon_tartalo;
+    public int getRobotIconId() {
+        int iconId = R.drawable.tartalo_small;
+        Integer currentFloor = currentFloorObserver.getValue();
+        assert currentFloor != null;
+            switch (currentFloor) {
+                // case 0 = ic_tartalo (default)
+                case 1:
+                    iconId = R.drawable.kbot_small;
+                    break;
+                case 2:
+                    iconId = R.drawable.galtxa_small;
+                    break;
+                case 3:
+                    iconId = R.drawable.mari_small;
+                    break;
         }
         return iconId;
     }
 
     public void selectOrigin(int spinnerIndex) {
+        assert this.currentFloorRoomsObserver.getValue() != null;
         this.origin = this.currentFloorRoomsObserver.getValue().get(spinnerIndex);
     }
 
     public void selectDestination(int spinnerIndex) {
+        assert this.currentFloorRoomsObserver.getValue() != null;
         this.destination = this.currentFloorRoomsObserver.getValue().get(spinnerIndex);
     }
 

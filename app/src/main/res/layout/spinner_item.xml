@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView
+<RelativeLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:textSize="20sp"
-    android:gravity="start"
-    android:textColor="#0D0D0D"
-    android:padding="5dip"
-    />
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+    <TextView
+        android:id="@+id/spinnerText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:textColor="@color/material_black"
+        android:textSize="18sp"
+        android:padding="5dip"
+        />
+<!--    <ImageView-->
+<!--        android:layout_width="16dp"-->
+<!--        android:layout_height="16dp"-->
+<!--        android:layout_alignParentEnd="true"-->
+<!--        android:layout_centerVertical="true"-->
+<!--        android:src="@drawable/ic_dropdown_arrow"-->
+<!--        android:layout_toEndOf="@id/spinnerText"-->
+<!--        app:srcCompat="@drawable/ic_dropdown_arrow"-->
+<!--        />-->
+</RelativeLayout>

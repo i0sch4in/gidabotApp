@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -56,9 +57,9 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private GoogleMap map;
     private TileOverlay tileOverlay;
 
-    private Handler mHandler;
-    private Runnable mStatusChecker;
-    private final int MAP_UPDATE_INTERVAL = 1000; // ms
+//    private Handler mHandler;
+//    private Runnable mStatusChecker;
+//    private final int MAP_UPDATE_INTERVAL = 1000; // ms
 
     private Button publishBtn, cancelBtn;
     private Spinner spinnerNon, spinnerNora, spinnerFloor;
@@ -91,6 +92,12 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 showAlert(message);
             }
         });
+        viewModel.getPositionObserver().observe(this, new Observer<MapPosition>() {
+            @Override
+            public void onChanged(MapPosition position) {
+                drawRobot(position);
+            }
+        });
 
         publishBtn = findViewById(R.id.publishBtn);
         publishBtn.setOnClickListener(new View.OnClickListener() {
@@ -118,7 +125,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
 
         spinnerNon = findViewById(R.id.spinnerNon);
-        final ArrayAdapter<Room> adapterRooms = new ArrayAdapter<>(this, R.layout.spinner_item, viewModel.getCurrentFloorRooms());
+        final ArrayAdapter<Room> adapterRooms = new ArrayAdapter<>(this, R.layout.spinner_item, R.id.spinnerText, viewModel.getCurrentFloorRooms());
         spinnerNon.setAdapter(adapterRooms);
         spinnerNon.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -144,7 +151,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
         spinnerFloor = findViewById(R.id.spinnerFloor);
         Log.i("Null", Arrays.toString(getResources().getStringArray((R.array.floorArray))));
-        final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, getResources().getStringArray(R.array.floorArray));
+        final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.spinner_item , R.id.spinnerText, getResources().getStringArray(R.array.floorArray));
         spinnerFloor.setAdapter(floorAdapter);
         spinnerFloor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -181,24 +188,25 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         mapFragment.getMapAsync(this);
     }
 
+    // TODO
     private void enableButtons(NavPhase navPhase) {
-        // disable spinners and publish button
-        // enable cancel button
-        if (navPhase == NavPhase.CONTINUE_NAVIGATION){
-            spinnerNora.setEnabled(false);
-            spinnerNon.setEnabled(false);
-            publishBtn.setEnabled(false);
-            cancelBtn.setEnabled(true);
-        }
-
-        // disable cancel button
-        // enable spinners and publish button
-        if (navPhase == NavPhase.WAIT_NAVIGATION){
-            spinnerNora.setEnabled(true);
-            spinnerNon.setEnabled(true);
-            publishBtn.setEnabled(true);
-            cancelBtn.setEnabled(false);
-        }
+//        // disable spinners and publish button
+//        // enable cancel button
+//        if (navPhase == NavPhase.CONTINUE_NAVIGATION){
+//            spinnerNora.setEnabled(false);
+//            spinnerNon.setEnabled(false);
+//            publishBtn.setEnabled(false);
+//            cancelBtn.setEnabled(true);
+//        }
+//
+//        // disable cancel button
+//        // enable spinners and publish button
+//        if (navPhase == NavPhase.WAIT_NAVIGATION){
+//            spinnerNora.setEnabled(true);
+//            spinnerNon.setEnabled(true);
+//            publishBtn.setEnabled(true);
+//            cancelBtn.setEnabled(false);
+//        }
     }
 
     private void showAlert(String msg) {
@@ -263,28 +271,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
         this.map = map;
-
-        mHandler = new Handler();
-        mStatusChecker = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    updateRobotPos();
-                }
-                finally {
-                    mHandler.postDelayed(mStatusChecker, MAP_UPDATE_INTERVAL);
-                }
-            }
-        };
-
-        // Start redrawing robot every second
-        mStatusChecker.run();
     }
 
-    private void updateRobotPos() {
-        MapPosition pos = viewModel.getCurrentPos();
-        drawRobot(pos);
-    }
 
     // TODO: map can be null
     private void drawNewTiles(final int floor){
@@ -331,7 +319,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         BitmapDescriptor current_icon = BitmapDescriptorFactory.fromResource(iconId);
 
         // Get robot name and make first letter uppercase
-        String current_name = getResources().getResourceEntryName(iconId).split("_")[1];
+        String current_name = getResources().getResourceEntryName(iconId).split("_")[0];
         current_name = current_name.substring(0,1).toUpperCase() + current_name.substring(1);
         if(robotMarker == null){
             robotMarker = map.addMarker(new MarkerOptions()
@@ -419,17 +407,31 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
         Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(image);
-        canvas.drawColor(ContextCompat.getColor(getApplicationContext(),R.color.aero_blue));
+        canvas.drawColor(ContextCompat.getColor(getApplicationContext(),R.color.light_blue));
         canvas.drawText(text, 0, baseLine, paint);
         return image;
+    }
+
+    private Bitmap getBitmap(int drawableRes){
+        Drawable drawable = ContextCompat.getDrawable(getApplicationContext(),drawableRes);
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        // Stop updating robot
-        mHandler.removeCallbacks(mStatusChecker);
+        viewModel.getCurrentFloorObserver().removeObservers(this);
+        viewModel.getToastObserver().removeObservers(this);
+        viewModel.getAlertObserver().removeObservers(this);
+        viewModel.getPositionObserver().removeObservers(this);
+        viewModel.getCurrentFloorRoomsObserver().removeObservers(this);
+        viewModel.getNavPhaseObserver().removeObservers(this);
     }
 
     private static class CoordTileProvider implements TileProvider {

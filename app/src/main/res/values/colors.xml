@@ -10,6 +10,8 @@
     <color name="default_color">#ffffff</color>
     <color name="pressed_color">#4d90fe</color>
     <color name="material_black">#070707</color>
-    <color name="aero_blue">#8AC4FF</color>
-<!--    <color name="cultured_white">#F4F7F5</color>-->
+    <color name="light_blue">#bbdefb</color>
+    <color name="maps_blue">#4A89F3</color>
+    <color name="maps_red">#DD4B3E</color>
+    <color name="maps_green">#1EA362</color>
 </resources>

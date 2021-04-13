@@ -1,7 +1,10 @@
 package com.github.gidabotapp;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +16,7 @@ import org.ros.node.NodeMainExecutor;
 public class MainActivity extends RosActivity {
     private QNode qNode;
     NodeConfiguration nodeConfiguration;
+    AlertDialog errorAlert;
 
     // TODO: strings.xml fitxategia erabili string-entzat
     // TODO: Intent = another activity -> MVVM pattern
@@ -25,22 +29,41 @@ public class MainActivity extends RosActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
 
         this.qNode = QNode.getInstance();
+    }
 
-        final Button mapBtn = findViewById(R.id.mapBtn);
-        mapBtn.setOnClickListener(new View.OnClickListener() {
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setContentView(R.layout.main);
+        errorAlert = new AlertDialog.Builder(this).create();
+        errorAlert.setTitle(getString(R.string.master_error_title));
+        errorAlert.setMessage(getString(R.string.master_error_msg));
+        errorAlert.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.accept_btn),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = getIntent();
+                        finish();
+                        startActivity(intent);
+                    }
+                });
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), RouteSelectActivity.class);
-                startActivity(intent);
+            public void run() {
+                errorAlert.show();
             }
-        });
+        }, 2000);
+
     }
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
+        errorAlert.dismiss();
 
         nodeConfiguration = NodeConfiguration.newPublic(getRosHostname());
         Log.i("HostName", getRosHostname());
@@ -50,6 +73,8 @@ public class MainActivity extends RosActivity {
 
         nodeMainExecutor.execute(qNode, nodeConfiguration);
 
+        Intent intent = new Intent(getApplicationContext(), RouteSelectActivity.class);
+        startActivity(intent);
     }
 
 }
