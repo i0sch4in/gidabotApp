@@ -1,4 +1,4 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.domain;
 
 public class NavInfo {
     private int goalSeq;

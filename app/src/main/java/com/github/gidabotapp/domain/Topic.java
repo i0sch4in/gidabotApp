@@ -1,8 +1,8 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.domain;
 
 public class Topic {
-    final String name;
-    final String type;
+    private final String name;
+    private final String type;
     private int sequenceNumber;
 
     public Topic(String name, String type){
@@ -17,5 +17,13 @@ public class Topic {
 
     public void add(){
         this.sequenceNumber++;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
     }
 }

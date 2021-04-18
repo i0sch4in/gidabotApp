@@ -1,4 +1,6 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.domain;
+
+import com.github.gidabotapp.R;
 
 public class PhaseMessage {
     private message_enum msg;

@@ -1,4 +1,4 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -14,7 +14,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,6 +22,12 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.github.gidabotapp.R;
+import com.github.gidabotapp.domain.Floor;
+import com.github.gidabotapp.domain.MapPosition;
+import com.github.gidabotapp.domain.NavPhase;
+import com.github.gidabotapp.domain.Room;
+import com.github.gidabotapp.viewmodel.MapViewModel;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -65,6 +70,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private Spinner spinnerNon, spinnerNora, spinnerFloor;
     private FloatingActionButton locateRobotBtn;
 
+    private final int MAX_ZOOM = 3;
+
     public RouteSelectActivity() {
     }
 
@@ -72,13 +79,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route_select);
+
         viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())).get(MapViewModel.class);
-        viewModel.getCurrentFloorObserver().observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer floor) {
-                drawNewTiles(floor);
-            }
-        });
         viewModel.getToastObserver().observe(this, new Observer<String>() {
             @Override
             public void onChanged(String message) {
@@ -98,6 +100,12 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 drawRobot(position);
             }
         });
+//        viewModel.getAllRooms().observe(this, new Observer<List<Room>>() {
+//            @Override
+//            public void onChanged(List<Room> rooms) {
+////                Log.i("DAO", "Rooms: " + rooms.toString());
+//            }
+//        });
 
         publishBtn = findViewById(R.id.publishBtn);
         publishBtn.setOnClickListener(new View.OnClickListener() {
@@ -125,8 +133,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
 
         spinnerNon = findViewById(R.id.spinnerNon);
-        final ArrayAdapter<Room> adapterRooms = new ArrayAdapter<>(this, R.layout.spinner_item, R.id.spinnerText, viewModel.getCurrentFloorRooms());
-        spinnerNon.setAdapter(adapterRooms);
         spinnerNon.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -138,7 +144,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         });
 
         spinnerNora = findViewById(R.id.spinnerNora);
-        spinnerNora.setAdapter(adapterRooms);
         spinnerNora.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -150,7 +155,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         });
 
         spinnerFloor = findViewById(R.id.spinnerFloor);
-        Log.i("Null", Arrays.toString(getResources().getStringArray((R.array.floorArray))));
         final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.spinner_item , R.id.spinnerText, getResources().getStringArray(R.array.floorArray));
         spinnerFloor.setAdapter(floorAdapter);
         spinnerFloor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -166,11 +170,14 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         });
 
 
-        viewModel.getCurrentFloorRoomsObserver().observe(this, new Observer<List<Room>>() {
+        viewModel.getCurrentFloorRooms().observe(this, new Observer<List<Room>>() {
             @Override
             public void onChanged(List<Room> rooms) {
-                adapterRooms.clear();
-                adapterRooms.addAll(rooms);
+                ArrayAdapter<Room> adapterRooms = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, R.id.spinnerText, rooms);
+                spinnerNon.setAdapter(adapterRooms);
+                spinnerNora.setAdapter(adapterRooms);
+
+                drawNewTiles(rooms);
             }
         });
 
@@ -230,7 +237,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     @Override
     public void onMapReady(GoogleMap map) {
         map.setMapType(GoogleMap.MAP_TYPE_NONE);
-        map.setMaxZoomPreference(4.0f);
+        map.setMaxZoomPreference(MAX_ZOOM);
 
         // TODO: set camera bounds
 //        LatLng NORTHEAST_BOUND = new LatLng(85,-180);
@@ -274,14 +281,13 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
 
-    // TODO: map can be null
-    private void drawNewTiles(final int floor){
+    private void drawNewTiles(List<Room> rooms){
         if(map != null) {
-            generateRoomMarkers(map);
-
+            final double floor = rooms.get((0)).getFloor();
+            generateRoomMarkers(rooms);
             TileProvider tileProvider = new TileProvider() {
                 final String FLOOR_MAP_URL_FORMAT =
-                        "map_tiles/floor%d/%d/tile_%d_%d.png";
+                        "map_tiles/floor_%.1f/%d/tile_%d_%d.png";
                 final int TILE_SIZE_DP = 256;
 
                 @Override
@@ -306,21 +312,25 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             // Remove current overlay and robot
             if (tileOverlay != null) {
                 tileOverlay.remove();
-                robotMarker.remove();
-                robotMarker = null;
             }
+//            if (robotMarker != null){
+//                robotMarker.remove();
+//                robotMarker = null;
+//            }
             tileOverlay = map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProvider));
         }
     }
 
     private void drawRobot(MapPosition position){
-        LatLng latLng = toLatLng(position);
+        LatLng latLng = position.toLatLng();
         int iconId = viewModel.getRobotIconId();
+
         BitmapDescriptor current_icon = BitmapDescriptorFactory.fromResource(iconId);
 
         // Get robot name and make first letter uppercase
         String current_name = getResources().getResourceEntryName(iconId).split("_")[0];
         current_name = current_name.substring(0,1).toUpperCase() + current_name.substring(1);
+
         if(robotMarker == null){
             robotMarker = map.addMarker(new MarkerOptions()
                     .title(current_name)
@@ -328,16 +338,22 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                     .position(latLng)
                     .zIndex(0.9f)
             );
+            robotMarker.showInfoWindow();
             resetCamera();
         }
-        robotMarker.setPosition(latLng);
+        else {
+            robotMarker.setTitle(current_name);
+            robotMarker.setIcon(current_icon);
+            robotMarker.setPosition(latLng);
+        }
+//        resetCamera();
     }
 
     private void resetCamera() {
         map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(robotMarker.getPosition(),0,0,0)));
     }
 
-    private void generateRoomMarkers(GoogleMap map) {
+    private void generateRoomMarkers(List<Room> rooms) {
         // Remove map's current markers markers
         if(roomMarkers != null) {
             for(Marker marker:roomMarkers){
@@ -349,8 +365,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         // else, instantiate marker array
         roomMarkers = new ArrayList<>();
 
-        for(Room room: viewModel.getCurrentFloorRooms()){
-            LatLng latLng = this.toLatLng(room.getPosition());
+        for(Room room: rooms){
+            LatLng latLng = room.getPosition().toLatLng();
             Bitmap textIcon = this.textAsBitmap(room.getName());
             Marker marker = map.addMarker(new MarkerOptions()
                 .position(latLng)
@@ -363,33 +379,11 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
     }
 
-    /*
-     * Check that the tile server supports the requested x, y and zoom.
-     * Complete this stub according to the tile range you support.
-     * If you support a limited range of tiles at different zoom levels, then you
-     * need to define the supported x, y range at each zoom level.
-     */
     private boolean checkTileExists(int x, int y, int zoom) {
         int minZoom = 0;
-        int maxZoom = 4;
 
-        return (zoom >= minZoom && zoom <= maxZoom);
+        return (zoom >= minZoom && zoom <= MAX_ZOOM);
     }
-
-    // TODO: refine precision
-    private LatLng toLatLng(MapPosition position){
-        double FACTOR_X = 5.333;
-        double FACTOR_Y = 3.3;
-
-        double x = position.getX();
-        double y = position.getY();
-
-        double lng = FACTOR_X * (x+30) - 180;
-        double lat = FACTOR_Y * (y+22.6) - 65;
-
-        return new LatLng(lat,lng);
-    }
-
 
     private Bitmap textAsBitmap(String text){
         final float scaleFactor = getApplicationContext().getResources().getDisplayMetrics().density;
@@ -426,11 +420,11 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     @Override
     public void onDestroy() {
         super.onDestroy();
-        viewModel.getCurrentFloorObserver().removeObservers(this);
+        viewModel.getCurrentFloor().removeObservers(this);
         viewModel.getToastObserver().removeObservers(this);
         viewModel.getAlertObserver().removeObservers(this);
         viewModel.getPositionObserver().removeObservers(this);
-        viewModel.getCurrentFloorRoomsObserver().removeObservers(this);
+        viewModel.getCurrentFloorRooms().removeObservers(this);
         viewModel.getNavPhaseObserver().removeObservers(this);
     }
 

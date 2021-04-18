@@ -1,28 +1,50 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.repository;
 
 import android.content.Context;
+import android.os.Handler;
+import android.util.Log;
+
+import androidx.lifecycle.LiveData;
+import androidx.room.Database;
+
+import com.github.gidabotapp.domain.Floor;
+import com.github.gidabotapp.domain.MapPosition;
+import com.github.gidabotapp.domain.Room;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RoomRepository {
-    private List<Room> roomList;
+    private static List<Room> roomList;
     private InputStream stream;
     private Context appContext;
+    private LiveData<List<Room>> allRooms;
+    private LiveData<List<Room>> currentFloorRooms;
+    private final RoomRepositoryDAO roomDao;
 
 
     public RoomRepository(Context appContext) throws IOException, XmlPullParserException {
-//        this.stream = stream;
         this.appContext = appContext;
-        this.loadRooms();
+//        RoomDatabase db = RoomDatabase.getInstance(appContext.getApplicationContext());
+//        roomDao = db.roomRepositoryDAO();
+//        loadRooms();
+        RoomDatabase db = RoomDatabase.getInstance(appContext);
+        roomDao = db.roomRepositoryDAO();
+
+        // TODO: floor as argument
+        allRooms = roomDao.getAllRooms();
     }
 
-    public List<Room> getRooms (){
-        return this.roomList;
+    public static List<Room> getRooms (){
+        return roomList;
     }
 
     // TODO: get rooms from room_names.xml
@@ -45,30 +67,33 @@ public class RoomRepository {
             }
         }
         this.roomList = readRooms;
+
     }
 
-    public List<Room> getRoomsByFloor(double floor){
-        List<Room> list = new ArrayList<>();
-        for(Room r: this.roomList){
-            if(r.getFloor() == floor){
-                list.add(r);
-            }
-        }
-        return list;
-    }
+//    public List<Room> getRoomsByFloor(double floor){
+//        List<Room> list = new ArrayList<>();
+//        for (Room r : this.roomList) {
+//            if (r.getFloor() == floor) {
+//                list.add(r);
+//            }
+//        }
+//        return list;
+//    }
 
-    public Room getNearestRoom(MapPosition current){
-        List<Room> rooms = getRoomsByFloor(0);
+
+    public Room getNearestRoom(MapPosition current) {
+        // TODO: current Floor?
+        List<Room> rooms = allRooms.getValue();
 
         // get first element of the roomlist
         Room nearestRoom = rooms.get(0);
         double nearestDistance = current.dSquare(nearestRoom.getPosition());
 
         // iterate through other elements
-        for(Room r: rooms.subList(1,rooms.size())){
+        for (Room r : rooms.subList(1, rooms.size())) {
             MapPosition pos = r.getPosition();
             double distance = pos.dSquare(current);
-            if(distance < nearestDistance){
+            if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestRoom = r;
             }
@@ -76,14 +101,11 @@ public class RoomRepository {
         return nearestRoom;
     }
 
-    public Room getRoomByFloorIndex(int floor, int index) {
-        List<Room> floorList = new ArrayList<>();
-        for(Room r: this.roomList){
-            if(r.getFloor() == floor){
-                floorList.add(r);
-            }
-        }
-        return floorList.get(index);
+    public LiveData<List<Room>> getAllRooms(){
+        return allRooms;
     }
 
+    public LiveData<List<Room>> getRoomsByFloor(Floor floor){
+        return roomDao.getRoomsByFloor(floor.getFloorCode());
+    }
 }

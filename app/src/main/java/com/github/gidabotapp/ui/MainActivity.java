@@ -1,4 +1,4 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.ui;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+
+import com.github.gidabotapp.R;
+import com.github.gidabotapp.repository.QNode;
+import com.github.gidabotapp.repository.RoomDatabase;
 
 import org.ros.android.RosActivity;
 import org.ros.node.NodeConfiguration;
@@ -77,4 +79,9 @@ public class MainActivity extends RosActivity {
         startActivity(intent);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        qNode.shutdown();
+    }
 }

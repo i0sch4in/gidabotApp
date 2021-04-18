@@ -1,10 +1,11 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.domain;
 
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Locale;
 
 import geometry_msgs.Point;
-import geometry_msgs.Pose;
 import geometry_msgs.PoseWithCovarianceStamped;
 
 public class MapPosition {
@@ -61,5 +62,15 @@ public class MapPosition {
 
     public String toString(){
         return String.format(Locale.getDefault(), "X:%.2f , Y %.2f: , Z:%.2f ", this.x, this.y, this.z);
+    }
+
+    public LatLng toLatLng(){
+        double FACTOR_X = 5.333;
+        double FACTOR_Y = 3.3;
+
+        double lng = FACTOR_X * (x+30) - 180;
+        double lat = FACTOR_Y * (y+22.6) - 65;
+
+        return new LatLng(lat,lng);
     }
 }

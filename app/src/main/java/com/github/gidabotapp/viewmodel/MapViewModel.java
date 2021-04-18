@@ -1,12 +1,23 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.viewmodel;
 
 import android.app.Application;
 import android.os.Handler;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.arch.core.util.Function;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
+
+import com.github.gidabotapp.domain.Floor;
+import com.github.gidabotapp.domain.MapPosition;
+import com.github.gidabotapp.domain.NavPhase;
+import com.github.gidabotapp.domain.PhaseMessage;
+import com.github.gidabotapp.repository.QNode;
+import com.github.gidabotapp.R;
+import com.github.gidabotapp.domain.Room;
+import com.github.gidabotapp.repository.RoomRepository;
 
 import org.ros.message.MessageListener;
 import org.xmlpull.v1.XmlPullParserException;
@@ -24,16 +35,18 @@ public class MapViewModel extends AndroidViewModel {
     private RoomRepository roomRepository;
 
     private final MutableLiveData<String> toastObserver;
-    private final MutableLiveData<Integer> currentFloorObserver;
-    private final MutableLiveData<List<Room>> currentFloorRoomsObserver;
+    private final MutableLiveData<Floor> currentFloor;
+    private final LiveData<List<Room>> currentFloorRooms;
     private final MutableLiveData<Integer> alertObserver;
     private final MutableLiveData<NavPhase> navPhaseObserver;
     private final MutableLiveData<MapPosition> positionObserver;
 
+    private final LiveData<List<Room>> allRooms;
+
     private Room origin;
     private Room destination;
     private static PhaseMessage currentPhaseMessage;
-    final int STARTING_FLOOR = 0;
+    final Floor STARTING_FLOOR = Floor.ZEROTH;
     private List<Goal> pendingGoals;
 
     public MapViewModel(@NonNull Application application) {
@@ -45,9 +58,19 @@ public class MapViewModel extends AndroidViewModel {
             e.printStackTrace();
         }
 
-        this.currentFloorObserver = new MutableLiveData<>(STARTING_FLOOR);
+        this.allRooms = roomRepository.getAllRooms();
+
+        this.currentFloor = new MutableLiveData<>(STARTING_FLOOR);
         this.toastObserver = new MutableLiveData<>();
-        this.currentFloorRoomsObserver = new MutableLiveData<>(roomRepository.getRoomsByFloor(STARTING_FLOOR));
+
+//        List<Room> starting_rooms = roomRepository.getRoomsByFloor(STARTING_FLOOR);
+//        this.currentFloorRoomsObserver = new MutableLiveData<>(starting_rooms);
+        this.currentFloorRooms = Transformations.switchMap(currentFloor, new Function<Floor, LiveData<List<Room>>>() {
+            @Override
+            public LiveData<List<Room>> apply(Floor floor) {
+                return roomRepository.getRoomsByFloor(floor);
+            }
+        });
         this.alertObserver = new MutableLiveData<>();
         this.navPhaseObserver = new MutableLiveData<>();
         this.positionObserver = new MutableLiveData<>();
@@ -84,6 +107,7 @@ public class MapViewModel extends AndroidViewModel {
                 pendingGoals = message.getGoals();
             }
         });
+
     }
 
     // TODO: Should not use context (leaks) --> locale change
@@ -105,43 +129,40 @@ public class MapViewModel extends AndroidViewModel {
     }
 
 
-    // TODO: Should be without try/catch
     public void publishCancel() {
         String userId = qNode.getUserId();
-
-            try {
-                Goal first = pendingGoals.get(0);
-                if(userId.compareTo(first.getUserName()) == 0){
-                    qNode.publishCancel(first.getGoalSeq(), false, 0, 0);
-                }
-
-                final Goal second = pendingGoals.get(1);
-                if(userId.compareTo(second.getUserName()) == 0) {
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            qNode.publishCancel(second.getGoalSeq(), false, 0, 0);
-                        }
-                    },5000);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        try {
+            Goal first = pendingGoals.get(0);
+            if (userId.compareTo(first.getUserName()) == 0) {
+                qNode.publishCancel(first.getGoalSeq(), false, 0, 0);
             }
 
-//        toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.cancel_msg_error));
+            final Goal second = pendingGoals.get(1);
+            if (userId.compareTo(second.getUserName()) == 0) {
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        qNode.publishCancel(second.getGoalSeq(), false, 0, 0);
+                    }
+                }, 5000);
+            }
+        }catch (IndexOutOfBoundsException e){
+            e.printStackTrace();
+        }
+
     }
 
     public MutableLiveData<String> getToastObserver() {
         return toastObserver;
     }
 
-    public MutableLiveData<List<Room>> getCurrentFloorRoomsObserver() {
-        return this.currentFloorRoomsObserver;
+    public LiveData<List<Room>> getCurrentFloorRooms() {
+        return this.currentFloorRooms;
     }
 
-    public MutableLiveData<Integer> getCurrentFloorObserver() {
-        return this.currentFloorObserver;
+    public MutableLiveData<Floor> getCurrentFloor() {
+        return this.currentFloor;
     }
     public MutableLiveData<Integer> getAlertObserver() {
         return this.alertObserver;
@@ -150,49 +171,50 @@ public class MapViewModel extends AndroidViewModel {
     public MutableLiveData<MapPosition> getPositionObserver(){return this.positionObserver;}
 
 
-    public List<Room> getCurrentFloorRooms() {
-        List<Room> currentFloorRooms = null;
+//    public List<Room> getCurrentFloorRooms() {
+//        List<Room> currentFloorRooms = new ArrayList<>();
+//        if (this.currentFloorObserver.getValue() != null) {
+//            currentFloorRooms = roomRepository.getRoomsByFloor(this.currentFloorObserver.getValue());
+//        }
+//        return currentFloorRooms;
+//    }
 
-        // Observer can be null
-        if(this.currentFloorObserver.getValue() != null){
-            currentFloorRooms = roomRepository.getRoomsByFloor(this.currentFloorObserver.getValue());
-        }
-        return currentFloorRooms;
-    }
-
-    public void selectFloor(int floor) {
-        this.currentFloorObserver.postValue(floor);
-        this.currentFloorRoomsObserver.postValue(roomRepository.getRoomsByFloor(floor));
+    public void selectFloor(int index) {
+        this.currentFloor.setValue(Floor.values()[index]);
+//        this.currentFloorRooms.postValue(roomRepository.getRoomsByFloor(floor));
     }
 
 
     public int getRobotIconId() {
         int iconId = R.drawable.tartalo_small;
-        Integer currentFloor = currentFloorObserver.getValue();
+        Floor currentFloor = this.currentFloor.getValue();
         assert currentFloor != null;
-            switch (currentFloor) {
-                // case 0 = ic_tartalo (default)
-                case 1:
-                    iconId = R.drawable.kbot_small;
-                    break;
-                case 2:
-                    iconId = R.drawable.galtxa_small;
-                    break;
-                case 3:
-                    iconId = R.drawable.mari_small;
-                    break;
+        switch (currentFloor) {
+            // case 0 = ic_tartalo (default)
+            case MEZZANINE:
+                iconId = R.drawable.kbot_small;
+                break;
+            case SECOND:
+                iconId = R.drawable.galtxa_small;
+                break;
+            case THIRD:
+                iconId = R.drawable.mari_small;
+                break;
         }
         return iconId;
     }
 
     public void selectOrigin(int spinnerIndex) {
-        assert this.currentFloorRoomsObserver.getValue() != null;
-        this.origin = this.currentFloorRoomsObserver.getValue().get(spinnerIndex);
+        assert this.currentFloorRooms.getValue() != null;
+        this.origin = this.currentFloorRooms.getValue().get(spinnerIndex);
     }
 
     public void selectDestination(int spinnerIndex) {
-        assert this.currentFloorRoomsObserver.getValue() != null;
-        this.destination = this.currentFloorRoomsObserver.getValue().get(spinnerIndex);
+        assert this.currentFloorRooms.getValue() != null;
+        this.destination = this.currentFloorRooms.getValue().get(spinnerIndex);
     }
 
+    public LiveData<List<Room>> getAllRooms(){
+        return this.allRooms;
+    }
 }

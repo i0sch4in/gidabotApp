@@ -1,6 +1,9 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.repository;
 
 import android.util.Xml;
+
+import com.github.gidabotapp.domain.MapPosition;
+import com.github.gidabotapp.domain.Room;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -61,7 +64,7 @@ public class RoomXmlParser {
                     floor = readFloor(parser);
                     break;
                 case "num":
-                    num = readText(parser);
+                    num = readNum(parser);
                     break;
                 case "name":
                     name = readName(parser);
@@ -96,6 +99,14 @@ public class RoomXmlParser {
         parser.require(XmlPullParser.START_TAG, ns, "name");
         name = readText(parser);
         parser.require(XmlPullParser.END_TAG, ns, "name");
+        return name;
+    }
+
+    private String readNum(XmlPullParser parser) throws IOException, XmlPullParserException {
+        String name;
+        parser.require(XmlPullParser.START_TAG, ns, "num");
+        name = readText(parser);
+        parser.require(XmlPullParser.END_TAG, ns, "num");
         return name;
     }
 

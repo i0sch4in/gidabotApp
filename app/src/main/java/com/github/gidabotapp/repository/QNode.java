@@ -1,6 +1,10 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.repository;
 
 import android.util.Log;
+
+import com.github.gidabotapp.domain.NavInfo;
+import com.github.gidabotapp.domain.Room;
+import com.github.gidabotapp.domain.Topic;
 
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
@@ -9,7 +13,6 @@ import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
-import org.ros.node.Node;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.topic.Publisher;
@@ -72,10 +75,10 @@ public class QNode extends AbstractNodeMain {
     public void onStart(final ConnectedNode connectedNode) {
         this.connectedNode = connectedNode;
 
-        pubGoal = connectedNode.newPublisher(goal.name, goal.type);
+        pubGoal = connectedNode.newPublisher(goal.getName(), goal.getType());
         pubGoal.setLatchMode(true);
 
-        pubCancel = connectedNode.newPublisher(cancel.name, cancel.type);
+        pubCancel = connectedNode.newPublisher(cancel.getName(), cancel.getType());
         pubCancel.setLatchMode(true);
 
         subPosition = connectedNode.newSubscriber("/tartalo/amcl_pose", PoseWithCovarianceStamped._TYPE);
@@ -169,7 +172,7 @@ public class QNode extends AbstractNodeMain {
     public void publishCancel(int goal_seq, boolean intermediateRobot, double...floors){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
-        CancelRequest message = topicMessageFactory.newFromType(cancel.type);
+        CancelRequest message = topicMessageFactory.newFromType(cancel.getType());
         message.setGoalSeq(goal_seq);
         message.setInitialFloor((float) floors[0]);
         message.setGoalFloor((float) floors[1]);
@@ -227,4 +230,17 @@ public class QNode extends AbstractNodeMain {
         return this.userId;
     }
 
+    public void shutdown() {
+        subPosition.shutdown();
+        subDialogMessage.shutdown();
+        subNavPhase.shutdown();
+        subPendingGoals.shutdown();
+
+        pubCancel.shutdown();
+        pubGoal.shutdown();
+
+        clientClearCostmap.shutdown();
+
+        INSTANCE = null;
+    }
 }

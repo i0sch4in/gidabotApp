@@ -1,13 +1,21 @@
-package com.github.gidabotapp;
+package com.github.gidabotapp.domain;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Embedded;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
-// TODO: floor -> double egin da, ez dakit arazoak eman ditzakeen
-// TODO: num -> String egin da, laborategiek letrak dituztelako
+@Entity (tableName = "rooms")
 public class Room {
-    private final double floor;
+    @PrimaryKey @NonNull
     private final String num;
+
+    private final double floor;
     private final String name;
+
+    @Embedded
     private final MapPosition position;
 
     public Room(double floor, String num, String name, MapPosition position){
