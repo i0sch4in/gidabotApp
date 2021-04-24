@@ -14,18 +14,19 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.github.gidabotapp.R;
+import com.github.gidabotapp.domain.AppNavPhase;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
-import com.github.gidabotapp.domain.NavPhase;
+import com.github.gidabotapp.domain.MultiNavPhase;
 import com.github.gidabotapp.domain.Room;
 import com.github.gidabotapp.viewmodel.MapViewModel;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,19 +37,21 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -67,10 +70,11 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 //    private final int MAP_UPDATE_INTERVAL = 1000; // ms
 
     private Button publishBtn, cancelBtn;
-    private Spinner spinnerNon, spinnerNora, spinnerFloor;
+    private TextInputLayout til_non, til_nora, til_floor;
+    private AutoCompleteTextView act_non, act_nora, act_floor;
     private FloatingActionButton locateRobotBtn;
 
-    private final int MAX_ZOOM = 3;
+    private final int MAX_MAP_ZOOM = 3;
 
     public RouteSelectActivity() {
     }
@@ -89,9 +93,14 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         });
         viewModel.getAlertObserver().observe(this, new Observer<Integer>() {
             @Override
-            public void onChanged(Integer i) {
-                String message = getString(i);
-                showAlert(message);
+            public void onChanged(Integer stringResId) {
+                if(stringResId == R.string.origin_reached_msg){
+                    showNextGoalAlert();
+                }
+                else if (viewModel.getAppNavPhase() != AppNavPhase.WAIT_USER_INPUT){
+                    String message = getString(stringResId);
+                    showAlert(message);
+                }
             }
         });
         viewModel.getPositionObserver().observe(this, new Observer<MapPosition>() {
@@ -100,18 +109,20 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 drawRobot(position);
             }
         });
-//        viewModel.getAllRooms().observe(this, new Observer<List<Room>>() {
-//            @Override
-//            public void onChanged(List<Room> rooms) {
-////                Log.i("DAO", "Rooms: " + rooms.toString());
-//            }
-//        });
+        viewModel.getAllRoomsLD().observe(this, new Observer<List<Room>>() {
+            @Override
+            public void onChanged(List<Room> rooms) {
+                ArrayAdapter<Room> adapterAllRooms = new ArrayAdapter<>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, rooms);
+//                viewModel.setAllRooms(rooms);
+                act_nora.setAdapter(adapterAllRooms);
+            }
+        });
 
         publishBtn = findViewById(R.id.publishBtn);
         publishBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewModel.publishRoute();
+                viewModel.publishOrigin();
             }
         });
 
@@ -131,41 +142,45 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
-
-        spinnerNon = findViewById(R.id.spinnerNon);
-        spinnerNon.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        til_non = findViewById(R.id.til_non);
+        act_non = findViewById(R.id.act_non);
+        act_non.setThreshold(1);
+        act_non.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                viewModel.selectOrigin(position);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Hide Keyboard
+                InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+
+                Room origin = (Room) parent.getItemAtPosition(position);
+                viewModel.selectOrigin(origin);
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        spinnerNora = findViewById(R.id.spinnerNora);
-        spinnerNora.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        til_nora = findViewById(R.id.til_nora);
+        act_nora = findViewById(R.id.act_nora);
+        act_nora.setThreshold(1);
+        act_nora.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                viewModel.selectDestination(position);
-            }
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Hide Keyboard
+                InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
+                Room destination = (Room) parent.getItemAtPosition(position);
+                viewModel.selectDestination(destination);
+            }
         });
 
-        spinnerFloor = findViewById(R.id.spinnerFloor);
-        final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.spinner_item , R.id.spinnerText, getResources().getStringArray(R.array.floorArray));
-        spinnerFloor.setAdapter(floorAdapter);
-        spinnerFloor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        til_floor = findViewById(R.id.til_floor);
+        act_floor = findViewById(R.id.act_floor);
+        final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Floor.getFloorList());
+        act_floor.setAdapter(floorAdapter);
+        act_floor.setText(floorAdapter.getItem(0),false);
+        act_floor.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 viewModel.selectFloor(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
@@ -173,18 +188,18 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         viewModel.getCurrentFloorRooms().observe(this, new Observer<List<Room>>() {
             @Override
             public void onChanged(List<Room> rooms) {
-                ArrayAdapter<Room> adapterRooms = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, R.id.spinnerText, rooms);
-                spinnerNon.setAdapter(adapterRooms);
-                spinnerNora.setAdapter(adapterRooms);
-
+                ArrayAdapter<Room> adapterFloorRooms = new ArrayAdapter<>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, rooms);
+                act_non.setAdapter(adapterFloorRooms);
+                act_non.setText("");
+                viewModel.selectOrigin(null);
                 drawNewTiles(rooms);
             }
         });
 
-        viewModel.getNavPhaseObserver().observe(this,new Observer<NavPhase>(){
+        viewModel.getNavPhaseObserver().observe(this,new Observer<MultiNavPhase>(){
             @Override
-            public void onChanged(NavPhase navPhase) {
-                enableButtons(navPhase);
+            public void onChanged(MultiNavPhase multiNavPhase) {
+                enableButtons(multiNavPhase);
             }
 
         });
@@ -196,7 +211,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
     // TODO
-    private void enableButtons(NavPhase navPhase) {
+    private void enableButtons(MultiNavPhase multiNavPhase) {
 //        // disable spinners and publish button
 //        // enable cancel button
 //        if (navPhase == NavPhase.CONTINUE_NAVIGATION){
@@ -217,17 +232,36 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void showAlert(String msg) {
-        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle(getString(R.string.alert_title));
-        alertDialog.setMessage(msg);
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.accept_btn),
-                new DialogInterface.OnClickListener() {
+         MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(getString(R.string.alert_title))
+                .setMessage(msg)
+                .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss(); // publish destination
+                    }
+                });
+        dialog.show();
+    }
+
+    private void showNextGoalAlert(){
+        String message = String.format(getString(R.string.origin_reached_msg),viewModel.getDestination());
+        MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.alert_title)
+                .setMessage(message)
+                .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        viewModel.publishDestination(); // publish destination
+                    }
+                })
+                .setNeutralButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 });
-        alertDialog.show();
+        dialog.show();
     }
 
     private void setCameraOnRobot() {
@@ -237,13 +271,12 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     @Override
     public void onMapReady(GoogleMap map) {
         map.setMapType(GoogleMap.MAP_TYPE_NONE);
-        map.setMaxZoomPreference(MAX_ZOOM);
+        map.setMaxZoomPreference(MAX_MAP_ZOOM);
 
-        // TODO: set camera bounds
-//        LatLng NORTHEAST_BOUND = new LatLng(85,-180);
-//        LatLng SOUTHWEST_BOUND = new LatLng(-85,-180);
-//        LatLngBounds bounds = new LatLngBounds(NORTHEAST_BOUND,SOUTHWEST_BOUND);
-//        map.setLatLngBoundsForCameraTarget(bounds);
+        LatLng SOUTHWEST_BOUND = new LatLng(-65,-110);
+        LatLng NORTHEAST_BOUND = new LatLng(+65,+110);
+        LatLngBounds bounds = new LatLngBounds(SOUTHWEST_BOUND,NORTHEAST_BOUND);
+        map.setLatLngBoundsForCameraTarget(bounds);
 
         /*
          * Set custom onClickListener for all markers,
@@ -336,7 +369,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                     .title(current_name)
                     .icon(current_icon)
                     .position(latLng)
-                    .zIndex(0.9f)
+                    .zIndex(1.0f)
             );
             robotMarker.showInfoWindow();
             resetCamera();
@@ -372,7 +405,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 .position(latLng)
 //                .title(room.getName())
                 .icon(BitmapDescriptorFactory.fromBitmap(textIcon))
-                .zIndex(1.0f)
+                .zIndex(0.9f)
             );
             roomMarkers.add(marker);
         }
@@ -382,7 +415,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private boolean checkTileExists(int x, int y, int zoom) {
         int minZoom = 0;
 
-        return (zoom >= minZoom && zoom <= MAX_ZOOM);
+        return (zoom >= minZoom && zoom <= MAX_MAP_ZOOM);
     }
 
     private Bitmap textAsBitmap(String text){

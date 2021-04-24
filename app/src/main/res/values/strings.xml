@@ -1,10 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="eu">
     <string name="app_name">GidaBotApp</string>
     <string name="start_route_btn">Hasi bidaia</string>
-    <string name="cancel_route_btn">Cancel</string>
-    <string name="publish_success_msg">"Ibilbidea hasi da: %s-tik %s-ra."</string>
-    <string name="publish_error_msg_same">"Errorea: bi kokalekuak berdinak dira.</string>
-    <string name="publish_error_msg_empty">"Errorea: ataletako bat hutsik utzi duzu."</string>
+    <string name="cancel_route_btn">Ezeztatu bidaia</string>
+    <string name="publish_success_msg">"Ibilbidea hasi da: Robota %s-ra doa."</string>
+    <string name="publish_error_msg_same">"Errorea: Robota dagoeneko kokaleku horretan dago.</string>
+    <string name="publish_error_msg_origin_empty">"Errorea: Ez duzu zehaztu non zauden."</string>
+    <string name="publish_error_msg_destination_empty">"Errorea: Ez duzu zehaztu nora joan nahi duzun."</string>
     <string name="cancel_msg_success">"Ibilbidea bertan behera utzi da."</string>
 
 <!--    Phase Messages -->
@@ -20,17 +21,16 @@
     <string name="NAV_CANCELLED_BY_USER">"Nabigazioa gelditu duzu.</string>
 
     <string name="alert_title">Informazioa</string>
-    <string name="accept_btn">Onartu</string>
+    <string name="accept_btn">Ados</string>
+    <string name="cancel_btn">Ezeztatu</string>
     <string name="master_error_msg">Ez duzu Masterrarekin konexioa zehaztu. Sakatu botoia aplikazioa berrabiarazteko.</string>
     <string name="master_error_title">Errorea</string>
     <string name="cancel_msg_error">Ezin izan da ibilbidea bertan behera utzi.</string>
+    <string name="hint_destination">Nora zoaz?</string>
+    <string name="hint_origin">Non zaude?</string>
+    <string name="hint_floor">Solairua</string>
+    <string name="origin_reached_msg">Robota zuregana iritsi da. %s-ra eramatea nahi al duzu?</string>
+    <string name="destination_reached_msg">Iritsi zara zure helburura!</string>
 
-    <!--    Floors shown on spinners -->
-    <string-array name="floorArray">
-        <item>0</item>
-        <item>0.5</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
+
 </resources>

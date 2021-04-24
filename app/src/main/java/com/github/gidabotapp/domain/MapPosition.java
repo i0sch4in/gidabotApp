@@ -1,6 +1,8 @@
 package com.github.gidabotapp.domain;
 
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Locale;
@@ -65,12 +67,22 @@ public class MapPosition {
     }
 
     public LatLng toLatLng(){
-        double FACTOR_X = 5.333;
-        double FACTOR_Y = 3.3;
+//        double FACTOR_X = 5.333;
+//        double FACTOR_Y = 3.3;
+//
+//        double lng = FACTOR_X * (x+30) - 180;
+//        double lat = FACTOR_Y * (y+22.6) - 65;
 
-        double lng = FACTOR_X * (x+30) - 180;
-        double lat = FACTOR_Y * (y+22.6) - 65;
+        double lng = rangeConversion(-30, 37.5, -180, 180, x);
+        double lat = rangeConversion(-21.6, 9.3, -65, 65, y);
 
         return new LatLng(lat,lng);
     }
+
+    public double rangeConversion(double first_old, double last_old, double first_new, double last_new, double old_value) {
+        double old_range = (last_old - first_old);
+        double new_range = (last_new - first_new);
+        return (((old_value - first_old) * new_range) / old_range) + first_new;
+    }
+
 }

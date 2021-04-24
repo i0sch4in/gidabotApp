@@ -11,7 +11,7 @@ public class NavInfo {
     private boolean goalRobotWorking;
     private boolean goalRobotError;
     private boolean isIntermediateRobotError;
-    private NavPhase navPhase;
+    private MultiNavPhase multiNavPhase;
 
     public NavInfo(){
         this.goalSeq = 0;
@@ -98,11 +98,11 @@ public class NavInfo {
         isIntermediateRobotError = intermediateRobotError;
     }
 
-    public NavPhase getNavPhase() {
-        return navPhase;
+    public MultiNavPhase getMultiNavPhase() {
+        return multiNavPhase;
     }
 
-    public void setNavPhase(NavPhase navPhase) {
-        this.navPhase = navPhase;
+    public void setMultiNavPhase(MultiNavPhase multiNavPhase) {
+        this.multiNavPhase = multiNavPhase;
     }
 }

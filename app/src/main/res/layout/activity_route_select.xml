@@ -7,31 +7,81 @@
     android:layout_height="match_parent"
     tools:context=".ui.RouteSelectActivity">
 
-    <Spinner
-        android:id="@+id/spinnerNora"
-        style="@style/Widget.AppCompat.Spinner.DropDown"
-        android:layout_width="235dp"
-        android:layout_height="43dp"
-        android:background="@drawable/blue_outline"
-        android:popupBackground="@drawable/blue_outline_white_background"
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_non"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="230dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.15"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:startIconDrawable="@drawable/ic_origin">
+
+        <AutoCompleteTextView
+            android:id="@+id/act_non"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:hint="@string/hint_origin"
+            android:textSize="14sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_nora"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="360dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="66dp"
         app:layout_constraintBottom_toTopOf="@+id/map"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.704"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerNon"
-        app:layout_constraintVertical_bias="0.126" />
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/til_non"
+        app:layout_constraintTop_toTopOf="@+id/til_non"
+        app:layout_constraintVertical_bias="0.211"
+        app:startIconDrawable="@drawable/ic_destination">
 
-    <Spinner
-        android:id="@+id/spinnerNon"
-        android:layout_width="235dp"
-        android:layout_height="43dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/blue_outline"
-        android:popupBackground="@drawable/blue_outline_white_background"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.704"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <AutoCompleteTextView
+            android:id="@+id/act_nora"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:hint="@string/hint_destination"
+            android:textSize="14sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_floor"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="125dp"
+        android:layout_height="60dp"
+        app:layout_constraintBottom_toBottomOf="@+id/til_non"
+        app:layout_constraintEnd_toEndOf="@+id/til_nora"
+        app:layout_constraintHorizontal_bias="0.617"
+        app:layout_constraintStart_toEndOf="@+id/til_non"
+        app:layout_constraintTop_toTopOf="@+id/til_non"
+        app:layout_constraintVertical_bias="1.0"
+        app:startIconDrawable="@drawable/ic_floor">
+
+
+        <AutoCompleteTextView
+            android:id="@+id/act_floor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:hint="@string/hint_floor"
+            android:inputType="none"
+            android:textSize="14sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
 
     <fragment
         android:id="@+id/map"
@@ -54,7 +104,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp"
         android:text="@string/start_route_btn"
-        android:textSize="15dp"
+        android:textSize="15sp"
         app:cornerRadius="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -68,7 +118,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp"
         android:text="@string/cancel_route_btn"
-        android:textSize="15dp"
+        android:textSize="15sp"
         app:cornerRadius="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -76,20 +126,6 @@
         app:layout_constraintStart_toEndOf="@+id/publishBtn"
         app:layout_constraintTop_toBottomOf="@+id/map" />
 
-    <Spinner
-        android:id="@+id/spinnerFloor"
-        android:layout_width="75dp"
-        android:layout_height="43dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/blue_outline"
-        android:popupBackground="@drawable/blue_outline_white_background"
-        app:layout_constraintBottom_toTopOf="@+id/map"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.651"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerNora"
-        app:layout_constraintVertical_bias="1.0" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/locateRobotBtn"
@@ -105,41 +141,6 @@
         app:layout_constraintVertical_bias="0.975"
         app:srcCompat="@drawable/ic_location_search" />
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="29dp"
-        android:layout_height="26dp"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintBottom_toBottomOf="@+id/spinnerNon"
-        app:layout_constraintEnd_toStartOf="@+id/spinnerNon"
-        app:layout_constraintHorizontal_bias="0.83"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/spinnerNon"
-        app:layout_constraintVertical_bias="0.588"
-        app:srcCompat="@drawable/ic_origin" />
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="29dp"
-        android:layout_height="26dp"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintBottom_toBottomOf="@+id/spinnerNora"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/spinnerNora"
-        app:layout_constraintVertical_bias="0.47"
-        app:srcCompat="@drawable/ic_destination" />
-
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="19dp"
-        android:layout_height="19dp"
-        app:layout_constraintBottom_toTopOf="@+id/imageView2"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:srcCompat="@drawable/ic_round_south_24" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

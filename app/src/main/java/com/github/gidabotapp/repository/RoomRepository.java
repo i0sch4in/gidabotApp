@@ -26,21 +26,15 @@ public class RoomRepository {
     private static List<Room> roomList;
     private InputStream stream;
     private Context appContext;
-    private LiveData<List<Room>> allRooms;
+    private List<Room> allRooms;
     private LiveData<List<Room>> currentFloorRooms;
     private final RoomRepositoryDAO roomDao;
 
 
-    public RoomRepository(Context appContext) throws IOException, XmlPullParserException {
+    public RoomRepository(Context appContext){
         this.appContext = appContext;
-//        RoomDatabase db = RoomDatabase.getInstance(appContext.getApplicationContext());
-//        roomDao = db.roomRepositoryDAO();
-//        loadRooms();
         RoomDatabase db = RoomDatabase.getInstance(appContext);
         roomDao = db.roomRepositoryDAO();
-
-        // TODO: floor as argument
-        allRooms = roomDao.getAllRooms();
     }
 
     public static List<Room> getRooms (){
@@ -80,29 +74,8 @@ public class RoomRepository {
 //        return list;
 //    }
 
-
-    public Room getNearestRoom(MapPosition current) {
-        // TODO: current Floor?
-        List<Room> rooms = allRooms.getValue();
-
-        // get first element of the roomlist
-        Room nearestRoom = rooms.get(0);
-        double nearestDistance = current.dSquare(nearestRoom.getPosition());
-
-        // iterate through other elements
-        for (Room r : rooms.subList(1, rooms.size())) {
-            MapPosition pos = r.getPosition();
-            double distance = pos.dSquare(current);
-            if (distance < nearestDistance) {
-                nearestDistance = distance;
-                nearestRoom = r;
-            }
-        }
-        return nearestRoom;
-    }
-
     public LiveData<List<Room>> getAllRooms(){
-        return allRooms;
+        return roomDao.getAllRooms();
     }
 
     public LiveData<List<Room>> getRoomsByFloor(Floor floor){

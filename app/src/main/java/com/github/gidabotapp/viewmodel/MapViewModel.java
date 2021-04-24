@@ -10,9 +10,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
+import com.github.gidabotapp.domain.AppNavPhase;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
-import com.github.gidabotapp.domain.NavPhase;
+import com.github.gidabotapp.domain.MultiNavPhase;
 import com.github.gidabotapp.domain.PhaseMessage;
 import com.github.gidabotapp.repository.QNode;
 import com.github.gidabotapp.R;
@@ -20,9 +21,7 @@ import com.github.gidabotapp.domain.Room;
 import com.github.gidabotapp.repository.RoomRepository;
 
 import org.ros.message.MessageListener;
-import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
 import java.util.List;
 
 import geometry_msgs.PoseWithCovarianceStamped;
@@ -38,13 +37,15 @@ public class MapViewModel extends AndroidViewModel {
     private final MutableLiveData<Floor> currentFloor;
     private final LiveData<List<Room>> currentFloorRooms;
     private final MutableLiveData<Integer> alertObserver;
-    private final MutableLiveData<NavPhase> navPhaseObserver;
+    private final MutableLiveData<MultiNavPhase> navPhaseObserver;
     private final MutableLiveData<MapPosition> positionObserver;
+    private final LiveData<List<Room>> allRoomsLD;
 
-    private final LiveData<List<Room>> allRooms;
+    private AppNavPhase appNavPhase;
 
     private Room origin;
     private Room destination;
+
     private static PhaseMessage currentPhaseMessage;
     final Floor STARTING_FLOOR = Floor.ZEROTH;
     private List<Goal> pendingGoals;
@@ -52,19 +53,21 @@ public class MapViewModel extends AndroidViewModel {
     public MapViewModel(@NonNull Application application) {
         super(application);
         qNode = QNode.getInstance();
-        try {
-            roomRepository = new RoomRepository(application.getApplicationContext());
-        } catch (IOException | XmlPullParserException e) {
-            e.printStackTrace();
-        }
-
-        this.allRooms = roomRepository.getAllRooms();
+        roomRepository = new RoomRepository(application.getApplicationContext());
+        this.appNavPhase = AppNavPhase.WAIT_USER_INPUT;
 
         this.currentFloor = new MutableLiveData<>(STARTING_FLOOR);
         this.toastObserver = new MutableLiveData<>();
 
-//        List<Room> starting_rooms = roomRepository.getRoomsByFloor(STARTING_FLOOR);
-//        this.currentFloorRoomsObserver = new MutableLiveData<>(starting_rooms);
+//        MutableLiveData<Boolean> forceLoad = new MutableLiveData<>(true);
+//        this.allRoomsLD = Transformations.switchMap(forceLoad, new Function<Boolean, LiveData<List<Room>>>() {
+//            @Override
+//            public LiveData<List<Room>> apply(Boolean input) {
+//                return roomRepository.getAllRooms();
+//            }
+//        });
+        this.allRoomsLD = roomRepository.getAllRooms();
+
         this.currentFloorRooms = Transformations.switchMap(currentFloor, new Function<Floor, LiveData<List<Room>>>() {
             @Override
             public LiveData<List<Room>> apply(Floor floor) {
@@ -81,7 +84,17 @@ public class MapViewModel extends AndroidViewModel {
             public void onNewMessage(Int8 message) {
                 int i = message.getData();
                 currentPhaseMessage = new PhaseMessage(i);
-                alertObserver.postValue(currentPhaseMessage.getMessageId());
+                if(currentPhaseMessage.getPhase() == PhaseMessage.message_enum.GOAL_REACHED){
+                    if(appNavPhase == AppNavPhase.REACHING_ORIGIN){
+                        alertObserver.postValue(R.string.origin_reached_msg);
+                    }
+                    else if(appNavPhase == AppNavPhase.REACHING_DESTINATION){
+                        alertObserver.postValue(R.string.destination_reached_msg);
+                    }
+                }
+                else {
+                    alertObserver.postValue(currentPhaseMessage.getMessageResId());
+                }
             }
         });
 
@@ -89,7 +102,7 @@ public class MapViewModel extends AndroidViewModel {
             @Override
             public void onNewMessage(Int8 message) {
                 int i = message.getData();
-                navPhaseObserver.postValue(NavPhase.values()[i]);
+                navPhaseObserver.postValue(MultiNavPhase.values()[i]);
             }
         });
 
@@ -111,23 +124,35 @@ public class MapViewModel extends AndroidViewModel {
     }
 
     // TODO: Should not use context (leaks) --> locale change
-    public void publishRoute() {
-        String message;
-        if (origin == null || destination == null) {
-            message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_empty);
-        } else if (origin.equals(destination)) {
-            message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_same);
+    public void publishOrigin() {
+        String message = null;
+        Room nearest = getNearestRoom(positionObserver.getValue());
+        if (origin == null) {
+            message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_origin_empty);
+        } else if (nearest.equals(origin)) {
+            publishDestination();
         } else {
-            Room nearest = roomRepository.getNearestRoom(positionObserver.getValue());
-            if (!nearest.equals(origin)) {
-                qNode.publishGoal(nearest, origin);
-            }
-            qNode.publishGoal(origin, destination);
-            message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), origin, destination);
+           qNode.publishGoal(nearest, origin);
+           message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), origin);
         }
         toastObserver.postValue(message);
+        this.appNavPhase = appNavPhase.next();
     }
 
+    public void publishDestination(){
+        String message;
+        Room nearest = getNearestRoom(positionObserver.getValue());
+        if (destination == null) {
+            message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_destination_empty);
+        } else if (nearest.equals(destination)) {
+            message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_same);
+        } else {
+            qNode.publishGoal(nearest, destination);
+            message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), destination);
+        }
+        toastObserver.postValue(message);
+        this.appNavPhase = appNavPhase.next();
+    }
 
     public void publishCancel() {
         String userId = qNode.getUserId();
@@ -147,7 +172,7 @@ public class MapViewModel extends AndroidViewModel {
                     }
                 }, 5000);
             }
-        }catch (IndexOutOfBoundsException e){
+        }catch (Exception e){
             e.printStackTrace();
         }
 
@@ -167,7 +192,7 @@ public class MapViewModel extends AndroidViewModel {
     public MutableLiveData<Integer> getAlertObserver() {
         return this.alertObserver;
     }
-    public MutableLiveData<NavPhase> getNavPhaseObserver(){return this.navPhaseObserver;}
+    public MutableLiveData<MultiNavPhase> getNavPhaseObserver(){return this.navPhaseObserver;}
     public MutableLiveData<MapPosition> getPositionObserver(){return this.positionObserver;}
 
 
@@ -191,7 +216,7 @@ public class MapViewModel extends AndroidViewModel {
         assert currentFloor != null;
         switch (currentFloor) {
             // case 0 = ic_tartalo (default)
-            case MEZZANINE:
+            case FIRST:
                 iconId = R.drawable.kbot_small;
                 break;
             case SECOND:
@@ -204,17 +229,48 @@ public class MapViewModel extends AndroidViewModel {
         return iconId;
     }
 
-    public void selectOrigin(int spinnerIndex) {
-        assert this.currentFloorRooms.getValue() != null;
-        this.origin = this.currentFloorRooms.getValue().get(spinnerIndex);
+    public void selectOrigin(Room origin) {
+        this.origin = origin;
     }
 
-    public void selectDestination(int spinnerIndex) {
-        assert this.currentFloorRooms.getValue() != null;
-        this.destination = this.currentFloorRooms.getValue().get(spinnerIndex);
+    public void selectDestination(Room dest) {
+        this.destination = dest;
     }
 
-    public LiveData<List<Room>> getAllRooms(){
-        return this.allRooms;
+    public LiveData<List<Room>> getAllRoomsLD(){
+        return this.allRoomsLD;
     }
+
+    public Room getNearestRoom(MapPosition current) {
+        List<Room> rooms = getCurrentFloorRooms().getValue();
+
+        // current Floor always has a value
+        assert rooms != null;
+        Room nearestRoom = rooms.get(0);
+        double nearestDistance = current.dSquare(nearestRoom.getPosition());
+
+        // iterate through other elements
+        for (Room r : rooms.subList(1, rooms.size())) {
+            MapPosition pos = r.getPosition();
+            double distance = pos.dSquare(current);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestRoom = r;
+            }
+        }
+
+        return nearestRoom;
+    }
+
+    public Room getDestination() {
+        return this.destination;
+    }
+
+    public AppNavPhase getAppNavPhase(){
+        return this.appNavPhase;
+    }
+
+//    public void setAllRooms(List<Room> rooms){
+//        this.allRooms = rooms;
+//    }
 }

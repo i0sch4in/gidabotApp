@@ -5,7 +5,7 @@ import com.github.gidabotapp.R;
 public class PhaseMessage {
     private message_enum msg;
     private int msgResId;
-    private enum message_enum {
+    public enum message_enum {
         WAIT_NAVIGATION_END,
         CONTINUE_GOAL,
         GOAL_REACHED,
@@ -57,7 +57,10 @@ public class PhaseMessage {
         }
     }
 
-    public int getMessageId(){
+    public int getMessageResId(){
         return msgResId;
+    }
+    public message_enum getPhase(){
+        return this.msg;
     }
 }
