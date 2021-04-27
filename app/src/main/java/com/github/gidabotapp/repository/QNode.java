@@ -82,24 +82,8 @@ public class QNode extends AbstractNodeMain {
         pubCancel.setLatchMode(true);
 
         subPosition = connectedNode.newSubscriber("/tartalo/amcl_pose", PoseWithCovarianceStamped._TYPE);
-//        subPosition.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
-//            @Override
-//            public void onNewMessage(PoseWithCovarianceStamped message) {
-//                currentNav.setCurrent(new MapPosition(message));
-//            }
-//        });
-
         subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
-//        subNavPhase.addMessageListener(new MessageListener<Int8>() {
-//            @Override
-//            public void onNewMessage(Int8 message) {
-//                int i = message.getData();
-//                currentNav.setPhase(Phase.values()[i]);
-//            }
-//        });
-
         subDialogMessage = connectedNode.newSubscriber("/dialog_qt_message", Int8._TYPE);
-
         subPendingGoals = connectedNode.newSubscriber("tartalo/pending_requests", PendingGoals._TYPE);
 
         try {
@@ -111,20 +95,6 @@ public class QNode extends AbstractNodeMain {
         }
 
     }
-//
-//    public void onShutdown(Node node){
-//        super.onShutdown(node);
-//        Log.e("QNode", "QNode shut down");
-//    }
-//    public void onShutdownComplete(Node node) {
-//        super.onShutdownComplete(node);
-//        Log.e("QNode", "QNode shut down complete");
-//    }
-//
-//    public void onError(Node node, Throwable throwable) {
-//        super.onError(node, throwable);
-//        Log.e("QNode", "QNode error");
-//    }
 
 
     public void publishGoal(Room current, Room room){
@@ -181,7 +151,6 @@ public class QNode extends AbstractNodeMain {
             message.setIntermediateFloor((float) floors[2]);
             message.setRequestFloor((float) floors[3]);
         }
-
 
         pubCancel.publish(message);
     }

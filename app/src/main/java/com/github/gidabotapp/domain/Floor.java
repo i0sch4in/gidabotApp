@@ -23,7 +23,6 @@ public enum Floor {
 
     Floor(double floorCode){
         this.floorCode = floorCode;
-
     }
 
     public double getFloorCode(){

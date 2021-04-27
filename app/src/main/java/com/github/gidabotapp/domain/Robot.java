@@ -3,7 +3,7 @@ package com.github.gidabotapp.domain;
 import com.google.android.gms.maps.model.Marker;
 
 public class Robot {
-    private final String ICON_URL_FORMAT = "robotIcons/ic_%s";
+    private final String ICON_URL_FORMAT =   "robotIcons/ic_%s";
     private final String name;
     private final double floor;
     private Marker marker;
@@ -27,5 +27,9 @@ public class Robot {
 
     public void setMarker(Marker marker) {
         this.marker = marker;
+    }
+
+    public void updateMarker(MapPosition position){
+
     }
 }

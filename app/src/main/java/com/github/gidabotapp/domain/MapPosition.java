@@ -30,35 +30,19 @@ public class MapPosition {
         return x;
     }
 
-    public void setX(double x) {
-        this.x = x;
-    }
-
     public double getY() {
         return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
     }
 
     public double getZ() {
         return z;
     }
 
-    public void setZ(double z) {
-        this.z = z;
-    }
-
-    public double[] getPositions(){
-        return new double[] {this.x,this.y,this.z};
-    }
-
     // Beste puntu batekiko distantzia euklidearra (karratua) kalkulatu
-    // ez da erro erabiltzen (horregatik izena du distance square)
-    public double dSquare(MapPosition other){
-        double dx = other.x - this.x;
-        double dy = other.y - this.y;
+    // ez da erroa erabiltzen -> distance square
+    public double dSquare(MapPosition otherPos){
+        double dx = otherPos.x - this.x;
+        double dy = otherPos.y - this.y;
         return dx * dx + dy * dy;
     }
 
@@ -67,14 +51,11 @@ public class MapPosition {
     }
 
     public LatLng toLatLng(){
-//        double FACTOR_X = 5.333;
-//        double FACTOR_Y = 3.3;
-//
-//        double lng = FACTOR_X * (x+30) - 180;
-//        double lat = FACTOR_Y * (y+22.6) - 65;
+        final int[] LAT_RANGE = new int[]{-65 , +65};
+        final int[] LNG_RANGE = new int[]{-180, +180};
 
-        double lng = rangeConversion(-30, 37.5, -180, 180, x);
-        double lat = rangeConversion(-21.6, 9.3, -65, 65, y);
+        double lng = rangeConversion(-30, 37.5, LNG_RANGE[0], LNG_RANGE[1], x);
+        double lat = rangeConversion(-21.6, 9.3, LAT_RANGE[0], LAT_RANGE[1], y);
 
         return new LatLng(lat,lng);
     }

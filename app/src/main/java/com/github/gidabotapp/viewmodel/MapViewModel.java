@@ -28,6 +28,7 @@ import geometry_msgs.PoseWithCovarianceStamped;
 import multilevel_navigation_msgs.Goal;
 import multilevel_navigation_msgs.PendingGoals;
 import std_msgs.Int8;
+import static com.github.gidabotapp.domain.AppNavPhase.*;
 
 public class MapViewModel extends AndroidViewModel {
     private static QNode qNode;
@@ -41,7 +42,7 @@ public class MapViewModel extends AndroidViewModel {
     private final MutableLiveData<MapPosition> positionObserver;
     private final LiveData<List<Room>> allRoomsLD;
 
-    private AppNavPhase appNavPhase;
+    private MutableLiveData<AppNavPhase> appNavPhase;
 
     private Room origin;
     private Room destination;
@@ -54,20 +55,11 @@ public class MapViewModel extends AndroidViewModel {
         super(application);
         qNode = QNode.getInstance();
         roomRepository = new RoomRepository(application.getApplicationContext());
-        this.appNavPhase = AppNavPhase.WAIT_USER_INPUT;
+        this.appNavPhase = new MutableLiveData<>(WAITING_USER_INPUT);
 
         this.currentFloor = new MutableLiveData<>(STARTING_FLOOR);
         this.toastObserver = new MutableLiveData<>();
-
-//        MutableLiveData<Boolean> forceLoad = new MutableLiveData<>(true);
-//        this.allRoomsLD = Transformations.switchMap(forceLoad, new Function<Boolean, LiveData<List<Room>>>() {
-//            @Override
-//            public LiveData<List<Room>> apply(Boolean input) {
-//                return roomRepository.getAllRooms();
-//            }
-//        });
         this.allRoomsLD = roomRepository.getAllRooms();
-
         this.currentFloorRooms = Transformations.switchMap(currentFloor, new Function<Floor, LiveData<List<Room>>>() {
             @Override
             public LiveData<List<Room>> apply(Floor floor) {
@@ -78,17 +70,16 @@ public class MapViewModel extends AndroidViewModel {
         this.navPhaseObserver = new MutableLiveData<>();
         this.positionObserver = new MutableLiveData<>();
 
-
         qNode.setPhaseMsgListener(new MessageListener<Int8>() {
             @Override
             public void onNewMessage(Int8 message) {
                 int i = message.getData();
                 currentPhaseMessage = new PhaseMessage(i);
                 if(currentPhaseMessage.getPhase() == PhaseMessage.message_enum.GOAL_REACHED){
-                    if(appNavPhase == AppNavPhase.REACHING_ORIGIN){
+                    if(appNavPhase.getValue() == REACHING_ORIGIN){
                         alertObserver.postValue(R.string.origin_reached_msg);
                     }
-                    else if(appNavPhase == AppNavPhase.REACHING_DESTINATION){
+                    else if(appNavPhase.getValue() == REACHING_DESTINATION){
                         alertObserver.postValue(R.string.destination_reached_msg);
                     }
                 }
@@ -125,18 +116,19 @@ public class MapViewModel extends AndroidViewModel {
 
     // TODO: Should not use context (leaks) --> locale change
     public void publishOrigin() {
-        String message = null;
+        String message;
         Room nearest = getNearestRoom(positionObserver.getValue());
         if (origin == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_origin_empty);
-        } else if (nearest.equals(origin)) {
+        } else if (nearest.equals(origin)) { // Robot Position == origin
             publishDestination();
+            return;
         } else {
            qNode.publishGoal(nearest, origin);
            message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), origin);
         }
         toastObserver.postValue(message);
-        this.appNavPhase = appNavPhase.next();
+        this.appNavPhase.setValue(REACHING_ORIGIN);
     }
 
     public void publishDestination(){
@@ -151,31 +143,21 @@ public class MapViewModel extends AndroidViewModel {
             message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), destination);
         }
         toastObserver.postValue(message);
-        this.appNavPhase = appNavPhase.next();
+        this.appNavPhase.setValue(REACHING_DESTINATION);
     }
 
     public void publishCancel() {
-        String userId = qNode.getUserId();
-        try {
+        if(!pendingGoals.isEmpty()){
+            String userId = qNode.getUserId();
             Goal first = pendingGoals.get(0);
             if (userId.compareTo(first.getUserName()) == 0) {
                 qNode.publishCancel(first.getGoalSeq(), false, 0, 0);
+                appNavPhase.setValue(WAITING_USER_INPUT);
             }
-
-            final Goal second = pendingGoals.get(1);
-            if (userId.compareTo(second.getUserName()) == 0) {
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        qNode.publishCancel(second.getGoalSeq(), false, 0, 0);
-                    }
-                }, 5000);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
         }
-
+        else {
+            toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.error_empty_cancel));
+        }
     }
 
     public MutableLiveData<String> getToastObserver() {
@@ -196,17 +178,8 @@ public class MapViewModel extends AndroidViewModel {
     public MutableLiveData<MapPosition> getPositionObserver(){return this.positionObserver;}
 
 
-//    public List<Room> getCurrentFloorRooms() {
-//        List<Room> currentFloorRooms = new ArrayList<>();
-//        if (this.currentFloorObserver.getValue() != null) {
-//            currentFloorRooms = roomRepository.getRoomsByFloor(this.currentFloorObserver.getValue());
-//        }
-//        return currentFloorRooms;
-//    }
-
     public void selectFloor(int index) {
         this.currentFloor.setValue(Floor.values()[index]);
-//        this.currentFloorRooms.postValue(roomRepository.getRoomsByFloor(floor));
     }
 
 
@@ -266,11 +239,16 @@ public class MapViewModel extends AndroidViewModel {
         return this.destination;
     }
 
-    public AppNavPhase getAppNavPhase(){
+    public LiveData<AppNavPhase> getAppNavPhase(){
         return this.appNavPhase;
     }
 
-//    public void setAllRooms(List<Room> rooms){
-//        this.allRooms = rooms;
-//    }
+    public void resetAppNavPhase(){
+        this.appNavPhase.setValue(WAITING_USER_INPUT);
+    }
+
+    public void closeNode() {
+        qNode.shutdown();
+    }
+
 }

@@ -5,7 +5,6 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -46,6 +45,7 @@ import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.ByteArrayOutputStream;
@@ -65,14 +65,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private GoogleMap map;
     private TileOverlay tileOverlay;
 
-//    private Handler mHandler;
-//    private Runnable mStatusChecker;
-//    private final int MAP_UPDATE_INTERVAL = 1000; // ms
-
     private Button publishBtn, cancelBtn;
-    private TextInputLayout til_non, til_nora, til_floor;
-    private AutoCompleteTextView act_non, act_nora, act_floor;
-    private FloatingActionButton locateRobotBtn;
+    private AutoCompleteTextView act_origin, act_destination, act_floor;
 
     private final int MAX_MAP_ZOOM = 3;
 
@@ -88,7 +82,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         viewModel.getToastObserver().observe(this, new Observer<String>() {
             @Override
             public void onChanged(String message) {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                View bottomButtons = findViewById(R.id.cancelBtn);
+                Snackbar.make(bottomButtons,message,Snackbar.LENGTH_SHORT).show();
             }
         });
         viewModel.getAlertObserver().observe(this, new Observer<Integer>() {
@@ -97,7 +92,11 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 if(stringResId == R.string.origin_reached_msg){
                     showNextGoalAlert();
                 }
-                else if (viewModel.getAppNavPhase() != AppNavPhase.WAIT_USER_INPUT){
+                else if(stringResId == R.string.destination_reached_msg){
+                    showRouteEndAlert();
+                }
+//                else if (viewModel.getAppNavPhase().getValue() != AppNavPhase.WAITING_USER_INPUT){
+                else{
                     String message = getString(stringResId);
                     showAlert(message);
                 }
@@ -113,8 +112,13 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             @Override
             public void onChanged(List<Room> rooms) {
                 ArrayAdapter<Room> adapterAllRooms = new ArrayAdapter<>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, rooms);
-//                viewModel.setAllRooms(rooms);
-                act_nora.setAdapter(adapterAllRooms);
+                act_destination.setAdapter(adapterAllRooms);
+            }
+        });
+        viewModel.getAppNavPhase().observe(this, new Observer<AppNavPhase>() {
+            @Override
+            public void onChanged(AppNavPhase phase) {
+                updateButtonsLock(phase);
             }
         });
 
@@ -134,7 +138,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
-        locateRobotBtn = findViewById(R.id.locateRobotBtn);
+        FloatingActionButton locateRobotBtn = findViewById(R.id.locateRobotBtn);
         locateRobotBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -142,10 +146,9 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
-        til_non = findViewById(R.id.til_non);
-        act_non = findViewById(R.id.act_non);
-        act_non.setThreshold(1);
-        act_non.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        act_origin = findViewById(R.id.act_non);
+        act_origin.setThreshold(1);
+        act_origin.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Hide Keyboard
@@ -157,10 +160,9 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
-        til_nora = findViewById(R.id.til_nora);
-        act_nora = findViewById(R.id.act_nora);
-        act_nora.setThreshold(1);
-        act_nora.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        act_destination = findViewById(R.id.act_nora);
+        act_destination.setThreshold(1);
+        act_destination.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Hide Keyboard
@@ -172,7 +174,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
-        til_floor = findViewById(R.id.til_floor);
         act_floor = findViewById(R.id.act_floor);
         final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Floor.getFloorList());
         act_floor.setAdapter(floorAdapter);
@@ -189,20 +190,20 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             @Override
             public void onChanged(List<Room> rooms) {
                 ArrayAdapter<Room> adapterFloorRooms = new ArrayAdapter<>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, rooms);
-                act_non.setAdapter(adapterFloorRooms);
-                act_non.setText("");
+                act_origin.setAdapter(adapterFloorRooms);
+                act_origin.setText("");
                 viewModel.selectOrigin(null);
                 drawNewTiles(rooms);
             }
         });
 
-        viewModel.getNavPhaseObserver().observe(this,new Observer<MultiNavPhase>(){
-            @Override
-            public void onChanged(MultiNavPhase multiNavPhase) {
-                enableButtons(multiNavPhase);
-            }
-
-        });
+//        viewModel.getNavPhaseObserver().observe(this,new Observer<MultiNavPhase>(){
+//            @Override
+//            public void onChanged(MultiNavPhase multiNavPhase) {
+//                enableButtons(multiNavPhase);
+//            }
+//
+//        });
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -210,25 +211,22 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         mapFragment.getMapAsync(this);
     }
 
-    // TODO
-    private void enableButtons(MultiNavPhase multiNavPhase) {
-//        // disable spinners and publish button
-//        // enable cancel button
-//        if (navPhase == NavPhase.CONTINUE_NAVIGATION){
-//            spinnerNora.setEnabled(false);
-//            spinnerNon.setEnabled(false);
-//            publishBtn.setEnabled(false);
-//            cancelBtn.setEnabled(true);
-//        }
-//
-//        // disable cancel button
-//        // enable spinners and publish button
-//        if (navPhase == NavPhase.WAIT_NAVIGATION){
-//            spinnerNora.setEnabled(true);
-//            spinnerNon.setEnabled(true);
-//            publishBtn.setEnabled(true);
-//            cancelBtn.setEnabled(false);
-//        }
+
+    private void updateButtonsLock(AppNavPhase phase) {
+         if (phase == AppNavPhase.WAITING_USER_INPUT){
+            act_origin.setEnabled(true);
+            act_destination.setEnabled(true);
+            act_floor.setEnabled(true);
+            publishBtn.setEnabled(true);
+            cancelBtn.setEnabled(false);
+        }
+        else {
+            act_origin.setEnabled(false);
+            act_destination.setEnabled(false);
+            act_floor.setEnabled(false);
+            publishBtn.setEnabled(false);
+            cancelBtn.setEnabled(true);
+        }
     }
 
     private void showAlert(String msg) {
@@ -255,10 +253,37 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                         viewModel.publishDestination(); // publish destination
                     }
                 })
-                .setNeutralButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        viewModel.resetAppNavPhase();
                         dialog.dismiss();
+                    }
+                })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        viewModel.resetAppNavPhase();
+                    }
+                });
+        dialog.show();
+    }
+
+    private void showRouteEndAlert() {
+        String message = getString(R.string.destination_reached_msg);
+        MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.alert_title)
+                .setMessage(message)
+                .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        viewModel.resetAppNavPhase();
+                    }
+                })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        viewModel.resetAppNavPhase();
                     }
                 });
         dialog.show();
@@ -273,6 +298,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         map.setMapType(GoogleMap.MAP_TYPE_NONE);
         map.setMaxZoomPreference(MAX_MAP_ZOOM);
 
+        // Set camera bounds: Horizontal scroll ends with map
         LatLng SOUTHWEST_BOUND = new LatLng(-65,-110);
         LatLng NORTHEAST_BOUND = new LatLng(+65,+110);
         LatLngBounds bounds = new LatLngBounds(SOUTHWEST_BOUND,NORTHEAST_BOUND);
@@ -291,7 +317,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 if (lastOpened[0] != null) {
                     // Close the info window
                     lastOpened[0].hideInfoWindow();
-
                     // Is the marker the same marker that was already open
                     if (lastOpened[0].equals(marker)) {
                         // Nullify the lastOpened object
@@ -300,12 +325,10 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                         return true;
                     }
                 }
-
                 // Open the info window for the marker
                 marker.showInfoWindow();
                 // Re-assign the last opened such that we can close it later
                 lastOpened[0] = marker;
-
                 // Event was handled by our code, so do not launch default behaviour.
                 return true;
             }
@@ -342,14 +365,9 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                     return null;
                 }
             };
-            // Remove current overlay and robot
             if (tileOverlay != null) {
                 tileOverlay.remove();
             }
-//            if (robotMarker != null){
-//                robotMarker.remove();
-//                robotMarker = null;
-//            }
             tileOverlay = map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProvider));
         }
     }
@@ -439,17 +457,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         return image;
     }
 
-    private Bitmap getBitmap(int drawableRes){
-        Drawable drawable = ContextCompat.getDrawable(getApplicationContext(),drawableRes);
-        Canvas canvas = new Canvas();
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        canvas.setBitmap(bitmap);
-        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -459,58 +466,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         viewModel.getPositionObserver().removeObservers(this);
         viewModel.getCurrentFloorRooms().removeObservers(this);
         viewModel.getNavPhaseObserver().removeObservers(this);
-    }
-
-    private static class CoordTileProvider implements TileProvider {
-
-        private static final int TILE_SIZE_DP = 256;
-
-        private final float scaleFactor;
-
-        private final Bitmap borderTile;
-
-        public CoordTileProvider(Context context) {
-            /* Scale factor based on density, with a 0.6 multiplier to increase tile generation
-             * speed */
-            scaleFactor = context.getResources().getDisplayMetrics().density * 0.6f;
-            Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            borderPaint.setStyle(Paint.Style.STROKE);
-            borderTile = Bitmap.createBitmap((int) (TILE_SIZE_DP * scaleFactor),
-                    (int) (TILE_SIZE_DP * scaleFactor), android.graphics.Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(borderTile);
-            canvas.drawRect(0, 0, TILE_SIZE_DP * scaleFactor, TILE_SIZE_DP * scaleFactor,
-                    borderPaint);
-        }
-
-        @Override
-        public Tile getTile(int x, int y, int zoom) {
-            Bitmap coordTile = drawTileCoords(x, y, zoom);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            coordTile.compress(Bitmap.CompressFormat.PNG, 0, stream);
-            byte[] bitmapData = stream.toByteArray();
-            return new Tile((int) (TILE_SIZE_DP * scaleFactor),
-                    (int) (TILE_SIZE_DP * scaleFactor), bitmapData);
-        }
-
-        private Bitmap drawTileCoords(int x, int y, int zoom) {
-            // Synchronize copying the bitmap to avoid a race condition in some devices.
-            Bitmap copy = null;
-            synchronized (borderTile) {
-                copy = borderTile.copy(android.graphics.Bitmap.Config.ARGB_8888, true);
-            }
-            Canvas canvas = new Canvas(copy);
-            String tileCoords = "(" + x + ", " + y + ")";
-            String zoomLevel = "zoom = " + zoom;
-            /* Paint is not thread safe. */
-            Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            mTextPaint.setTextAlign(Paint.Align.CENTER);
-            mTextPaint.setTextSize(18 * scaleFactor);
-            canvas.drawText(tileCoords, TILE_SIZE_DP * scaleFactor / 2,
-                    TILE_SIZE_DP * scaleFactor / 2, mTextPaint);
-            canvas.drawText(zoomLevel, TILE_SIZE_DP * scaleFactor / 2,
-                    TILE_SIZE_DP * scaleFactor * 2 / 3, mTextPaint);
-            return copy;
-        }
+        viewModel.closeNode();
     }
 
 }
