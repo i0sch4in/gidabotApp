@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.github.gidabotapp.domain.NavInfo;
 import com.github.gidabotapp.domain.Room;
-import com.github.gidabotapp.domain.Topic;
 
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
@@ -33,32 +32,28 @@ import std_srvs.EmptyResponse;
 public class QNode extends AbstractNodeMain {
     private static QNode INSTANCE = null;
 
-    final String GRAPH_NAME_BASE = "GidabotApp/QNode_";
-    private final long timeStart;
+    private Publisher<Goal> pubGoal;
+    private Publisher<CancelRequest> pubCancel;
 
-    Publisher<Goal> pubGoal;
-    // TODO: ez dakit beharrezkoak diren Topic-ak
-    Topic goal = new Topic("/multilevel_goal", Goal._TYPE);
-    Publisher<CancelRequest> pubCancel;
-    Topic cancel = new Topic("/cancel_request", CancelRequest._TYPE);
+    private ServiceClient<EmptyRequest, EmptyResponse> clientClearCostmap;
 
-    ServiceClient<EmptyRequest, EmptyResponse> clientClearCostmap;
+    private Subscriber<PoseWithCovarianceStamped> subTartaloPos;
+    private Subscriber<PendingGoals> subPendingGoals;
+    private Subscriber<std_msgs.Int8> subNavPhase;
+    private Subscriber<std_msgs.Int8> subDialogMessage;
 
-    Subscriber<PoseWithCovarianceStamped> subPosition;
-    Subscriber<PendingGoals> subPendingGoals;
-    Subscriber<std_msgs.Int8> subNavPhase;
-    Subscriber<std_msgs.Int8> subDialogMessage;
-
-    ConnectedNode connectedNode;
+    private ConnectedNode connectedNode;
 
     private final String userId;
 
     private final NavInfo currentNav;
 
+    private int sequenceNumber;
+
     private QNode() {
-        this.timeStart = System.nanoTime();
         this.currentNav = new NavInfo();
         this.userId = UUID.randomUUID().toString().substring(0,4);
+        this.sequenceNumber = 0;
     }
 
     public static synchronized QNode getInstance(){
@@ -69,19 +64,20 @@ public class QNode extends AbstractNodeMain {
     }
 
     public GraphName getDefaultNodeName() {
+        String GRAPH_NAME_BASE = "GidabotApp/QNode_";
         return GraphName.of(GRAPH_NAME_BASE + userId);
     }
 
     public void onStart(final ConnectedNode connectedNode) {
         this.connectedNode = connectedNode;
 
-        pubGoal = connectedNode.newPublisher(goal.getName(), goal.getType());
+        pubGoal = connectedNode.newPublisher("/multilevel_goal", Goal._TYPE);
         pubGoal.setLatchMode(true);
 
-        pubCancel = connectedNode.newPublisher(cancel.getName(), cancel.getType());
+        pubCancel = connectedNode.newPublisher("/cancel_request", CancelRequest._TYPE);
         pubCancel.setLatchMode(true);
 
-        subPosition = connectedNode.newSubscriber("/tartalo/amcl_pose", PoseWithCovarianceStamped._TYPE);
+        subTartaloPos = connectedNode.newSubscriber("/tartalo/amcl_pose", PoseWithCovarianceStamped._TYPE);
         subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
         subDialogMessage = connectedNode.newSubscriber("/dialog_qt_message", Int8._TYPE);
         subPendingGoals = connectedNode.newSubscriber("tartalo/pending_requests", PendingGoals._TYPE);
@@ -97,16 +93,15 @@ public class QNode extends AbstractNodeMain {
     }
 
 
-    public void publishGoal(Room current, Room room){
+    public void publishGoal(Room current, Room goal){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
         // Clear Global costmap
         clearGlobalCostmap();
 
         Goal message = topicMessageFactory.newFromType(Goal._TYPE);
-        long now = System.nanoTime() - timeStart;
 
-        message.setGoalSeq(goal.getSequenceNumber());
+        message.setGoalSeq(sequenceNumber);
         message.setInitialFloor((float) 0.0); //osatzeko
 
         Point initial_pose = topicMessageFactory.newFromType(Point._TYPE);
@@ -120,9 +115,9 @@ public class QNode extends AbstractNodeMain {
         message.setInitialPose(initial_pose);
 
         Point goal_pose = topicMessageFactory.newFromType(Point._TYPE);
-        goal_pose.setX(room.getX());
-        goal_pose.setY(room.getY());
-        goal_pose.setZ(room.getZ());
+        goal_pose.setX(goal.getX());
+        goal_pose.setY(goal.getY());
+        goal_pose.setZ(goal.getZ());
         message.setGoalPose(goal_pose);
 
         message.setIntermediateRobot(false); //TODO
@@ -130,19 +125,19 @@ public class QNode extends AbstractNodeMain {
         message.setWay("None");
         message.setStartId(current.getNum()); //TODO
 //        message.setGoalId(String.format(Locale.getDefault(),"%03d", room.getNum()));
-        message.setGoalId(room.getNum());
+        message.setGoalId(goal.getNum());
         message.setLanguage("EU");
         message.setUserName(this.userId);
 
         pubGoal.publish(message);
-        goal.add();
+        this.sequenceNumber++;
     }
 
 
     public void publishCancel(int goal_seq, boolean intermediateRobot, double...floors){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
-        CancelRequest message = topicMessageFactory.newFromType(cancel.getType());
+        CancelRequest message = topicMessageFactory.newFromType(CancelRequest._TYPE);
         message.setGoalSeq(goal_seq);
         message.setInitialFloor((float) floors[0]);
         message.setGoalFloor((float) floors[1]);
@@ -184,7 +179,7 @@ public class QNode extends AbstractNodeMain {
     }
 
     public void setPositionListener(MessageListener<PoseWithCovarianceStamped> listener){
-        subPosition.addMessageListener(listener);
+        subTartaloPos.addMessageListener(listener);
     }
 
     public void setPendingGoalsListener(MessageListener<PendingGoals> listener){
@@ -200,7 +195,7 @@ public class QNode extends AbstractNodeMain {
     }
 
     public void shutdown() {
-        subPosition.shutdown();
+        subTartaloPos.shutdown();
         subDialogMessage.shutdown();
         subNavPhase.shutdown();
         subPendingGoals.shutdown();
@@ -209,6 +204,8 @@ public class QNode extends AbstractNodeMain {
         pubGoal.shutdown();
 
         clientClearCostmap.shutdown();
+
+        connectedNode.shutdown();
 
         INSTANCE = null;
     }

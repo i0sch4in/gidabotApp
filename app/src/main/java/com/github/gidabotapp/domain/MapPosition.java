@@ -51,19 +51,35 @@ public class MapPosition {
     }
 
     public LatLng toLatLng(){
-        final int[] LAT_RANGE = new int[]{-65 , +65};
-        final int[] LNG_RANGE = new int[]{-180, +180};
+        final double[] LAT_BOUNDS = new double[]{-65 , +65};
+        final double[] LNG_BOUNDS = new double[]{-180, +180};
 
-        double lng = rangeConversion(-30, 37.5, LNG_RANGE[0], LNG_RANGE[1], x);
-        double lat = rangeConversion(-21.6, 9.3, LAT_RANGE[0], LAT_RANGE[1], y);
+        // Floor = 0 tartalo
+        final double[] X_BOUNDS = new double[]{-30, 37.5};
+        final double[] Y_BOUNDS = new double[]{-21.6, 9.3};
+
+        // Floor = 1 kbot
+//        final double[] X_BOUNDS = new double[]{-60.82, 2.38};
+//        final double[] Y_BOUNDS = new double[]{-28.61, 28.42}; // y[0] inaccurate
+
+        // Floor = 2 galtxagorri
+//        final double[] X_BOUNDS = new double[]{-14.61, 47.0};
+//        final double[] Y_BOUNDS = new double[]{-39.91, -17.34}; // y[0] inaccurate
+
+        // Floor = 3 marisorgin
+//        final double[] X_BOUNDS = new double[]{-8.6, 54.25}; // 54.24 fix
+//        final double[] Y_BOUNDS = new double[]{-14.6, 14.27};
+
+        double lng = rangeConversion(X_BOUNDS, LNG_BOUNDS, x);
+        double lat = rangeConversion(Y_BOUNDS, LAT_BOUNDS, y);
 
         return new LatLng(lat,lng);
     }
 
-    public double rangeConversion(double first_old, double last_old, double first_new, double last_new, double old_value) {
-        double old_range = (last_old - first_old);
-        double new_range = (last_new - first_new);
-        return (((old_value - first_old) * new_range) / old_range) + first_new;
+    public double rangeConversion(double[] old_bounds, double[] new_bounds, double old_value) {
+        double old_range = (old_bounds[1] - old_bounds[0]);
+        double new_range = (new_bounds[1] - new_bounds[0]);
+        return (((old_value - old_bounds[0]) * new_range) / old_range) + new_bounds[0];
     }
 
 }

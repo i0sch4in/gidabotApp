@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -19,13 +18,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.github.gidabotapp.R;
 import com.github.gidabotapp.domain.AppNavPhase;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
-import com.github.gidabotapp.domain.MultiNavPhase;
 import com.github.gidabotapp.domain.Room;
 import com.github.gidabotapp.viewmodel.MapViewModel;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -46,7 +43,6 @@ import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -176,6 +172,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
         act_floor = findViewById(R.id.act_floor);
         final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Floor.getFloorList());
+        act_floor.setAdapter(floorAdapter);
         act_floor.setAdapter(floorAdapter);
         act_floor.setText(floorAdapter.getItem(0),false);
         act_floor.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -340,7 +337,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private void drawNewTiles(List<Room> rooms){
         if(map != null) {
             final double floor = rooms.get((0)).getFloor();
-            generateRoomMarkers(rooms);
             TileProvider tileProvider = new TileProvider() {
                 final String FLOOR_MAP_URL_FORMAT =
                         "map_tiles/floor_%.1f/%d/tile_%d_%d.png";
@@ -369,6 +365,19 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 tileOverlay.remove();
             }
             tileOverlay = map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProvider));
+//            map.addMarker(new MarkerOptions()
+//                .title("DCI, Egokituz")
+//                .position(new MapPosition(0.3069,-8.7494,4.7124).toLatLng())
+//            );
+//            map.addMarker(new MarkerOptions()
+//                .title("Dekanotza")
+//                .position(new MapPosition(-16.2700,-16.2700,0).toLatLng())
+//            );
+//            map.addMarker(new MarkerOptions()
+//                .title("Ezkerreko eskailerak")
+//                .position(new MapPosition(5.2744,-35.9580,0).toLatLng())
+//            );
+
         }
     }
 
@@ -404,57 +413,10 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(robotMarker.getPosition(),0,0,0)));
     }
 
-    private void generateRoomMarkers(List<Room> rooms) {
-        // Remove map's current markers markers
-        if(roomMarkers != null) {
-            for(Marker marker:roomMarkers){
-                marker.remove();
-            }
-        }
-
-        // if instantiated, remove current old markers overwriting with new array
-        // else, instantiate marker array
-        roomMarkers = new ArrayList<>();
-
-        for(Room room: rooms){
-            LatLng latLng = room.getPosition().toLatLng();
-            Bitmap textIcon = this.textAsBitmap(room.getName());
-            Marker marker = map.addMarker(new MarkerOptions()
-                .position(latLng)
-//                .title(room.getName())
-                .icon(BitmapDescriptorFactory.fromBitmap(textIcon))
-                .zIndex(0.9f)
-            );
-            roomMarkers.add(marker);
-        }
-
-    }
-
     private boolean checkTileExists(int x, int y, int zoom) {
         int minZoom = 0;
 
         return (zoom >= minZoom && zoom <= MAX_MAP_ZOOM);
-    }
-
-    private Bitmap textAsBitmap(String text){
-        final float scaleFactor = getApplicationContext().getResources().getDisplayMetrics().density;
-        final float TEXT_SIZE = 17f;
-        final float render_size = TEXT_SIZE * scaleFactor;
-
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setTextSize(render_size);
-        paint.setColor(getColor(R.color.material_black));
-        paint.setTextAlign(Paint.Align.LEFT);
-
-        float baseLine = -paint.ascent();
-        int width = (int) (paint.measureText(text) + 1f); // round
-        int height = (int) (baseLine + paint.descent() + 0.5f);
-
-        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(image);
-        canvas.drawColor(ContextCompat.getColor(getApplicationContext(),R.color.light_blue));
-        canvas.drawText(text, 0, baseLine, paint);
-        return image;
     }
 
     @Override
@@ -466,7 +428,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         viewModel.getPositionObserver().removeObservers(this);
         viewModel.getCurrentFloorRooms().removeObservers(this);
         viewModel.getNavPhaseObserver().removeObservers(this);
-        viewModel.closeNode();
+        viewModel.shutdownNode();
     }
 
 }

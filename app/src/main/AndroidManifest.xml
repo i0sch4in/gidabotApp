@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GidabotApp"
         tools:replace="android:icon">
-        <activity android:name=".ui.RouteSelectActivity"></activity>
+        <activity android:name=".ui.RouteSelectActivity" />
         <!-- <activity android:name=".MainActivity"></activity> -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"

@@ -114,7 +114,6 @@ public class MapViewModel extends AndroidViewModel {
 
     }
 
-    // TODO: Should not use context (leaks) --> locale change
     public void publishOrigin() {
         String message;
         Room nearest = getNearestRoom(positionObserver.getValue());
@@ -247,7 +246,7 @@ public class MapViewModel extends AndroidViewModel {
         this.appNavPhase.setValue(WAITING_USER_INPUT);
     }
 
-    public void closeNode() {
+    public void shutdownNode() {
         qNode.shutdown();
     }
 
