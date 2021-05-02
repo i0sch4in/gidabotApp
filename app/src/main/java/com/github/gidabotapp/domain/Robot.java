@@ -3,22 +3,20 @@ package com.github.gidabotapp.domain;
 import com.google.android.gms.maps.model.Marker;
 
 public class Robot {
-    private final String ICON_URL_FORMAT =   "robotIcons/ic_%s";
     private final String name;
-    private final double floor;
+    public final int iconResId;
     private Marker marker;
+    private final Floor floor;
+    private MapPosition position;
 
-    public Robot(double floor, String name){
-        this.floor = floor;
+    public Robot(Floor floor, String name, int iconResId){
         this.name = name;
+        this.iconResId = iconResId;
+        this.floor = floor;
     }
 
     public String getName() {
         return name;
-    }
-
-    public double getFloor() {
-        return floor;
     }
 
     public Marker getMarker() {
@@ -30,6 +28,19 @@ public class Robot {
     }
 
     public void updateMarker(MapPosition position){
+        this.marker.setPosition(position.toLatLng(floor));
+        this.position = position;
+    }
 
+    public MapPosition getPosition(){
+        return this.position;
+    }
+
+    public void show(){
+        this.marker.setVisible(true);
+    }
+
+    public void hide(){
+        this.marker.setVisible(false);
     }
 }

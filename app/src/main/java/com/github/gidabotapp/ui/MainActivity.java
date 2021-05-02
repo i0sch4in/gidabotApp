@@ -57,7 +57,7 @@ public class MainActivity extends RosActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                errorAlert.show();
+//                errorAlert.show();
             }
         }, 2000);
 

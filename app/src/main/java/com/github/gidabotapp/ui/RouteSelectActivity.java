@@ -48,23 +48,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 public class RouteSelectActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private Marker robotMarker;
-    private ArrayList<Marker> roomMarkers;
 
     private MapViewModel viewModel;
 
-    private GoogleMap map;
     private TileOverlay tileOverlay;
 
     private Button publishBtn, cancelBtn;
     private AutoCompleteTextView act_origin, act_destination, act_floor;
 
-    private final int MAX_MAP_ZOOM = 3;
+    private HashMap<Floor, Marker> robotMarkers;
 
     public RouteSelectActivity() {
     }
@@ -98,12 +97,12 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 }
             }
         });
-        viewModel.getPositionObserver().observe(this, new Observer<MapPosition>() {
-            @Override
-            public void onChanged(MapPosition position) {
-                drawRobot(position);
-            }
-        });
+//        viewModel.getPositionObserver().observe(this, new Observer<MapPosition>() {
+//            @Override
+//            public void onChanged(MapPosition position) {
+//                viewModel.drawRobot(position);
+//            }
+//        });
         viewModel.getAllRoomsLD().observe(this, new Observer<List<Room>>() {
             @Override
             public void onChanged(List<Room> rooms) {
@@ -138,7 +137,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         locateRobotBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setCameraOnRobot();
+                viewModel.setCameraOnRobot();
             }
         });
 
@@ -190,7 +189,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 act_origin.setAdapter(adapterFloorRooms);
                 act_origin.setText("");
                 viewModel.selectOrigin(null);
-                drawNewTiles(rooms);
             }
         });
 
@@ -286,138 +284,11 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         dialog.show();
     }
 
-    private void setCameraOnRobot() {
-        map.animateCamera(CameraUpdateFactory.newLatLng(robotMarker.getPosition()));
-    }
-
     @Override
     public void onMapReady(GoogleMap map) {
-        map.setMapType(GoogleMap.MAP_TYPE_NONE);
-        map.setMaxZoomPreference(MAX_MAP_ZOOM);
-
-        // Set camera bounds: Horizontal scroll ends with map
-        LatLng SOUTHWEST_BOUND = new LatLng(-65,-110);
-        LatLng NORTHEAST_BOUND = new LatLng(+65,+110);
-        LatLngBounds bounds = new LatLngBounds(SOUTHWEST_BOUND,NORTHEAST_BOUND);
-        map.setLatLngBoundsForCameraTarget(bounds);
-
-        /*
-         * Set custom onClickListener for all markers,
-         * so that it only shows Marker's information (if it has any),
-         * and hides Google's default buttons, which we don't want.
-         */
-        final Marker[] lastOpened = {null};
-        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                // Check if there is an open info window
-                if (lastOpened[0] != null) {
-                    // Close the info window
-                    lastOpened[0].hideInfoWindow();
-                    // Is the marker the same marker that was already open
-                    if (lastOpened[0].equals(marker)) {
-                        // Nullify the lastOpened object
-                        lastOpened[0] = null;
-                        // Return so that the info window isn't opened again
-                        return true;
-                    }
-                }
-                // Open the info window for the marker
-                marker.showInfoWindow();
-                // Re-assign the last opened such that we can close it later
-                lastOpened[0] = marker;
-                // Event was handled by our code, so do not launch default behaviour.
-                return true;
-            }
-        });
-        this.map = map;
+        viewModel.setMap(map);
     }
 
-
-    private void drawNewTiles(List<Room> rooms){
-        if(map != null) {
-            final double floor = rooms.get((0)).getFloor();
-            TileProvider tileProvider = new TileProvider() {
-                final String FLOOR_MAP_URL_FORMAT =
-                        "map_tiles/floor_%.1f/%d/tile_%d_%d.png";
-                final int TILE_SIZE_DP = 256;
-
-                @Override
-                public Tile getTile(int x, int y, int zoom) {
-                    if (!checkTileExists(x, y, zoom)) {
-                        return null;
-                    }
-                    String s = String.format(Locale.US, FLOOR_MAP_URL_FORMAT, floor, zoom, x, y);
-                    try {
-                        InputStream is = getAssets().open(s);
-                        Bitmap bitmap = BitmapFactory.decodeStream(is);
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-
-                        return new Tile(TILE_SIZE_DP, TILE_SIZE_DP, stream.toByteArray());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-            };
-            if (tileOverlay != null) {
-                tileOverlay.remove();
-            }
-            tileOverlay = map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProvider));
-//            map.addMarker(new MarkerOptions()
-//                .title("DCI, Egokituz")
-//                .position(new MapPosition(0.3069,-8.7494,4.7124).toLatLng())
-//            );
-//            map.addMarker(new MarkerOptions()
-//                .title("Dekanotza")
-//                .position(new MapPosition(-16.2700,-16.2700,0).toLatLng())
-//            );
-//            map.addMarker(new MarkerOptions()
-//                .title("Ezkerreko eskailerak")
-//                .position(new MapPosition(5.2744,-35.9580,0).toLatLng())
-//            );
-
-        }
-    }
-
-    private void drawRobot(MapPosition position){
-        LatLng latLng = position.toLatLng();
-        int iconId = viewModel.getRobotIconId();
-
-        BitmapDescriptor current_icon = BitmapDescriptorFactory.fromResource(iconId);
-
-        // Get robot name and make first letter uppercase
-        String current_name = getResources().getResourceEntryName(iconId).split("_")[0];
-        current_name = current_name.substring(0,1).toUpperCase() + current_name.substring(1);
-
-        if(robotMarker == null){
-            robotMarker = map.addMarker(new MarkerOptions()
-                    .title(current_name)
-                    .icon(current_icon)
-                    .position(latLng)
-                    .zIndex(1.0f)
-            );
-            robotMarker.showInfoWindow();
-            resetCamera();
-        }
-        else {
-            robotMarker.setTitle(current_name);
-            robotMarker.setIcon(current_icon);
-            robotMarker.setPosition(latLng);
-        }
-//        resetCamera();
-    }
-
-    private void resetCamera() {
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(robotMarker.getPosition(),0,0,0)));
-    }
-
-    private boolean checkTileExists(int x, int y, int zoom) {
-        int minZoom = 0;
-
-        return (zoom >= minZoom && zoom <= MAX_MAP_ZOOM);
-    }
 
     @Override
     public void onDestroy() {
