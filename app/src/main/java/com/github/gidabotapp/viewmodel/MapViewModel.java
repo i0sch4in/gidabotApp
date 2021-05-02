@@ -1,7 +1,6 @@
 package com.github.gidabotapp.viewmodel;
 
 import android.app.Application;
-import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
@@ -48,7 +47,6 @@ public class MapViewModel extends AndroidViewModel {
     private Room destination;
 
     private static PhaseMessage currentPhaseMessage;
-    final Floor STARTING_FLOOR = Floor.ZEROTH;
     private List<Goal> pendingGoals;
 
     public MapViewModel(@NonNull Application application) {
@@ -57,7 +55,7 @@ public class MapViewModel extends AndroidViewModel {
         roomRepository = new RoomRepository(application.getApplicationContext());
         this.appNavPhase = new MutableLiveData<>(WAITING_USER_INPUT);
 
-        this.currentFloor = new MutableLiveData<>(STARTING_FLOOR);
+        this.currentFloor = new MutableLiveData<>(Floor.getStartingFloor());
         this.toastObserver = new MutableLiveData<>();
         this.allRoomsLD = roomRepository.getAllRooms();
         this.currentFloorRooms = Transformations.switchMap(currentFloor, new Function<Floor, LiveData<List<Room>>>() {
@@ -97,7 +95,7 @@ public class MapViewModel extends AndroidViewModel {
             }
         });
 
-        qNode.setPositionListener(new MessageListener<PoseWithCovarianceStamped>() {
+        qNode.setTartaloPosListener(new MessageListener<PoseWithCovarianceStamped>() {
             @Override
             public void onNewMessage(PoseWithCovarianceStamped message) {
                 MapPosition position = new MapPosition(message);
@@ -177,8 +175,8 @@ public class MapViewModel extends AndroidViewModel {
     public MutableLiveData<MapPosition> getPositionObserver(){return this.positionObserver;}
 
 
-    public void selectFloor(int index) {
-        this.currentFloor.setValue(Floor.values()[index]);
+    public void selectFloor(Floor floor) {
+        this.currentFloor.setValue(floor);
     }
 
 
@@ -188,13 +186,13 @@ public class MapViewModel extends AndroidViewModel {
         assert currentFloor != null;
         switch (currentFloor) {
             // case 0 = ic_tartalo (default)
-            case FIRST:
+            case FIRST_FLOOR:
                 iconId = R.drawable.kbot_small;
                 break;
-            case SECOND:
+            case SECOND_FLOOR:
                 iconId = R.drawable.galtxa_small;
                 break;
-            case THIRD:
+            case THIRD_FLOOR:
                 iconId = R.drawable.mari_small;
                 break;
         }

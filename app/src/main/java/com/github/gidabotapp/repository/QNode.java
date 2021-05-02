@@ -2,6 +2,9 @@ package com.github.gidabotapp.repository;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+
+import com.github.gidabotapp.domain.MapPosition;
 import com.github.gidabotapp.domain.NavInfo;
 import com.github.gidabotapp.domain.Room;
 
@@ -38,9 +41,18 @@ public class QNode extends AbstractNodeMain {
     private ServiceClient<EmptyRequest, EmptyResponse> clientClearCostmap;
 
     private Subscriber<PoseWithCovarianceStamped> subTartaloPos;
+    private Subscriber<PoseWithCovarianceStamped> subKbotPos;
+    private Subscriber<PoseWithCovarianceStamped> subGaltxaPos;
+    private Subscriber<PoseWithCovarianceStamped> subMariPos;
     private Subscriber<PendingGoals> subPendingGoals;
     private Subscriber<std_msgs.Int8> subNavPhase;
     private Subscriber<std_msgs.Int8> subDialogMessage;
+
+    private LiveData<MapPosition> currentPosLD;
+    private LiveData<PendingGoals> pendingGoalsLD;
+    private LiveData<std_msgs.Int8> navPhaseLD;
+    private LiveData<std_msgs.Int8> subDialogLD;
+
 
     private ConnectedNode connectedNode;
 
@@ -78,6 +90,10 @@ public class QNode extends AbstractNodeMain {
         pubCancel.setLatchMode(true);
 
         subTartaloPos = connectedNode.newSubscriber("/tartalo/amcl_pose", PoseWithCovarianceStamped._TYPE);
+        subKbotPos = connectedNode.newSubscriber("/kbot/amcl_pose", PoseWithCovarianceStamped._TYPE);
+        subGaltxaPos = connectedNode.newSubscriber("/galtxa/amcl_pose", PoseWithCovarianceStamped._TYPE);
+        subMariPos = connectedNode.newSubscriber("/mari/amcl_pose", PoseWithCovarianceStamped._TYPE);
+
         subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
         subDialogMessage = connectedNode.newSubscriber("/dialog_qt_message", Int8._TYPE);
         subPendingGoals = connectedNode.newSubscriber("tartalo/pending_requests", PendingGoals._TYPE);
@@ -155,17 +171,22 @@ public class QNode extends AbstractNodeMain {
 
         EmptyRequest empty_srv = requestMessageFactory.newFromType(Empty._TYPE);
 
-        clientClearCostmap.call(empty_srv, new ServiceResponseListener<EmptyResponse>() {
-            @Override
-            public void onSuccess(EmptyResponse empty) {
-                Log.i("globalCostmap", "globalCostmap successfully reset");
-            }
+        try {
+            clientClearCostmap.call(empty_srv, new ServiceResponseListener<EmptyResponse>() {
+                @Override
+                public void onSuccess(EmptyResponse empty) {
+                    Log.i("globalCostmap", "globalCostmap successfully reset");
+                }
 
-            @Override
-            public void onFailure(RemoteException e) {
-                Log.e("globalCostmap", "globalCostmap reset failed");
-            }
-        });
+                @Override
+                public void onFailure(RemoteException e) {
+                    Log.e("globalCostmap", "globalCostmap reset failed");
+                }
+            });
+        }
+        catch(NullPointerException e){
+            e.printStackTrace();
+        }
     }
 
     public void setPhaseMsgListener(MessageListener<Int8> listener){
@@ -178,8 +199,20 @@ public class QNode extends AbstractNodeMain {
         Log.i("listener", "nav phase listener set");
     }
 
-    public void setPositionListener(MessageListener<PoseWithCovarianceStamped> listener){
+    public void setTartaloPosListener(MessageListener<PoseWithCovarianceStamped> listener){
         subTartaloPos.addMessageListener(listener);
+    }
+
+    public void setKbotPosListener(MessageListener<PoseWithCovarianceStamped> listener) {
+        subKbotPos.addMessageListener(listener);
+    }
+
+    public void setGaltxaPosListener(MessageListener<PoseWithCovarianceStamped> listener) {
+        subGaltxaPos.addMessageListener(listener);
+    }
+
+    public void setMariPosListener(MessageListener<PoseWithCovarianceStamped> listener) {
+        subMariPos.addMessageListener(listener);
     }
 
     public void setPendingGoalsListener(MessageListener<PendingGoals> listener){
@@ -195,18 +228,23 @@ public class QNode extends AbstractNodeMain {
     }
 
     public void shutdown() {
-        subTartaloPos.shutdown();
-        subDialogMessage.shutdown();
-        subNavPhase.shutdown();
-        subPendingGoals.shutdown();
+        try {
+            subTartaloPos.shutdown();
+            subDialogMessage.shutdown();
+            subNavPhase.shutdown();
+            subPendingGoals.shutdown();
 
-        pubCancel.shutdown();
-        pubGoal.shutdown();
+            pubCancel.shutdown();
+            pubGoal.shutdown();
 
-        clientClearCostmap.shutdown();
+            clientClearCostmap.shutdown();
 
-        connectedNode.shutdown();
+            connectedNode.shutdown();
+        }
+        finally {
+            INSTANCE = null;
+        }
 
-        INSTANCE = null;
     }
+
 }

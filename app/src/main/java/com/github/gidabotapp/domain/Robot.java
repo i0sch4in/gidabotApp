@@ -1,35 +1,42 @@
 package com.github.gidabotapp.domain;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 public class Robot {
-    private final String ICON_URL_FORMAT =   "robotIcons/ic_%s";
     private final String name;
-    private final double floor;
-    private Marker marker;
+    private final int icon;
+    private final Floor floor;
+    private MapPosition currentPos;
 
-    public Robot(double floor, String name){
+    public Robot(Floor floor, String name, int iconResId){
         this.floor = floor;
         this.name = name;
+        this.icon = iconResId;
+        this.currentPos = floor.getStartPosition();
     }
 
     public String getName() {
         return name;
     }
 
-    public double getFloor() {
+    public Floor getFloor() {
         return floor;
     }
 
-    public Marker getMarker() {
-        return marker;
+    public MapPosition getCurrentPos() {
+        return currentPos;
     }
 
-    public void setMarker(Marker marker) {
-        this.marker = marker;
+    public LatLng getLatLng(){
+        return currentPos.toLatLng(floor);
     }
 
-    public void updateMarker(MapPosition position){
+    public void setCurrentPos(MapPosition currentPos) {
+        this.currentPos = currentPos;
+    }
 
+    public int getIcon() {
+        return icon;
     }
 }
