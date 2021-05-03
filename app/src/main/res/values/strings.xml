@@ -32,6 +32,7 @@
     <string name="origin_reached_msg">Robota zuregana iritsi da. %s-ra eramatea nahi al duzu?</string>
     <string name="destination_reached_msg">Iritsi zara zure helburura!</string>
     <string name="error_empty_cancel">Ez dago ezeztatzeko helbururik.</string>
+    <string name="empty" />
 
 
 </resources>

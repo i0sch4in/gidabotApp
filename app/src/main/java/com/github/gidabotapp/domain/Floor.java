@@ -14,7 +14,7 @@ public enum Floor {
     FIRST_FLOOR(1, -16.2700, 4.42812,-60.82,  2.38,  -1.82,  28.42),
 
     // StartPoint => Ezkerreko eskailerak (2nd floor)
-    SECOND_FLOOR(2, 28.5169, -36.1166,-14.61,  47.0,  -39.91, -17.34),
+    SECOND_FLOOR(2, 5.2744, -35.9580,-14.61,  47.0,  -41.91, -17.34),
 
     // StartPoint => 302 - DCI, Egokituz
     THIRD_FLOOR(3, -0.3069, -8.7494, -8.6,    54.25, -14.6,   14.27)

@@ -1,11 +1,16 @@
 package com.github.gidabotapp.repository;
 
+import android.os.Message;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
+import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
+import com.github.gidabotapp.domain.MultiNavPhase;
 import com.github.gidabotapp.domain.NavInfo;
+import com.github.gidabotapp.domain.PhaseMessage;
 import com.github.gidabotapp.domain.Room;
 
 import org.ros.exception.RemoteException;
@@ -20,6 +25,8 @@ import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import geometry_msgs.Point;
@@ -31,6 +38,11 @@ import std_msgs.Int8;
 import std_srvs.Empty;
 import std_srvs.EmptyRequest;
 import std_srvs.EmptyResponse;
+
+import static com.github.gidabotapp.domain.Floor.FIRST_FLOOR;
+import static com.github.gidabotapp.domain.Floor.SECOND_FLOOR;
+import static com.github.gidabotapp.domain.Floor.THIRD_FLOOR;
+import static com.github.gidabotapp.domain.Floor.ZEROTH_FLOOR;
 
 public class QNode extends AbstractNodeMain {
     private static QNode INSTANCE = null;
@@ -48,10 +60,10 @@ public class QNode extends AbstractNodeMain {
     private Subscriber<std_msgs.Int8> subNavPhase;
     private Subscriber<std_msgs.Int8> subDialogMessage;
 
-    private LiveData<MapPosition> currentPosLD;
-    private LiveData<PendingGoals> pendingGoalsLD;
-    private LiveData<std_msgs.Int8> navPhaseLD;
-    private LiveData<std_msgs.Int8> subDialogLD;
+    private final HashMap<Floor, MutableLiveData<MapPosition>> currentPositions;
+    private final MutableLiveData<PhaseMessage> phaseMessageLD;
+    private final MutableLiveData<MultiNavPhase> multiNavPhaseLD;
+    private final MutableLiveData<List<Goal>> pendingGoalsLD;
 
 
     private ConnectedNode connectedNode;
@@ -66,6 +78,14 @@ public class QNode extends AbstractNodeMain {
         this.currentNav = new NavInfo();
         this.userId = UUID.randomUUID().toString().substring(0,4);
         this.sequenceNumber = 0;
+        this.currentPositions = new HashMap<Floor, MutableLiveData<MapPosition>>(){{
+            for(Floor floor: Floor.values()){
+                put(floor, new MutableLiveData<MapPosition>());
+            }
+        }};
+        this.phaseMessageLD = new MutableLiveData<>();
+        this.multiNavPhaseLD = new MutableLiveData<>();
+        this.pendingGoalsLD = new MutableLiveData<>();
     }
 
     public static synchronized QNode getInstance(){
@@ -90,13 +110,68 @@ public class QNode extends AbstractNodeMain {
         pubCancel.setLatchMode(true);
 
         subTartaloPos = connectedNode.newSubscriber("/tartalo/amcl_pose", PoseWithCovarianceStamped._TYPE);
+        subTartaloPos.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
+            @Override
+            public void onNewMessage(PoseWithCovarianceStamped message) {
+                MapPosition position = new MapPosition(message);
+                currentPositions.get(ZEROTH_FLOOR).postValue(position);
+            }
+        });
+
         subKbotPos = connectedNode.newSubscriber("/kbot/amcl_pose", PoseWithCovarianceStamped._TYPE);
+        subKbotPos.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
+            @Override
+            public void onNewMessage(PoseWithCovarianceStamped message) {
+                MapPosition position = new MapPosition(message);
+                currentPositions.get(FIRST_FLOOR).postValue(position);
+            }
+        });
+
         subGaltxaPos = connectedNode.newSubscriber("/galtxa/amcl_pose", PoseWithCovarianceStamped._TYPE);
+        subGaltxaPos.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
+            @Override
+            public void onNewMessage(PoseWithCovarianceStamped message) {
+                MapPosition position = new MapPosition(message);
+                currentPositions.get(SECOND_FLOOR).postValue(position);
+            }
+        });
+
         subMariPos = connectedNode.newSubscriber("/mari/amcl_pose", PoseWithCovarianceStamped._TYPE);
+        subMariPos.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
+            @Override
+            public void onNewMessage(PoseWithCovarianceStamped message) {
+                MapPosition position = new MapPosition(message);
+                currentPositions.get(THIRD_FLOOR).postValue(position);
+            }
+        });
 
         subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
+        subNavPhase.addMessageListener(new MessageListener<Int8>() {
+            @Override
+            public void onNewMessage(Int8 message) {
+                int i = message.getData();
+                MultiNavPhase currentNavPhase = MultiNavPhase.values()[i];
+                multiNavPhaseLD.postValue(currentNavPhase);
+            }
+        });
+
         subDialogMessage = connectedNode.newSubscriber("/dialog_qt_message", Int8._TYPE);
+        subDialogMessage.addMessageListener(new MessageListener<Int8>() {
+            @Override
+            public void onNewMessage(Int8 message) {
+                int i = message.getData();
+                PhaseMessage currentPhaseMessage = new PhaseMessage(i);
+                phaseMessageLD.postValue(currentPhaseMessage);
+            }
+        });
         subPendingGoals = connectedNode.newSubscriber("tartalo/pending_requests", PendingGoals._TYPE);
+        subPendingGoals.addMessageListener(new MessageListener<PendingGoals>() {
+            @Override
+            public void onNewMessage(PendingGoals message) {
+                List<Goal> pendingGoals = message.getGoals();
+                pendingGoalsLD.postValue(pendingGoals);
+            }
+        });
 
         try {
             clientClearCostmap = connectedNode.newServiceClient("/move_base/clear_costmaps", Empty._TYPE);
@@ -118,17 +193,16 @@ public class QNode extends AbstractNodeMain {
         Goal message = topicMessageFactory.newFromType(Goal._TYPE);
 
         message.setGoalSeq(sequenceNumber);
-        message.setInitialFloor((float) 0.0); //osatzeko
+        message.setInitialFloor((float) current.getFloor());
+        message.setGoalFloor((float) goal.getFloor());
 
         Point initial_pose = topicMessageFactory.newFromType(Point._TYPE);
 
-        // etengabe eguneratzen dagoenez, uneko posizioaren "kopia" tenporala
-        // QT interfazean --> azken initial_pose (ez oraingoa)
-        //TODO: uneko posizioa --> hurbilen dagoen kokalekua
         initial_pose.setX(current.getX());
         initial_pose.setY(current.getY());
         initial_pose.setZ(current.getZ());
         message.setInitialPose(initial_pose);
+
 
         Point goal_pose = topicMessageFactory.newFromType(Point._TYPE);
         goal_pose.setX(goal.getX());
@@ -139,8 +213,7 @@ public class QNode extends AbstractNodeMain {
         message.setIntermediateRobot(false); //TODO
         message.setIntermediateFloor((float)0.0); //TODO
         message.setWay("None");
-        message.setStartId(current.getNum()); //TODO
-//        message.setGoalId(String.format(Locale.getDefault(),"%03d", room.getNum()));
+        message.setStartId(current.getNum());
         message.setGoalId(goal.getNum());
         message.setLanguage("EU");
         message.setUserName(this.userId);
@@ -189,34 +262,23 @@ public class QNode extends AbstractNodeMain {
         }
     }
 
-    public void setPhaseMsgListener(MessageListener<Int8> listener){
-        subDialogMessage.addMessageListener(listener);
-        Log.i("listener", "phase message listener set");
+
+    public MutableLiveData<PhaseMessage> getPhaseMessageLD(){
+        return this.phaseMessageLD;
     }
 
-    public void setNavPhaseListener(MessageListener<Int8> listener){
-        subNavPhase.addMessageListener(listener);
-        Log.i("listener", "nav phase listener set");
+
+    public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){
+        return this.multiNavPhaseLD;
     }
 
-    public void setTartaloPosListener(MessageListener<PoseWithCovarianceStamped> listener){
-        subTartaloPos.addMessageListener(listener);
+
+    public HashMap<Floor, MutableLiveData<MapPosition>> getCurrentPositions(){
+        return this.currentPositions;
     }
 
-    public void setKbotPosListener(MessageListener<PoseWithCovarianceStamped> listener) {
-        subKbotPos.addMessageListener(listener);
-    }
-
-    public void setGaltxaPosListener(MessageListener<PoseWithCovarianceStamped> listener) {
-        subGaltxaPos.addMessageListener(listener);
-    }
-
-    public void setMariPosListener(MessageListener<PoseWithCovarianceStamped> listener) {
-        subMariPos.addMessageListener(listener);
-    }
-
-    public void setPendingGoalsListener(MessageListener<PendingGoals> listener){
-        subPendingGoals.addMessageListener(listener);
+    public MutableLiveData<List<Goal>> getPendingGoalsLD(){
+        return this.pendingGoalsLD;
     }
 
     public NavInfo getCurrentNav(){
@@ -230,6 +292,10 @@ public class QNode extends AbstractNodeMain {
     public void shutdown() {
         try {
             subTartaloPos.shutdown();
+            subKbotPos.shutdown();
+            subGaltxaPos.shutdown();
+            subMariPos.shutdown();
+
             subDialogMessage.shutdown();
             subNavPhase.shutdown();
             subPendingGoals.shutdown();

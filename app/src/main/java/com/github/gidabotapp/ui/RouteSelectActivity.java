@@ -33,7 +33,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Tile;
-import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -81,6 +80,9 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         viewModel.getAlertObserver().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer stringResId) {
+                if(stringResId == R.string.empty){
+                    return;
+                }
                 if(stringResId == R.string.origin_reached_msg){
                     showNextGoalAlert();
                 }
@@ -93,12 +95,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 }
             }
         });
-//        viewModel.getPositionObserver(ZEROTH_FLOOR).observe(this, new Observer<MapPosition>() {
-//            @Override
-//            public void onChanged(MapPosition position) {
-//                updateMarker(position);
-//            }
-//        });
+
         for(final Floor floor: Floor.values()){
             viewModel.getPositionObserver(floor).observe(this, new Observer<MapPosition>() {
                 @Override
@@ -320,9 +317,11 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             return;
         }
         if(tileProviders == null){
-            initializeTileProviders(); // loading problems, probably other thread needed --> on end event add overlay
+            initializeTileProviders(); // TODO loading problems, probably other thread needed --> on end event add overlay
         }
-        map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProviders.get(currentFloor)));
+        TileProvider provider = tileProviders.get(currentFloor);
+        map.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+
     }
 
 
@@ -444,7 +443,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             viewModel.getPositionObserver(floor).removeObservers(this);
         }
         viewModel.getCurrentFloorRooms().removeObservers(this);
-        viewModel.getNavPhaseObserver().removeObservers(this);
+        viewModel.getMultiNavPhaseLD().removeObservers(this);
         viewModel.shutdownNode();
     }
 

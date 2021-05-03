@@ -19,37 +19,32 @@ import com.github.gidabotapp.R;
 import com.github.gidabotapp.domain.Room;
 import com.github.gidabotapp.repository.RoomRepository;
 
-import org.ros.message.MessageListener;
-
 import java.util.HashMap;
 import java.util.List;
 
-import geometry_msgs.PoseWithCovarianceStamped;
 import multilevel_navigation_msgs.Goal;
-import multilevel_navigation_msgs.PendingGoals;
-import std_msgs.Int8;
+
 import static com.github.gidabotapp.domain.AppNavPhase.*;
 import static com.github.gidabotapp.domain.Floor.*;
 
 public class MapViewModel extends AndroidViewModel {
     private static QNode qNode;
-    private RoomRepository roomRepository;
+    private final RoomRepository roomRepository;
 
     private final MutableLiveData<String> toastObserver;
     private final MutableLiveData<Floor> currentFloor;
     private final LiveData<List<Room>> currentFloorRooms;
-    private final MutableLiveData<Integer> alertObserver;
-    private final MutableLiveData<MultiNavPhase> navPhaseObserver;
+    private final LiveData<Integer> alertObserver;
+    private final MutableLiveData<MultiNavPhase> multiNavPhaseLD;
     private final HashMap<Floor, MutableLiveData<MapPosition>> positionObserver;
     private final LiveData<List<Room>> allRoomsLD;
-
-    private MutableLiveData<AppNavPhase> appNavPhase;
+    private final MutableLiveData<List<Goal>> pendingGoalsLD;
+    private final MutableLiveData<AppNavPhase> appNavPhase;
 
     private Room origin;
     private Room destination;
 
-    private static PhaseMessage currentPhaseMessage;
-    private List<Goal> pendingGoals;
+
 
     public MapViewModel(@NonNull Application application) {
         super(application);
@@ -66,85 +61,34 @@ public class MapViewModel extends AndroidViewModel {
                 return roomRepository.getRoomsByFloor(floor);
             }
         });
-        this.alertObserver = new MutableLiveData<>();
-        this.navPhaseObserver = new MutableLiveData<>();
-        this.positionObserver = new HashMap<Floor, MutableLiveData<MapPosition>>(){{
-            for(Floor floor: Floor.values()){
-                put(floor, new MutableLiveData<MapPosition>());
-            }
-        }};
-
-        qNode.setPhaseMsgListener(new MessageListener<Int8>() {
+        this.positionObserver = qNode.getCurrentPositions();
+        this.alertObserver = Transformations.map(qNode.getPhaseMessageLD(), new Function<PhaseMessage, Integer>() {
             @Override
-            public void onNewMessage(Int8 message) {
-                int i = message.getData();
-                currentPhaseMessage = new PhaseMessage(i);
+            public Integer apply(PhaseMessage currentPhaseMessage) {
                 if(currentPhaseMessage.getPhase() == PhaseMessage.message_enum.GOAL_REACHED){
                     if(appNavPhase.getValue() == REACHING_ORIGIN){
-                        alertObserver.postValue(R.string.origin_reached_msg);
+                        return R.string.origin_reached_msg;
                     }
                     else if(appNavPhase.getValue() == REACHING_DESTINATION){
-                        alertObserver.postValue(R.string.destination_reached_msg);
+                        return R.string.destination_reached_msg;
                     }
                 }
                 else {
-                    alertObserver.postValue(currentPhaseMessage.getMessageResId());
+                    return currentPhaseMessage.getMessageResId();
                 }
+                return R.string.empty;
             }
         });
-
-        qNode.setNavPhaseListener(new MessageListener<Int8>() {
-            @Override
-            public void onNewMessage(Int8 message) {
-                int i = message.getData();
-                navPhaseObserver.postValue(MultiNavPhase.values()[i]);
-            }
-        });
-
-        qNode.setTartaloPosListener(new MessageListener<PoseWithCovarianceStamped>() {
-            @Override
-            public void onNewMessage(PoseWithCovarianceStamped message) {
-                MapPosition position = new MapPosition(message);
-                positionObserver.get(ZEROTH_FLOOR).postValue(position);
-            }
-        });
-
-        qNode.setKbotPosListener(new MessageListener<PoseWithCovarianceStamped>() {
-            @Override
-            public void onNewMessage(PoseWithCovarianceStamped message) {
-                MapPosition position = new MapPosition(message);
-                positionObserver.get(FIRST_FLOOR).postValue(position);
-            }
-        });
-
-        qNode.setGaltxaPosListener(new MessageListener<PoseWithCovarianceStamped>() {
-            @Override
-            public void onNewMessage(PoseWithCovarianceStamped message) {
-                MapPosition position = new MapPosition(message);
-                positionObserver.get(SECOND_FLOOR).postValue(position);
-            }
-        });
-
-        qNode.setMariPosListener(new MessageListener<PoseWithCovarianceStamped>() {
-            @Override
-            public void onNewMessage(PoseWithCovarianceStamped message) {
-                MapPosition position = new MapPosition(message);
-                positionObserver.get(THIRD_FLOOR).postValue(position);
-            }
-        });
-
-        qNode.setPendingGoalsListener(new MessageListener<PendingGoals>() {
-            @Override
-            public void onNewMessage(PendingGoals message) {
-                pendingGoals = message.getGoals();
-            }
-        });
+        this.multiNavPhaseLD = qNode.getMultiNavPhaseLD();
+        this.pendingGoalsLD = qNode.getPendingGoalsLD();
 
     }
 
     public void publishOrigin() {
         String message;
-        Room nearest = getNearestRoom(positionObserver.get(ZEROTH_FLOOR).getValue());
+        Floor currentFloor = getCurrentFloor().getValue();
+        MapPosition currentPosition = positionObserver.get(currentFloor).getValue();
+        Room nearest = getNearestRoom(currentPosition);
         if (origin == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_origin_empty);
         } else if (nearest.equals(origin)) { // Robot Position == origin
@@ -160,7 +104,9 @@ public class MapViewModel extends AndroidViewModel {
 
     public void publishDestination(){
         String message;
-        Room nearest = getNearestRoom(positionObserver.get(ZEROTH_FLOOR).getValue());
+        Floor currentFloor = getCurrentFloor().getValue();
+        MapPosition currentPosition = positionObserver.get(currentFloor).getValue();
+        Room nearest = getNearestRoom(currentPosition);
         if (destination == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_destination_empty);
         } else if (nearest.equals(destination)) {
@@ -174,16 +120,16 @@ public class MapViewModel extends AndroidViewModel {
     }
 
     public void publishCancel() {
-        if(!pendingGoals.isEmpty()){
-            String userId = qNode.getUserId();
-            Goal first = pendingGoals.get(0);
-            if (userId.compareTo(first.getUserName()) == 0) {
-                qNode.publishCancel(first.getGoalSeq(), false, 0, 0);
-                appNavPhase.setValue(WAITING_USER_INPUT);
-            }
-        }
-        else {
+        List<Goal> pendingGoals = pendingGoalsLD.getValue();
+        if(pendingGoals == null){
             toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.error_empty_cancel));
+            return;
+        }
+        String userId = qNode.getUserId();
+        Goal first = pendingGoals.get(0);
+        if (userId.compareTo(first.getUserName()) == 0) {
+            qNode.publishCancel(first.getGoalSeq(), false, 0, 0);
+            appNavPhase.setValue(WAITING_USER_INPUT);
         }
     }
 
@@ -198,10 +144,10 @@ public class MapViewModel extends AndroidViewModel {
     public MutableLiveData<Floor> getCurrentFloor() {
         return this.currentFloor;
     }
-    public MutableLiveData<Integer> getAlertObserver() {
+    public LiveData<Integer> getAlertObserver() {
         return this.alertObserver;
     }
-    public MutableLiveData<MultiNavPhase> getNavPhaseObserver(){return this.navPhaseObserver;}
+    public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){return this.multiNavPhaseLD;}
     public MutableLiveData<MapPosition> getPositionObserver(Floor f){return this.positionObserver.get(f);}
 
 
@@ -228,6 +174,7 @@ public class MapViewModel extends AndroidViewModel {
         // current Floor always has a value
         assert rooms != null;
         Room nearestRoom = rooms.get(0);
+//        Log.i("nearest", "")
         double nearestDistance = current.dSquare(nearestRoom.getPosition());
 
         // iterate through other elements
