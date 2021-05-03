@@ -21,6 +21,7 @@ import com.github.gidabotapp.repository.RoomRepository;
 
 import org.ros.message.MessageListener;
 
+import java.util.HashMap;
 import java.util.List;
 
 import geometry_msgs.PoseWithCovarianceStamped;
@@ -28,6 +29,7 @@ import multilevel_navigation_msgs.Goal;
 import multilevel_navigation_msgs.PendingGoals;
 import std_msgs.Int8;
 import static com.github.gidabotapp.domain.AppNavPhase.*;
+import static com.github.gidabotapp.domain.Floor.*;
 
 public class MapViewModel extends AndroidViewModel {
     private static QNode qNode;
@@ -38,7 +40,7 @@ public class MapViewModel extends AndroidViewModel {
     private final LiveData<List<Room>> currentFloorRooms;
     private final MutableLiveData<Integer> alertObserver;
     private final MutableLiveData<MultiNavPhase> navPhaseObserver;
-    private final MutableLiveData<MapPosition> positionObserver;
+    private final HashMap<Floor, MutableLiveData<MapPosition>> positionObserver;
     private final LiveData<List<Room>> allRoomsLD;
 
     private MutableLiveData<AppNavPhase> appNavPhase;
@@ -66,7 +68,11 @@ public class MapViewModel extends AndroidViewModel {
         });
         this.alertObserver = new MutableLiveData<>();
         this.navPhaseObserver = new MutableLiveData<>();
-        this.positionObserver = new MutableLiveData<>();
+        this.positionObserver = new HashMap<Floor, MutableLiveData<MapPosition>>(){{
+            for(Floor floor: Floor.values()){
+                put(floor, new MutableLiveData<MapPosition>());
+            }
+        }};
 
         qNode.setPhaseMsgListener(new MessageListener<Int8>() {
             @Override
@@ -99,7 +105,31 @@ public class MapViewModel extends AndroidViewModel {
             @Override
             public void onNewMessage(PoseWithCovarianceStamped message) {
                 MapPosition position = new MapPosition(message);
-                positionObserver.postValue(position);
+                positionObserver.get(ZEROTH_FLOOR).postValue(position);
+            }
+        });
+
+        qNode.setKbotPosListener(new MessageListener<PoseWithCovarianceStamped>() {
+            @Override
+            public void onNewMessage(PoseWithCovarianceStamped message) {
+                MapPosition position = new MapPosition(message);
+                positionObserver.get(FIRST_FLOOR).postValue(position);
+            }
+        });
+
+        qNode.setGaltxaPosListener(new MessageListener<PoseWithCovarianceStamped>() {
+            @Override
+            public void onNewMessage(PoseWithCovarianceStamped message) {
+                MapPosition position = new MapPosition(message);
+                positionObserver.get(SECOND_FLOOR).postValue(position);
+            }
+        });
+
+        qNode.setMariPosListener(new MessageListener<PoseWithCovarianceStamped>() {
+            @Override
+            public void onNewMessage(PoseWithCovarianceStamped message) {
+                MapPosition position = new MapPosition(message);
+                positionObserver.get(THIRD_FLOOR).postValue(position);
             }
         });
 
@@ -114,7 +144,7 @@ public class MapViewModel extends AndroidViewModel {
 
     public void publishOrigin() {
         String message;
-        Room nearest = getNearestRoom(positionObserver.getValue());
+        Room nearest = getNearestRoom(positionObserver.get(ZEROTH_FLOOR).getValue());
         if (origin == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_origin_empty);
         } else if (nearest.equals(origin)) { // Robot Position == origin
@@ -130,7 +160,7 @@ public class MapViewModel extends AndroidViewModel {
 
     public void publishDestination(){
         String message;
-        Room nearest = getNearestRoom(positionObserver.getValue());
+        Room nearest = getNearestRoom(positionObserver.get(ZEROTH_FLOOR).getValue());
         if (destination == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_destination_empty);
         } else if (nearest.equals(destination)) {
@@ -172,32 +202,13 @@ public class MapViewModel extends AndroidViewModel {
         return this.alertObserver;
     }
     public MutableLiveData<MultiNavPhase> getNavPhaseObserver(){return this.navPhaseObserver;}
-    public MutableLiveData<MapPosition> getPositionObserver(){return this.positionObserver;}
+    public MutableLiveData<MapPosition> getPositionObserver(Floor f){return this.positionObserver.get(f);}
 
 
     public void selectFloor(Floor floor) {
         this.currentFloor.setValue(floor);
     }
 
-
-    public int getRobotIconId() {
-        int iconId = R.drawable.tartalo_small;
-        Floor currentFloor = this.currentFloor.getValue();
-        assert currentFloor != null;
-        switch (currentFloor) {
-            // case 0 = ic_tartalo (default)
-            case FIRST_FLOOR:
-                iconId = R.drawable.kbot_small;
-                break;
-            case SECOND_FLOOR:
-                iconId = R.drawable.galtxa_small;
-                break;
-            case THIRD_FLOOR:
-                iconId = R.drawable.mari_small;
-                break;
-        }
-        return iconId;
-    }
 
     public void selectOrigin(Room origin) {
         this.origin = origin;

@@ -26,7 +26,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -45,26 +44,23 @@ import static com.github.gidabotapp.domain.Floor.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 public class RouteSelectActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private Marker robotMarker;
-    private ArrayList<Marker> roomMarkers;
+    private HashMap<Floor, Marker> robotMarkers;
 
     private MapViewModel viewModel;
 
     private GoogleMap map;
-    private TileOverlay tileOverlay;
 
     private Button publishBtn, cancelBtn;
     private AutoCompleteTextView act_origin, act_destination, act_floor;
 
     private final int MAX_MAP_ZOOM = 3;
-    HashMap<Floor, TileProvider> tileProviders;
+    private HashMap<Floor, TileProvider> tileProviders;
 
     public RouteSelectActivity() {
     }
@@ -91,19 +87,26 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 else if(stringResId == R.string.destination_reached_msg){
                     showRouteEndAlert();
                 }
-//                else if (viewModel.getAppNavPhase().getValue() != AppNavPhase.WAITING_USER_INPUT){
-                else{
+                else {
                     String message = getString(stringResId);
                     showAlert(message);
                 }
             }
         });
-        viewModel.getPositionObserver().observe(this, new Observer<MapPosition>() {
-            @Override
-            public void onChanged(MapPosition position) {
-                drawRobot(position);
-            }
-        });
+//        viewModel.getPositionObserver(ZEROTH_FLOOR).observe(this, new Observer<MapPosition>() {
+//            @Override
+//            public void onChanged(MapPosition position) {
+//                updateMarker(position);
+//            }
+//        });
+        for(final Floor floor: Floor.values()){
+            viewModel.getPositionObserver(floor).observe(this, new Observer<MapPosition>() {
+                @Override
+                public void onChanged(MapPosition position) {
+                    updateMarker(floor, position);
+                }
+            });
+        }
 
         viewModel.getAllRoomsLD().observe(this, new Observer<List<Room>>() {
             @Override
@@ -198,6 +201,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             @Override
             public void onChanged(Floor floor) {
                 showTiles(floor);
+                showMarker(floor);
             }
         });
 
@@ -207,6 +211,23 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         mapFragment.getMapAsync(this);
     }
 
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        this.map = map;
+
+        map.setMapType(GoogleMap.MAP_TYPE_NONE);
+        map.setMaxZoomPreference(MAX_MAP_ZOOM);
+
+        // Set camera bounds: Horizontal scroll ends with map
+        LatLng SOUTHWEST_BOUND = new LatLng(-65,-110);
+        LatLng NORTHEAST_BOUND = new LatLng(+65,+110);
+        LatLngBounds bounds = new LatLngBounds(SOUTHWEST_BOUND,NORTHEAST_BOUND);
+        map.setLatLngBoundsForCameraTarget(bounds);
+
+        showTiles(Floor.getStartingFloor());
+        showMarker(Floor.getStartingFloor());
+    }
 
     private void updateButtonsLock(AppNavPhase phase) {
          if (phase == AppNavPhase.WAITING_USER_INPUT){
@@ -286,31 +307,22 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void setCameraOnRobot() {
-        map.animateCamera(CameraUpdateFactory.newLatLng(robotMarker.getPosition()));
+        Floor currentFloor = viewModel.getCurrentFloor().getValue();
+        map.animateCamera(CameraUpdateFactory.newLatLng(robotMarkers.get(currentFloor).getPosition()));
     }
 
-    @Override
-    public void onMapReady(GoogleMap map) {
-        map.setMapType(GoogleMap.MAP_TYPE_NONE);
-        map.setMaxZoomPreference(MAX_MAP_ZOOM);
-
-        // Set camera bounds: Horizontal scroll ends with map
-        LatLng SOUTHWEST_BOUND = new LatLng(-65,-110);
-        LatLng NORTHEAST_BOUND = new LatLng(+65,+110);
-        LatLngBounds bounds = new LatLngBounds(SOUTHWEST_BOUND,NORTHEAST_BOUND);
-        map.setLatLngBoundsForCameraTarget(bounds);
-
-        this.map = map;
-
-        showTiles(Floor.getStartingFloor());
+    private void resetCamera(Floor currentFloor) {
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(robotMarkers.get(currentFloor).getPosition(),0,0,0)));
     }
 
-    private void showTiles(Floor f) {
-        if(tileProviders == null){
-            initializeTileProviders();
+    private void showTiles(Floor currentFloor) {
+        if (map == null){
             return;
         }
-        map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProviders.get(f)));
+        if(tileProviders == null){
+            initializeTileProviders(); // loading problems, probably other thread needed --> on end event add overlay
+        }
+        map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProviders.get(currentFloor)));
     }
 
 
@@ -322,36 +334,70 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
-    private void drawRobot(MapPosition position){
-        LatLng latLng = position.toLatLng(ZEROTH_FLOOR);
-        int iconId = viewModel.getRobotIconId();
-
-        BitmapDescriptor current_icon = BitmapDescriptorFactory.fromResource(iconId);
-
-        // Get robot name and make first letter uppercase
-        String current_name = getResources().getResourceEntryName(iconId).split("_")[0];
-        current_name = current_name.substring(0,1).toUpperCase() + current_name.substring(1);
-
-        if(robotMarker == null){
-            robotMarker = map.addMarker(new MarkerOptions()
-                    .title(current_name)
-                    .icon(current_icon)
-                    .position(latLng)
-                    .zIndex(1.0f)
-            );
-            robotMarker.showInfoWindow();
-            resetCamera();
+    private void showMarker(Floor currentFloor) {
+        if(map == null){
+            return;
         }
-        else {
-            robotMarker.setTitle(current_name);
-            robotMarker.setIcon(current_icon);
-            robotMarker.setPosition(latLng);
+        if(robotMarkers == null){
+            initializeRobotMarkers();
+        }
+        // Set current floor marker visible
+        robotMarkers.get(currentFloor).setVisible(true);
+        resetCamera(currentFloor);
+
+        // Set other markers not visible
+        for(Floor floor : robotMarkers.keySet()){
+            if(floor == currentFloor){
+                continue;
+            }
+            robotMarkers.get(floor).setVisible(false);
         }
     }
 
-    private void resetCamera() {
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(robotMarker.getPosition(),0,0,0)));
+    private void updateMarker(Floor currentFloor, MapPosition position) {
+        if(map == null){
+            return;
+        }
+        if(robotMarkers == null){
+            initializeRobotMarkers();
+        }
+        LatLng currentLatLng = position.toLatLng(currentFloor);
+        robotMarkers.get(currentFloor).setPosition(currentLatLng);
     }
+
+    private void initializeRobotMarkers() {
+        final Marker tartalo = map.addMarker(new MarkerOptions()
+            .title("Tartalo")
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.tartalo_small))
+            .position(ZEROTH_FLOOR.getStartLatLng())
+            .zIndex(1.0f)
+        );
+        final Marker kbot = map.addMarker(new MarkerOptions()
+                .title("Kbot")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.kbot_small))
+                .position(FIRST_FLOOR.getStartLatLng())
+                .zIndex(1.0f)
+        );
+        final Marker galtxa = map.addMarker(new MarkerOptions()
+                .title("Galtxagorri")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.galtxa_small))
+                .position(SECOND_FLOOR.getStartLatLng())
+                .zIndex(1.0f)
+        );
+        final Marker mari = map.addMarker(new MarkerOptions()
+                .title("Marisorgin")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.mari_small))
+                .position(THIRD_FLOOR.getStartLatLng())
+                .zIndex(1.0f)
+        );
+        robotMarkers = new HashMap<Floor, Marker>(){{
+           put(ZEROTH_FLOOR,tartalo);
+           put(FIRST_FLOOR,kbot);
+           put(SECOND_FLOOR,galtxa);
+           put(THIRD_FLOOR,mari);
+        }};
+    }
+
 
     private boolean tileNotAvailable(int zoom) {
         final int MIN_MAP_ZOOM = 0;
@@ -394,7 +440,9 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         viewModel.getCurrentFloor().removeObservers(this);
         viewModel.getToastObserver().removeObservers(this);
         viewModel.getAlertObserver().removeObservers(this);
-        viewModel.getPositionObserver().removeObservers(this);
+        for(Floor floor: Floor.values()){
+            viewModel.getPositionObserver(floor).removeObservers(this);
+        }
         viewModel.getCurrentFloorRooms().removeObservers(this);
         viewModel.getNavPhaseObserver().removeObservers(this);
         viewModel.shutdownNode();

@@ -11,7 +11,7 @@ public enum Floor {
     ZEROTH_FLOOR(0, 3.5503,  -18.4937,-30,     37.5,  -21.6,   9.3),
 
     // StartPoint => 122 - Dekanotza
-    FIRST_FLOOR(1, -16.2700, 4.42812,-60.82,  2.38,  -28.61,  28.42),
+    FIRST_FLOOR(1, -16.2700, 4.42812,-60.82,  2.38,  -1.82,  28.42),
 
     // StartPoint => Ezkerreko eskailerak (2nd floor)
     SECOND_FLOOR(2, 28.5169, -36.1166,-14.61,  47.0,  -39.91, -17.34),
@@ -34,13 +34,13 @@ public enum Floor {
         }
     }
 
-    Floor(int floorCode, double start_x, double start_y, double...bounds)
+    Floor(int floorCode, double start_x, double start_y, double x_min, double x_max, double y_min, double y_max)
     {
         this.floorCode = floorCode;
         this.start_x = start_x;
         this.start_y = start_y;
-        this.X_BOUNDS = new double[]{bounds[0],bounds[1]};
-        this.Y_BOUNDS = new double[]{bounds[2], bounds[3]};
+        this.X_BOUNDS = new double[]{x_min,x_max};
+        this.Y_BOUNDS = new double[]{y_min,y_max};
     }
 
     public int getFloorCode(){
@@ -53,6 +53,10 @@ public enum Floor {
 
     public MapPosition getStartPosition(){
         return new MapPosition(start_x, start_y,0);
+    }
+
+    public LatLng getStartLatLng(){
+        return new MapPosition(start_x, start_y, 0).toLatLng(this);
     }
 
     public static List<String> getFloorList(){
