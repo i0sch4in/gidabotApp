@@ -33,6 +33,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Tile;
+import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -59,8 +60,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private AutoCompleteTextView act_origin, act_destination, act_floor;
 
     private final int MAX_MAP_ZOOM = 3;
-    private HashMap<Floor, TileProvider> tileProviders;
-
+//    private HashMap<Floor, TileProvider> tileProviders;
+    private HashMap<Floor, TileOverlay> tileOverlays;
     public RouteSelectActivity() {
     }
 
@@ -222,8 +223,37 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         LatLngBounds bounds = new LatLngBounds(SOUTHWEST_BOUND,NORTHEAST_BOUND);
         map.setLatLngBoundsForCameraTarget(bounds);
 
-        showTiles(Floor.getStartingFloor());
+        /*
+         * Set custom onClickListener for all markers, so that it only shows Marker's information (if it has any),
+         * and hides Google's default buttons, which we don't want.
+         */
+        final Marker[] lastOpened = {null};
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                // Check if there is an open info window
+                if (lastOpened[0] != null) {
+                    // Close the info window
+                    lastOpened[0].hideInfoWindow();
+                    // Is the marker the same marker that was already open
+                    if (lastOpened[0].equals(marker)) {
+                        // Nullify the lastOpened object
+                        lastOpened[0] = null;
+                        // Return so that the info window isn't opened again
+                        return true;
+                    }
+                }
+                // Open the info window for the marker
+                marker.showInfoWindow();
+                // Re-assign the last opened such that we can close it later
+                lastOpened[0] = marker;
+                // Event was handled by our code, so do not launch default behaviour.
+                return true;
+            }
+        });
+
         showMarker(Floor.getStartingFloor());
+        showTiles(Floor.getStartingFloor());
     }
 
     private void updateButtonsLock(AppNavPhase phase) {
@@ -250,7 +280,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss(); // publish destination
+                        dialog.dismiss();
                     }
                 });
         dialog.show();
@@ -308,28 +338,36 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         map.animateCamera(CameraUpdateFactory.newLatLng(robotMarkers.get(currentFloor).getPosition()));
     }
 
-    private void resetCamera(Floor currentFloor) {
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(robotMarkers.get(currentFloor).getPosition(),0,0,0)));
+    private void centerCamera(Floor currentFloor) {
+        LatLng currentLatLng = robotMarkers.get(currentFloor).getPosition();
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(currentLatLng,0,0,0)));
     }
 
     private void showTiles(Floor currentFloor) {
         if (map == null){
             return;
         }
-        if(tileProviders == null){
-            initializeTileProviders(); // TODO loading problems, probably other thread needed --> on end event add overlay
+        if(tileOverlays == null) {
+            initializeTileOverlays();
         }
-        TileProvider provider = tileProviders.get(currentFloor);
-        map.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
 
+        for(Floor floor: tileOverlays.keySet()){
+            if(floor == currentFloor){
+                tileOverlays.get(floor).setVisible(true);
+                continue;
+            }
+            tileOverlays.get(floor).setVisible(false);
+        }
+//        resetCamera(currentFloor);
     }
 
 
-    public void initializeTileProviders(){
-        tileProviders = new HashMap<>();
-        for (Floor f: Floor.values()){
-            TileProvider provider = getFloorTileProvider(f);
-            tileProviders.put(f, provider);
+    public void initializeTileOverlays(){
+        tileOverlays = new HashMap<>();
+        for (Floor floor: Floor.values()){
+            TileProvider provider = getFloorTileProvider(floor);
+            TileOverlay overlay = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+            tileOverlays.put(floor,overlay);
         }
     }
 
@@ -340,13 +378,10 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         if(robotMarkers == null){
             initializeRobotMarkers();
         }
-        // Set current floor marker visible
-        robotMarkers.get(currentFloor).setVisible(true);
-        resetCamera(currentFloor);
 
-        // Set other markers not visible
         for(Floor floor : robotMarkers.keySet()){
             if(floor == currentFloor){
+                robotMarkers.get(floor).setVisible(true);
                 continue;
             }
             robotMarkers.get(floor).setVisible(false);
@@ -365,38 +400,18 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void initializeRobotMarkers() {
-        final Marker tartalo = map.addMarker(new MarkerOptions()
-            .title("Tartalo")
-            .icon(BitmapDescriptorFactory.fromResource(R.drawable.tartalo_small))
-            .position(ZEROTH_FLOOR.getStartLatLng())
-            .zIndex(1.0f)
-        );
-        final Marker kbot = map.addMarker(new MarkerOptions()
-                .title("Kbot")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.kbot_small))
-                .position(FIRST_FLOOR.getStartLatLng())
-                .zIndex(1.0f)
-        );
-        final Marker galtxa = map.addMarker(new MarkerOptions()
-                .title("Galtxagorri")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.galtxa_small))
-                .position(SECOND_FLOOR.getStartLatLng())
-                .zIndex(1.0f)
-        );
-        final Marker mari = map.addMarker(new MarkerOptions()
-                .title("Marisorgin")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.mari_small))
-                .position(THIRD_FLOOR.getStartLatLng())
-                .zIndex(1.0f)
-        );
         robotMarkers = new HashMap<Floor, Marker>(){{
-           put(ZEROTH_FLOOR,tartalo);
-           put(FIRST_FLOOR,kbot);
-           put(SECOND_FLOOR,galtxa);
-           put(THIRD_FLOOR,mari);
+            for(Floor floor: Floor.values()){
+                Marker marker = map.addMarker(new MarkerOptions()
+                    .title(floor.getRobotName())
+                    .icon(BitmapDescriptorFactory.fromResource(floor.getRobotIconRes()))
+                    .position(floor.getStartLatLng())
+                    .zIndex(1.0f)
+                );
+                put(floor,marker);
+            }
         }};
     }
-
 
     private boolean tileNotAvailable(int zoom) {
         final int MIN_MAP_ZOOM = 0;

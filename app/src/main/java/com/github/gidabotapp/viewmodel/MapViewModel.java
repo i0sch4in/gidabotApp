@@ -38,7 +38,7 @@ public class MapViewModel extends AndroidViewModel {
     private final MutableLiveData<MultiNavPhase> multiNavPhaseLD;
     private final HashMap<Floor, MutableLiveData<MapPosition>> positionObserver;
     private final LiveData<List<Room>> allRoomsLD;
-    private final MutableLiveData<List<Goal>> pendingGoalsLD;
+    private final HashMap<Floor, MutableLiveData<List<Goal>>> pendingRequests;
     private final MutableLiveData<AppNavPhase> appNavPhase;
 
     private Room origin;
@@ -80,8 +80,7 @@ public class MapViewModel extends AndroidViewModel {
             }
         });
         this.multiNavPhaseLD = qNode.getMultiNavPhaseLD();
-        this.pendingGoalsLD = qNode.getPendingGoalsLD();
-
+        this.pendingRequests = qNode.getPendingRequests();
     }
 
     public void publishOrigin() {
@@ -104,7 +103,7 @@ public class MapViewModel extends AndroidViewModel {
 
     public void publishDestination(){
         String message;
-        Floor currentFloor = getCurrentFloor().getValue();
+        Floor currentFloor = this.currentFloor.getValue();
         MapPosition currentPosition = positionObserver.get(currentFloor).getValue();
         Room nearest = getNearestRoom(currentPosition);
         if (destination == null) {
@@ -120,15 +119,16 @@ public class MapViewModel extends AndroidViewModel {
     }
 
     public void publishCancel() {
-        List<Goal> pendingGoals = pendingGoalsLD.getValue();
+        Floor currentFloor = this.currentFloor.getValue();
+        List<Goal> pendingGoals = pendingRequests.get(currentFloor).getValue();
         if(pendingGoals == null){
             toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.error_empty_cancel));
             return;
         }
         String userId = qNode.getUserId();
-        Goal first = pendingGoals.get(0);
-        if (userId.compareTo(first.getUserName()) == 0) {
-            qNode.publishCancel(first.getGoalSeq(), false, 0, 0);
+        Goal firstGoal = pendingGoals.get(0);
+        if (userId.compareTo(firstGoal.getUserName()) == 0) {
+            qNode.publishCancel(firstGoal.getGoalSeq(), false, currentFloor, currentFloor, null); // TODO
             appNavPhase.setValue(WAITING_USER_INPUT);
         }
     }

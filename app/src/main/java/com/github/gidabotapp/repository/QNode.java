@@ -1,9 +1,7 @@
 package com.github.gidabotapp.repository;
 
-import android.os.Message;
 import android.util.Log;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.github.gidabotapp.domain.Floor;
@@ -39,32 +37,23 @@ import std_srvs.Empty;
 import std_srvs.EmptyRequest;
 import std_srvs.EmptyResponse;
 
-import static com.github.gidabotapp.domain.Floor.FIRST_FLOOR;
-import static com.github.gidabotapp.domain.Floor.SECOND_FLOOR;
-import static com.github.gidabotapp.domain.Floor.THIRD_FLOOR;
-import static com.github.gidabotapp.domain.Floor.ZEROTH_FLOOR;
-
 public class QNode extends AbstractNodeMain {
     private static QNode INSTANCE = null;
 
     private Publisher<Goal> pubGoal;
     private Publisher<CancelRequest> pubCancel;
 
-    private ServiceClient<EmptyRequest, EmptyResponse> clientClearCostmap;
+    private ServiceClient<EmptyRequest, EmptyResponse> clearCostmapClient;
 
-    private Subscriber<PoseWithCovarianceStamped> subTartaloPos;
-    private Subscriber<PoseWithCovarianceStamped> subKbotPos;
-    private Subscriber<PoseWithCovarianceStamped> subGaltxaPos;
-    private Subscriber<PoseWithCovarianceStamped> subMariPos;
-    private Subscriber<PendingGoals> subPendingGoals;
+    private HashMap<Floor, Subscriber<PoseWithCovarianceStamped>> positionSubs;
+    private HashMap<Floor, Subscriber<PendingGoals>> pendingReqSubs;
     private Subscriber<std_msgs.Int8> subNavPhase;
     private Subscriber<std_msgs.Int8> subDialogMessage;
 
     private final HashMap<Floor, MutableLiveData<MapPosition>> currentPositions;
+    private final HashMap<Floor, MutableLiveData<List<Goal>>> pendingRequests;
     private final MutableLiveData<PhaseMessage> phaseMessageLD;
     private final MutableLiveData<MultiNavPhase> multiNavPhaseLD;
-    private final MutableLiveData<List<Goal>> pendingGoalsLD;
-
 
     private ConnectedNode connectedNode;
 
@@ -83,9 +72,13 @@ public class QNode extends AbstractNodeMain {
                 put(floor, new MutableLiveData<MapPosition>());
             }
         }};
+        this.pendingRequests = new HashMap<Floor, MutableLiveData<List<Goal>>>(){{
+            for(Floor floor: Floor.values()){
+                put(floor, new MutableLiveData<List<Goal>>());
+            }
+        }};
         this.phaseMessageLD = new MutableLiveData<>();
         this.multiNavPhaseLD = new MutableLiveData<>();
-        this.pendingGoalsLD = new MutableLiveData<>();
     }
 
     public static synchronized QNode getInstance(){
@@ -109,41 +102,36 @@ public class QNode extends AbstractNodeMain {
         pubCancel = connectedNode.newPublisher("/cancel_request", CancelRequest._TYPE);
         pubCancel.setLatchMode(true);
 
-        subTartaloPos = connectedNode.newSubscriber("/tartalo/amcl_pose", PoseWithCovarianceStamped._TYPE);
-        subTartaloPos.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
-            @Override
-            public void onNewMessage(PoseWithCovarianceStamped message) {
-                MapPosition position = new MapPosition(message);
-                currentPositions.get(ZEROTH_FLOOR).postValue(position);
-            }
-        });
+        positionSubs = new HashMap<>();
+        final String amcl_topic_template = "/%s/amcl_pose";
+        for(final Floor floor: Floor.values()){
+            String topic = String.format(amcl_topic_template, floor.getRobotName());
+            Subscriber<PoseWithCovarianceStamped> subscriber = connectedNode.newSubscriber(topic, PoseWithCovarianceStamped._TYPE);
+            subscriber.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
+                @Override
+                public void onNewMessage(PoseWithCovarianceStamped message) {
+                    MapPosition position = new MapPosition(message);
+                    currentPositions.get(floor).postValue(position);
+                }
+            });
+            positionSubs.put(floor,subscriber);
+        }
 
-        subKbotPos = connectedNode.newSubscriber("/kbot/amcl_pose", PoseWithCovarianceStamped._TYPE);
-        subKbotPos.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
-            @Override
-            public void onNewMessage(PoseWithCovarianceStamped message) {
-                MapPosition position = new MapPosition(message);
-                currentPositions.get(FIRST_FLOOR).postValue(position);
-            }
-        });
+        pendingReqSubs = new HashMap<>();
+        final String pReq_topic_template = "/%s/pending_requests";
+        for(final Floor floor: Floor.values()){
+            String topic = String.format(pReq_topic_template, floor.getRobotName());
+            Subscriber<PendingGoals> subscriber = connectedNode.newSubscriber(topic, PendingGoals._TYPE);
+            subscriber.addMessageListener(new MessageListener<PendingGoals>() {
+                @Override
+                public void onNewMessage(PendingGoals message) {
+                    List<Goal> pendingGoals = message.getGoals();
+                    pendingRequests.get(floor).postValue(pendingGoals);
+                }
+            });
+            pendingReqSubs.put(floor,subscriber);
+        }
 
-        subGaltxaPos = connectedNode.newSubscriber("/galtxa/amcl_pose", PoseWithCovarianceStamped._TYPE);
-        subGaltxaPos.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
-            @Override
-            public void onNewMessage(PoseWithCovarianceStamped message) {
-                MapPosition position = new MapPosition(message);
-                currentPositions.get(SECOND_FLOOR).postValue(position);
-            }
-        });
-
-        subMariPos = connectedNode.newSubscriber("/mari/amcl_pose", PoseWithCovarianceStamped._TYPE);
-        subMariPos.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
-            @Override
-            public void onNewMessage(PoseWithCovarianceStamped message) {
-                MapPosition position = new MapPosition(message);
-                currentPositions.get(THIRD_FLOOR).postValue(position);
-            }
-        });
 
         subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
         subNavPhase.addMessageListener(new MessageListener<Int8>() {
@@ -164,17 +152,10 @@ public class QNode extends AbstractNodeMain {
                 phaseMessageLD.postValue(currentPhaseMessage);
             }
         });
-        subPendingGoals = connectedNode.newSubscriber("tartalo/pending_requests", PendingGoals._TYPE);
-        subPendingGoals.addMessageListener(new MessageListener<PendingGoals>() {
-            @Override
-            public void onNewMessage(PendingGoals message) {
-                List<Goal> pendingGoals = message.getGoals();
-                pendingGoalsLD.postValue(pendingGoals);
-            }
-        });
+
 
         try {
-            clientClearCostmap = connectedNode.newServiceClient("/move_base/clear_costmaps", Empty._TYPE);
+            clearCostmapClient = connectedNode.newServiceClient("/move_base/clear_costmaps", Empty._TYPE);
             Log.i("globalCostmap", "/move_base/clear_costmaps service client successfully created");
         } catch (ServiceNotFoundException e) {
             Log.e("globalCostmap", "Error creating /move_base/clear_costmaps service client");
@@ -223,21 +204,23 @@ public class QNode extends AbstractNodeMain {
     }
 
 
-    public void publishCancel(int goal_seq, boolean intermediateRobot, double...floors){
+    public void publishCancel(int goal_seq, boolean intermediateRobot, Floor initialFloor, Floor goalFloor, Floor intermediateFloor){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
         CancelRequest message = topicMessageFactory.newFromType(CancelRequest._TYPE);
         message.setGoalSeq(goal_seq);
-        message.setInitialFloor((float) floors[0]);
-        message.setGoalFloor((float) floors[1]);
         message.setIntermediateRobot(intermediateRobot);
+        message.setInitialFloor((float) initialFloor.getFloorCode());
+        message.setGoalFloor((float) goalFloor.getFloorCode());
+        message.setRequestFloor((float) initialFloor.getFloorCode()); // IMPORTANTE: hau gabe ez doa
         if (intermediateRobot){
-            message.setIntermediateFloor((float) floors[2]);
-            message.setRequestFloor((float) floors[3]);
+            message.setIntermediateFloor((float) intermediateFloor.getFloorCode());
         }
 
         pubCancel.publish(message);
     }
+
+
 
     public void clearGlobalCostmap(){
         MessageFactory requestMessageFactory = connectedNode.getServiceRequestMessageFactory();
@@ -245,7 +228,7 @@ public class QNode extends AbstractNodeMain {
         EmptyRequest empty_srv = requestMessageFactory.newFromType(Empty._TYPE);
 
         try {
-            clientClearCostmap.call(empty_srv, new ServiceResponseListener<EmptyResponse>() {
+            clearCostmapClient.call(empty_srv, new ServiceResponseListener<EmptyResponse>() {
                 @Override
                 public void onSuccess(EmptyResponse empty) {
                     Log.i("globalCostmap", "globalCostmap successfully reset");
@@ -277,8 +260,8 @@ public class QNode extends AbstractNodeMain {
         return this.currentPositions;
     }
 
-    public MutableLiveData<List<Goal>> getPendingGoalsLD(){
-        return this.pendingGoalsLD;
+    public HashMap<Floor, MutableLiveData<List<Goal>>> getPendingRequests(){
+        return this.pendingRequests;
     }
 
     public NavInfo getCurrentNav(){
@@ -291,19 +274,20 @@ public class QNode extends AbstractNodeMain {
 
     public void shutdown() {
         try {
-            subTartaloPos.shutdown();
-            subKbotPos.shutdown();
-            subGaltxaPos.shutdown();
-            subMariPos.shutdown();
+            for(Subscriber<PoseWithCovarianceStamped> sub: positionSubs.values()){
+                sub.shutdown();
+            }
+            for(Subscriber<PendingGoals> sub: pendingReqSubs.values()){
+                sub.shutdown();
+            }
 
             subDialogMessage.shutdown();
             subNavPhase.shutdown();
-            subPendingGoals.shutdown();
 
             pubCancel.shutdown();
             pubGoal.shutdown();
 
-            clientClearCostmap.shutdown();
+            clearCostmapClient.shutdown();
 
             connectedNode.shutdown();
         }
