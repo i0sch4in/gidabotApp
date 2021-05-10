@@ -9,7 +9,6 @@ import android.util.Log;
 
 import com.github.gidabotapp.R;
 import com.github.gidabotapp.repository.QNode;
-import com.github.gidabotapp.repository.RoomDatabase;
 
 import org.ros.android.RosActivity;
 import org.ros.node.NodeConfiguration;
@@ -39,7 +38,7 @@ public class MainActivity extends RosActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
         errorAlert = new AlertDialog.Builder(this).create();
         errorAlert.setTitle(getString(R.string.master_error_title));
         errorAlert.setMessage(getString(R.string.master_error_msg));

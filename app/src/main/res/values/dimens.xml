@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="button_round_radius">8dp</dimen>
-    <dimen name="spinner_height">30dp</dimen>
-    <dimen name="spinner_width">50dp</dimen>
+    <dimen name="spinner_height">70dp</dimen>
 </resources>

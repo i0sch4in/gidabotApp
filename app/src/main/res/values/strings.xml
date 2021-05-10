@@ -33,6 +33,9 @@
     <string name="destination_reached_msg">Iritsi zara zure helburura!</string>
     <string name="error_empty_cancel">Ez dago ezeztatzeko helbururik.</string>
     <string name="empty" />
+    <string name="lift_stairs_question">Igogailua edo eskailerak erabili nahi dituzu?</string>
+    <string name="lift">Igogailua</string>
+    <string name="stairs">Eskailerak</string>
 
 
 </resources>

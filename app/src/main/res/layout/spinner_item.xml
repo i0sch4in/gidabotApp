@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
@@ -13,13 +12,4 @@
         android:textSize="18sp"
         android:padding="5dip"
         />
-<!--    <ImageView-->
-<!--        android:layout_width="16dp"-->
-<!--        android:layout_height="16dp"-->
-<!--        android:layout_alignParentEnd="true"-->
-<!--        android:layout_centerVertical="true"-->
-<!--        android:src="@drawable/ic_dropdown_arrow"-->
-<!--        android:layout_toEndOf="@id/spinnerText"-->
-<!--        app:srcCompat="@drawable/ic_dropdown_arrow"-->
-<!--        />-->
 </RelativeLayout>

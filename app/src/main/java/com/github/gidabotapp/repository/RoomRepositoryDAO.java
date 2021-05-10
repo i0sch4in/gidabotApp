@@ -19,10 +19,10 @@ public interface RoomRepositoryDAO {
     void insert(Room room);
 
     @Query("SELECT * FROM rooms WHERE num = :num")
-    public LiveData<Room> getRoom(double num);
+    LiveData<Room> getRoom(double num);
 
     @Query("SELECT * FROM rooms WHERE floor = :floor")
-    public LiveData<List<Room>> getRoomsByFloor(double floor);
+    LiveData<List<Room>> getRoomsByFloor(double floor);
 
     @Query("SELECT * FROM rooms")
     LiveData<List<Room>> getAllRooms();

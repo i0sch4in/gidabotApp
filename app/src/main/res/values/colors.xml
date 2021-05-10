@@ -4,14 +4,19 @@
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="default_color">#ffffff</color>
-    <color name="pressed_color">#4d90fe</color>
     <color name="material_black">#070707</color>
     <color name="light_blue">#bbdefb</color>
     <color name="maps_blue">#4A89F3</color>
     <color name="maps_red">#DD4B3E</color>
     <color name="maps_green">#1EA362</color>
+    <color name="primaryColor">#651fff</color>
+    <color name="primaryLightColor">#a255ff</color>
+    <color name="primaryDarkColor">#0100ca</color>
+    <color name="secondaryColor">#b388ff</color>
+    <color name="secondaryLightColor">#e7b9ff</color>
+    <color name="secondaryDarkColor">#805acb</color>
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="secondaryTextColor">#000000</color>
 </resources>

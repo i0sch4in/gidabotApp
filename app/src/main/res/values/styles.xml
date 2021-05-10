@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.GidabotApp" parent="Theme.MaterialComponents.Light.DarkActionBar">
-        <!-- ... -->
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryVariant">@color/primaryLightColor</item>
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="colorSecondary">@color/secondaryColor</item>
+        <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
+        <item name="snackbarStyle">@style/customSnackbar</item>
+    </style>
+
+    <style name="customSnackbar" parent="Widget.MaterialComponents.Snackbar" >
+        <item name="android:background">@color/primaryLightColor</item>
+        <item name="android:textColor">@color/primaryTextColor</item>
     </style>
 </resources>

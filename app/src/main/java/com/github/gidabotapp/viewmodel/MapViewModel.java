@@ -14,6 +14,7 @@ import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
 import com.github.gidabotapp.domain.MultiNavPhase;
 import com.github.gidabotapp.domain.PhaseMessage;
+import com.github.gidabotapp.domain.Way;
 import com.github.gidabotapp.repository.QNode;
 import com.github.gidabotapp.R;
 import com.github.gidabotapp.domain.Room;
@@ -43,8 +44,6 @@ public class MapViewModel extends AndroidViewModel {
 
     private Room origin;
     private Room destination;
-
-
 
     public MapViewModel(@NonNull Application application) {
         super(application);
@@ -83,35 +82,30 @@ public class MapViewModel extends AndroidViewModel {
         this.pendingRequests = qNode.getPendingRequests();
     }
 
-    public void publishOrigin() {
+    public void publishOrigin(Way chosenWay) {
         String message;
         Floor currentFloor = getCurrentFloor().getValue();
         MapPosition currentPosition = positionObserver.get(currentFloor).getValue();
         Room nearest = getNearestRoom(currentPosition);
         if (origin == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_origin_empty);
-        } else if (nearest.equals(origin)) { // Robot Position == origin
-            publishDestination();
-            return;
         } else {
-           qNode.publishGoal(nearest, origin);
+           qNode.publishGoal(nearest, origin, chosenWay);
            message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), origin);
         }
         toastObserver.postValue(message);
         this.appNavPhase.setValue(REACHING_ORIGIN);
     }
 
-    public void publishDestination(){
+    public void publishDestination(Way chosenWay){
         String message;
         Floor currentFloor = this.currentFloor.getValue();
         MapPosition currentPosition = positionObserver.get(currentFloor).getValue();
         Room nearest = getNearestRoom(currentPosition);
         if (destination == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_destination_empty);
-        } else if (nearest.equals(destination)) {
-            message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_same);
         } else {
-            qNode.publishGoal(nearest, destination);
+            qNode.publishGoal(nearest, destination, chosenWay);
             message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), destination);
         }
         toastObserver.postValue(message);
@@ -122,6 +116,10 @@ public class MapViewModel extends AndroidViewModel {
         Floor currentFloor = this.currentFloor.getValue();
         List<Goal> pendingGoals = pendingRequests.get(currentFloor).getValue();
         if(pendingGoals == null){
+            toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.error_empty_cancel));
+            return;
+        }
+        if(pendingGoals.size() == 0){
             toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.error_empty_cancel));
             return;
         }
@@ -174,7 +172,6 @@ public class MapViewModel extends AndroidViewModel {
         // current Floor always has a value
         assert rooms != null;
         Room nearestRoom = rooms.get(0);
-//        Log.i("nearest", "")
         double nearestDistance = current.dSquare(nearestRoom.getPosition());
 
         // iterate through other elements
@@ -204,6 +201,38 @@ public class MapViewModel extends AndroidViewModel {
 
     public void shutdownNode() {
         qNode.shutdown();
+    }
+
+    public boolean isLiftNeeded(){
+        if(emptyRoute()){
+            return false;
+        }
+        Floor goalFloor = getGoalFloor();
+        return goalFloor != currentFloor.getValue();
+    }
+
+    public int getGoalPendingReq(){
+        Floor goalFloor = getGoalFloor();
+        List<Goal> pending = pendingRequests.get(goalFloor).getValue();
+        if(pending == null){
+            return 0;
+        }
+        return pending.size();
+    }
+
+    public Floor getGoalFloor(){
+        Floor goalFloor;
+        if(appNavPhase.getValue() == WAITING_USER_INPUT){
+            goalFloor = Floor.values()[(int) origin.getFloor()];
+        }
+        else{ // appNavPhase != WAITING_USER_INPUT
+            goalFloor = Floor.values()[(int) destination.getFloor()];
+        }
+        return goalFloor;
+    }
+
+    public boolean emptyRoute(){
+        return origin == null || destination == null;
     }
 
 }

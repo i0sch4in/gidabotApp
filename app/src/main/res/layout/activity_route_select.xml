@@ -12,7 +12,7 @@
         android:id="@+id/til_non"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="230dp"
-        android:layout_height="60dp"
+        android:layout_height="@dimen/spinner_height"
         android:layout_marginTop="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.15"
@@ -23,7 +23,7 @@
         <AutoCompleteTextView
             android:id="@+id/act_non"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@null"
             android:hint="@string/hint_origin"
             android:textSize="14sp" />
@@ -34,7 +34,7 @@
         android:id="@+id/til_floor"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="125dp"
-        android:layout_height="60dp"
+        android:layout_height="@dimen/spinner_height"
         app:layout_constraintBottom_toBottomOf="@+id/til_non"
         app:layout_constraintEnd_toEndOf="@+id/til_nora"
         app:layout_constraintHorizontal_bias="0.617"
@@ -47,7 +47,7 @@
         <AutoCompleteTextView
             android:id="@+id/act_floor"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@null"
             android:hint="@string/hint_floor"
             android:inputType="none"
@@ -59,8 +59,8 @@
         android:id="@+id/til_nora"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="360dp"
-        android:layout_height="60dp"
-        app:layout_constraintBottom_toTopOf="@+id/map"
+        android:layout_height="@dimen/spinner_height"
+        app:layout_constraintBottom_toTopOf="@+id/mapFragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/til_non"
@@ -71,7 +71,7 @@
         <AutoCompleteTextView
             android:id="@+id/act_nora"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@null"
             android:hint="@string/hint_destination"
             android:textSize="14sp" />
@@ -80,7 +80,7 @@
 
 
     <fragment
-        android:id="@+id/map"
+        android:id="@+id/mapFragment"
         class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="411dp"
         android:layout_height="425dp"
@@ -103,7 +103,7 @@
         app:cornerRadius="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/map" />
+        app:layout_constraintTop_toBottomOf="@+id/mapFragment" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/cancelBtn"
@@ -119,7 +119,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.238"
         app:layout_constraintStart_toEndOf="@+id/publishBtn"
-        app:layout_constraintTop_toBottomOf="@+id/map" />
+        app:layout_constraintTop_toBottomOf="@+id/mapFragment" />
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -127,12 +127,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        app:backgroundTint="@color/white"
-        app:layout_constraintBottom_toBottomOf="@+id/map"
+        app:backgroundTint="@color/secondaryLightColor"
+        app:layout_constraintBottom_toBottomOf="@+id/mapFragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.954"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/map"
+        app:layout_constraintTop_toTopOf="@+id/mapFragment"
         app:layout_constraintVertical_bias="0.975"
         app:srcCompat="@drawable/ic_location_search" />
 

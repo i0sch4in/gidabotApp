@@ -21,13 +21,13 @@ import com.github.gidabotapp.domain.AppNavPhase;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
 import com.github.gidabotapp.domain.Room;
+import com.github.gidabotapp.domain.Way;
 import com.github.gidabotapp.viewmodel.MapViewModel;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -39,7 +39,6 @@ import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import static com.github.gidabotapp.domain.Floor.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -60,7 +59,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private AutoCompleteTextView act_origin, act_destination, act_floor;
 
     private final int MAX_MAP_ZOOM = 3;
-//    private HashMap<Floor, TileProvider> tileProviders;
     private HashMap<Floor, TileOverlay> tileOverlays;
     public RouteSelectActivity() {
     }
@@ -74,8 +72,15 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         viewModel.getToastObserver().observe(this, new Observer<String>() {
             @Override
             public void onChanged(String message) {
-                View bottomButtons = findViewById(R.id.cancelBtn);
-                Snackbar.make(bottomButtons,message,Snackbar.LENGTH_SHORT).show();
+                View bottom = findViewById(R.id.mapFragment);
+                final Snackbar snackbar = Snackbar.make(bottom,message,Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction(R.string.accept_btn, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        snackbar.dismiss();
+                    }
+                });
+                snackbar.show();
             }
         });
         viewModel.getAlertObserver().observe(this, new Observer<Integer>() {
@@ -84,11 +89,21 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 if(stringResId == R.string.empty){
                     return;
                 }
+
                 if(stringResId == R.string.origin_reached_msg){
                     showNextGoalAlert();
                 }
                 else if(stringResId == R.string.destination_reached_msg){
                     showRouteEndAlert();
+                }
+                else if(stringResId == R.string.WAIT_ROBOT){
+                    if(viewModel.emptyRoute()){
+                        return;
+                    }
+                    int floorCode = viewModel.getGoalFloor().getFloorCode();
+                    int pendingRequests = viewModel.getGoalPendingReq();
+                    String message = String.format(getString(stringResId), floorCode, pendingRequests);
+                    showAlert(message);
                 }
                 else {
                     String message = getString(stringResId);
@@ -124,7 +139,11 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         publishBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewModel.publishOrigin();
+                if (viewModel.isLiftNeeded()){
+                    showLiftAlert();
+                    return;
+                }
+                viewModel.publishOrigin(null);
             }
         });
 
@@ -175,7 +194,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         act_floor = findViewById(R.id.act_floor);
         final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Floor.getFloorList());
         act_floor.setAdapter(floorAdapter);
-        act_floor.setAdapter(floorAdapter);
         act_floor.setText(floorAdapter.getItem(0),false);
         act_floor.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -199,12 +217,12 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             @Override
             public void onChanged(Floor floor) {
                 showTiles(floor);
-                showMarker(floor);
+                showRobotMarker(floor);
             }
         });
 
         SupportMapFragment mapFragment =
-                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
     }
@@ -252,34 +270,34 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
-        showMarker(Floor.getStartingFloor());
+        showRobotMarker(Floor.getStartingFloor());
         showTiles(Floor.getStartingFloor());
     }
 
     private void updateButtonsLock(AppNavPhase phase) {
-         if (phase == AppNavPhase.WAITING_USER_INPUT){
-            act_origin.setEnabled(true);
-            act_destination.setEnabled(true);
-            act_floor.setEnabled(true);
-            publishBtn.setEnabled(true);
-            cancelBtn.setEnabled(false);
-        }
-        else {
-            act_origin.setEnabled(false);
-            act_destination.setEnabled(false);
-            act_floor.setEnabled(false);
-            publishBtn.setEnabled(false);
-            cancelBtn.setEnabled(true);
-        }
+//         if (phase == AppNavPhase.WAITING_USER_INPUT){
+//            act_origin.setEnabled(true);
+//            act_destination.setEnabled(true);
+//            act_floor.setEnabled(true);
+//            publishBtn.setEnabled(true);
+//            cancelBtn.setEnabled(false);
+//        }
+//        else {
+//            act_origin.setEnabled(false);
+//            act_destination.setEnabled(false);
+//            act_floor.setEnabled(false);
+//            publishBtn.setEnabled(false);
+//            cancelBtn.setEnabled(true);
+//        }
     }
 
     private void showAlert(String msg) {
          MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(getString(R.string.alert_title))
+                .setTitle(getString(R.string.alert_title)) // Informazioa
                 .setMessage(msg)
                 .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(DialogInterface dialog, int which) { // Ados
                         dialog.dismiss();
                     }
                 });
@@ -289,15 +307,19 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     private void showNextGoalAlert(){
         String message = String.format(getString(R.string.origin_reached_msg),viewModel.getDestination());
         MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.alert_title)
+                .setTitle(R.string.alert_title) // Informazioa
                 .setMessage(message)
-                .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() { // Ados
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        viewModel.publishDestination(); // publish destination
+                        if(viewModel.isLiftNeeded()){
+                            showLiftAlert();
+                            return;
+                        }
+                        viewModel.publishDestination(null); // publish destination
                     }
                 })
-                .setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() { // Ezeztatu
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         viewModel.resetAppNavPhase();
@@ -314,9 +336,9 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void showRouteEndAlert() {
-        String message = getString(R.string.destination_reached_msg);
+        String message = getString(R.string.destination_reached_msg); // Iritsi zara zure helburura
         MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.alert_title)
+                .setTitle(R.string.alert_title) // Informazioa
                 .setMessage(message)
                 .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() {
                     @Override
@@ -333,14 +355,39 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         dialog.show();
     }
 
+    private void showLiftAlert(){
+        String lift = getString(Way.LIFT.getResourceId());
+        String stairs = getString(Way.STAIRS.getResourceId());
+        String[] values = new String[]{lift, stairs};
+        MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.lift_stairs_question)
+                .setItems(values, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Way chosenWay = Way.values()[which];
+                        // publish goal
+                        if(viewModel.getAppNavPhase().getValue() == AppNavPhase.WAITING_USER_INPUT){
+                            viewModel.publishOrigin(chosenWay);
+                        }
+                        // publish destination
+                        if(viewModel.getAppNavPhase().getValue() == AppNavPhase.REACHING_ORIGIN){
+                            viewModel.publishDestination(chosenWay);
+                        }
+                    }
+                })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        viewModel.resetAppNavPhase();
+                    }
+                })
+                ;
+        dialog.show();
+    }
+
     private void setCameraOnRobot() {
         Floor currentFloor = viewModel.getCurrentFloor().getValue();
         map.animateCamera(CameraUpdateFactory.newLatLng(robotMarkers.get(currentFloor).getPosition()));
-    }
-
-    private void centerCamera(Floor currentFloor) {
-        LatLng currentLatLng = robotMarkers.get(currentFloor).getPosition();
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(currentLatLng,0,0,0)));
     }
 
     private void showTiles(Floor currentFloor) {
@@ -358,7 +405,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
             tileOverlays.get(floor).setVisible(false);
         }
-//        resetCamera(currentFloor);
     }
 
 
@@ -371,7 +417,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
-    private void showMarker(Floor currentFloor) {
+    private void showRobotMarker(Floor currentFloor) {
         if(map == null){
             return;
         }
@@ -382,6 +428,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         for(Floor floor : robotMarkers.keySet()){
             if(floor == currentFloor){
                 robotMarkers.get(floor).setVisible(true);
+                robotMarkers.get(floor).showInfoWindow();
                 continue;
             }
             robotMarkers.get(floor).setVisible(false);

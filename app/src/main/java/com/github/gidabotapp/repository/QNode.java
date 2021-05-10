@@ -10,6 +10,7 @@ import com.github.gidabotapp.domain.MultiNavPhase;
 import com.github.gidabotapp.domain.NavInfo;
 import com.github.gidabotapp.domain.PhaseMessage;
 import com.github.gidabotapp.domain.Room;
+import com.github.gidabotapp.domain.Way;
 
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
@@ -165,7 +166,7 @@ public class QNode extends AbstractNodeMain {
     }
 
 
-    public void publishGoal(Room current, Room goal){
+    public void publishGoal(Room current, Room goal, Way chosenWay){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
         // Clear Global costmap
@@ -193,7 +194,11 @@ public class QNode extends AbstractNodeMain {
 
         message.setIntermediateRobot(false); //TODO
         message.setIntermediateFloor((float)0.0); //TODO
-        message.setWay("None");
+        String way = "";
+        if (chosenWay != null){
+           way = chosenWay.toString();
+        }
+        message.setWay(way);
         message.setStartId(current.getNum());
         message.setGoalId(goal.getNum());
         message.setLanguage("EU");
