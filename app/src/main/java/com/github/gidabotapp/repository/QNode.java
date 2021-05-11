@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
 import com.github.gidabotapp.domain.MultiNavPhase;
-import com.github.gidabotapp.domain.NavInfo;
 import com.github.gidabotapp.domain.PhaseMessage;
 import com.github.gidabotapp.domain.Room;
 import com.github.gidabotapp.domain.Way;
@@ -60,12 +59,9 @@ public class QNode extends AbstractNodeMain {
 
     private final String userId;
 
-    private final NavInfo currentNav;
-
     private int sequenceNumber;
 
     private QNode() {
-        this.currentNav = new NavInfo();
         this.userId = UUID.randomUUID().toString().substring(0,4);
         this.sequenceNumber = 0;
         this.currentPositions = new HashMap<Floor, MutableLiveData<MapPosition>>(){{
@@ -106,7 +102,7 @@ public class QNode extends AbstractNodeMain {
         positionSubs = new HashMap<>();
         final String amcl_topic_template = "/%s/amcl_pose";
         for(final Floor floor: Floor.values()){
-            String topic = String.format(amcl_topic_template, floor.getRobotName());
+            String topic = String.format(amcl_topic_template, floor.getRobotNameShort());
             Subscriber<PoseWithCovarianceStamped> subscriber = connectedNode.newSubscriber(topic, PoseWithCovarianceStamped._TYPE);
             subscriber.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
                 @Override
@@ -121,7 +117,7 @@ public class QNode extends AbstractNodeMain {
         pendingReqSubs = new HashMap<>();
         final String pReq_topic_template = "/%s/pending_requests";
         for(final Floor floor: Floor.values()){
-            String topic = String.format(pReq_topic_template, floor.getRobotName());
+            String topic = String.format(pReq_topic_template, floor.getRobotNameShort());
             Subscriber<PendingGoals> subscriber = connectedNode.newSubscriber(topic, PendingGoals._TYPE);
             subscriber.addMessageListener(new MessageListener<PendingGoals>() {
                 @Override
@@ -149,7 +145,7 @@ public class QNode extends AbstractNodeMain {
             @Override
             public void onNewMessage(Int8 message) {
                 int i = message.getData();
-                PhaseMessage currentPhaseMessage = new PhaseMessage(i);
+                PhaseMessage currentPhaseMessage = PhaseMessage.values()[i];
                 phaseMessageLD.postValue(currentPhaseMessage);
             }
         });
@@ -157,9 +153,7 @@ public class QNode extends AbstractNodeMain {
 
         try {
             clearCostmapClient = connectedNode.newServiceClient("/move_base/clear_costmaps", Empty._TYPE);
-            Log.i("globalCostmap", "/move_base/clear_costmaps service client successfully created");
         } catch (ServiceNotFoundException e) {
-            Log.e("globalCostmap", "Error creating /move_base/clear_costmaps service client");
             e.printStackTrace();
         }
 
@@ -267,10 +261,6 @@ public class QNode extends AbstractNodeMain {
 
     public HashMap<Floor, MutableLiveData<List<Goal>>> getPendingRequests(){
         return this.pendingRequests;
-    }
-
-    public NavInfo getCurrentNav(){
-        return this.currentNav;
     }
 
     public String getUserId(){

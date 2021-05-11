@@ -1,6 +1,7 @@
 package com.github.gidabotapp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -8,6 +9,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -27,6 +30,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -50,6 +54,7 @@ import java.util.Locale;
 public class RouteSelectActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private HashMap<Floor, Marker> robotMarkers;
+    private Marker markerOrigin, markerDest;
 
     private MapViewModel viewModel;
 
@@ -116,7 +121,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             viewModel.getPositionObserver(floor).observe(this, new Observer<MapPosition>() {
                 @Override
                 public void onChanged(MapPosition position) {
-                    updateMarker(floor, position);
+                    updateRobotMarker(floor, position);
                 }
             });
         }
@@ -174,6 +179,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
                 Room origin = (Room) parent.getItemAtPosition(position);
                 viewModel.selectOrigin(origin);
+                updateOriginMarker(origin);
             }
         });
 
@@ -188,11 +194,12 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
                 Room destination = (Room) parent.getItemAtPosition(position);
                 viewModel.selectDestination(destination);
+                updateDestMarker(destination);
             }
         });
 
         act_floor = findViewById(R.id.act_floor);
-        final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Floor.getFloorList());
+        final ArrayAdapter<String> floorAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Floor.getFloorCodeList());
         act_floor.setAdapter(floorAdapter);
         act_floor.setText(floorAdapter.getItem(0),false);
         act_floor.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -200,6 +207,13 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Floor currentFloor = Floor.values()[position];
                 viewModel.selectFloor(currentFloor);
+                if(markerOrigin != null){
+                    markerOrigin.setVisible(false);
+                }
+                if(markerDest != null){
+                    boolean visible = viewModel.destOnCurrentFloor();
+                    markerDest.setVisible(visible);
+                }
             }
         });
 
@@ -227,6 +241,40 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         mapFragment.getMapAsync(this);
     }
 
+    private void updateOriginMarker(Room origin) {
+        Floor currentFloor = viewModel.getCurrentFloor().getValue();
+        assert currentFloor != null;
+        LatLng position = origin.getPosition().toLatLng(currentFloor);
+        if(markerOrigin == null){
+            BitmapDescriptor icon = bitmapDescriptorFromVector(this, R.drawable.ic_origin);
+            markerOrigin = map.addMarker(new MarkerOptions()
+                .icon(icon)
+                .position(position)
+            );
+        }
+        else{
+            markerOrigin.setPosition(position);
+            markerOrigin.setVisible(true);
+        }
+    }
+
+    private void updateDestMarker(Room destination) {
+        Floor destFloor = Floor.getFromDouble(destination.getFloor());
+        LatLng position = destination.getPosition().toLatLng(destFloor);
+        if(markerDest == null){
+            BitmapDescriptor icon = bitmapDescriptorFromVector(this, R.drawable.ic_destination);
+            markerDest = map.addMarker(new MarkerOptions()
+                    .icon(icon)
+                    .position(position)
+                    .visible(true)
+            );
+        }
+        else {
+            markerDest.setPosition(position);
+        }
+        boolean visible = viewModel.destOnCurrentFloor();
+        markerDest.setVisible(visible);
+    }
 
     @Override
     public void onMapReady(GoogleMap map) {
@@ -435,7 +483,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
-    private void updateMarker(Floor currentFloor, MapPosition position) {
+    private void updateRobotMarker(Floor currentFloor, MapPosition position) {
         if(map == null){
             return;
         }
@@ -450,7 +498,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         robotMarkers = new HashMap<Floor, Marker>(){{
             for(Floor floor: Floor.values()){
                 Marker marker = map.addMarker(new MarkerOptions()
-                    .title(floor.getRobotName())
+                    .title(floor.getRobotNameLong())
                     .icon(BitmapDescriptorFactory.fromResource(floor.getRobotIconRes()))
                     .position(floor.getStartLatLng())
                     .zIndex(1.0f)
@@ -483,7 +531,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                     InputStream is = getApplication().getAssets().open(s);
                     Bitmap bitmap = BitmapFactory.decodeStream(is);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 
                     return new Tile(TILE_SIZE_DP, TILE_SIZE_DP, stream.toByteArray());
                 } catch (IOException e) {
@@ -493,6 +541,18 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         };
         return floorTileProvider;
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        assert vectorDrawable != null;
+        final int WIDTH = vectorDrawable.getIntrinsicWidth() * 2;
+        final int HEIGHT = vectorDrawable.getIntrinsicHeight() * 2;
+        vectorDrawable.setBounds(0, 0, WIDTH, HEIGHT);
+        Bitmap bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
     @Override

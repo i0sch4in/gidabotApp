@@ -27,6 +27,7 @@ import multilevel_navigation_msgs.Goal;
 
 import static com.github.gidabotapp.domain.AppNavPhase.*;
 import static com.github.gidabotapp.domain.Floor.*;
+import static com.github.gidabotapp.domain.PhaseMessage.GOAL_REACHED;
 
 public class MapViewModel extends AndroidViewModel {
     private static QNode qNode;
@@ -64,7 +65,7 @@ public class MapViewModel extends AndroidViewModel {
         this.alertObserver = Transformations.map(qNode.getPhaseMessageLD(), new Function<PhaseMessage, Integer>() {
             @Override
             public Integer apply(PhaseMessage currentPhaseMessage) {
-                if(currentPhaseMessage.getPhase() == PhaseMessage.message_enum.GOAL_REACHED){
+                if(currentPhaseMessage == GOAL_REACHED){
                     if(appNavPhase.getValue() == REACHING_ORIGIN){
                         return R.string.origin_reached_msg;
                     }
@@ -166,7 +167,7 @@ public class MapViewModel extends AndroidViewModel {
         return this.allRoomsLD;
     }
 
-    public Room getNearestRoom(MapPosition current) {
+    private Room getNearestRoom(MapPosition current) {
         List<Room> rooms = getCurrentFloorRooms().getValue();
 
         // current Floor always has a value
@@ -235,4 +236,12 @@ public class MapViewModel extends AndroidViewModel {
         return origin == null || destination == null;
     }
 
+    public boolean destOnCurrentFloor() {
+        if(destination == null){
+            return false;
+        }
+        Floor currentFloor = this.currentFloor.getValue();
+        Floor destFloor = Floor.getFromDouble(destination.getFloor());
+        return currentFloor == destFloor;
+    }
 }

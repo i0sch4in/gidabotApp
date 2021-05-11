@@ -3,15 +3,13 @@ package com.github.gidabotapp.domain;
 import com.github.gidabotapp.R;
 
 public enum Way {
-    LIFT("Lift", R.string.lift),
-    STAIRS("Stairs",R.string.stairs)
+    LIFT(R.string.lift),
+    STAIRS(R.string.stairs)
     ;
 
-    private final String name;
     private final int resourceId;
 
-    Way(String name, int resId){
-        this.name = name;
+    Way(int resId){
         this.resourceId = resId;
     }
 
@@ -21,6 +19,7 @@ public enum Way {
 
 
     public String toString() {
-        return name;
+        String name = this.name();
+        return name.substring(0,1) + name.substring(1).toLowerCase();
     }
 }
