@@ -1,0 +1,64 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "6d00f206d371aacfa5ba1f644d08d70e",
+    "entities": [
+      {
+        "tableName": "rooms",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` TEXT NOT NULL, `floor` REAL NOT NULL, `name` TEXT, `x` REAL, `y` REAL, `z` REAL, PRIMARY KEY(`num`))",
+        "fields": [
+          {
+            "fieldPath": "num",
+            "columnName": "num",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "floor",
+            "columnName": "floor",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "position.x",
+            "columnName": "x",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "position.y",
+            "columnName": "y",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "position.z",
+            "columnName": "z",
+            "affinity": "REAL",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "num"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6d00f206d371aacfa5ba1f644d08d70e')"
+    ]
+  }
+}
