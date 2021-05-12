@@ -26,50 +26,65 @@ import java.util.List;
 import multilevel_navigation_msgs.Goal;
 
 import static com.github.gidabotapp.domain.AppNavPhase.*;
-import static com.github.gidabotapp.domain.Floor.*;
 import static com.github.gidabotapp.domain.PhaseMessage.GOAL_REACHED;
 
 public class MapViewModel extends AndroidViewModel {
     private static QNode qNode;
     private final RoomRepository roomRepository;
 
-    private final MutableLiveData<String> toastObserver;
-    private final MutableLiveData<Floor> currentFloor;
-    private final LiveData<List<Room>> currentFloorRooms;
-    private final LiveData<Integer> alertObserver;
-    private final MutableLiveData<MultiNavPhase> multiNavPhaseLD;
-    private final HashMap<Floor, MutableLiveData<MapPosition>> positionObserver;
+    private final LiveData<List<Room>> currentFloorRoomsLD;
+    private final LiveData<Integer> alertLD;
     private final LiveData<List<Room>> allRoomsLD;
-    private final HashMap<Floor, MutableLiveData<List<Goal>>> pendingRequests;
-    private final MutableLiveData<AppNavPhase> appNavPhase;
+    private final MutableLiveData<String> toastLD;
+    private final MutableLiveData<Floor> currentFloorLD;
+    private final MutableLiveData<MultiNavPhase> multiNavPhaseLD;
+    private final MutableLiveData<AppNavPhase> appNavPhaseLD;
+
+    private final HashMap<Floor, MutableLiveData<MapPosition>> positionsHM;
+    private final HashMap<Floor, MutableLiveData<List<Goal>>> pendingRequestsHM;
 
     private Room origin;
     private Room destination;
 
     public MapViewModel(@NonNull Application application) {
         super(application);
-        qNode = QNode.getInstance();
-        roomRepository = new RoomRepository(application.getApplicationContext());
-        this.appNavPhase = new MutableLiveData<>(WAITING_USER_INPUT);
 
-        this.currentFloor = new MutableLiveData<>(Floor.getStartingFloor());
-        this.toastObserver = new MutableLiveData<>();
+        // Get qNode instance, which should have already been instantiated
+        // Since MainActivity sets its connectedNode on execution start
+        qNode = QNode.getInstance();
+
+        // Instantiate Room repository with application's context,
+        // in order to be able to query data from database
+        roomRepository = new RoomRepository(application.getApplicationContext());
+
+        this.appNavPhaseLD = new MutableLiveData<>(WAITING_USER_INPUT);
+        this.currentFloorLD = new MutableLiveData<>(Floor.getStartingFloor());
+        this.toastLD = new MutableLiveData<>();
+
+        // Get repository and qNode's liveData, which will be exposed in viewModel
+        // for the view to observe
         this.allRoomsLD = roomRepository.getAllRooms();
-        this.currentFloorRooms = Transformations.switchMap(currentFloor, new Function<Floor, LiveData<List<Room>>>() {
+        this.positionsHM = qNode.getCurrentPositionsHM();
+        this.multiNavPhaseLD = qNode.getMultiNavPhaseLD();
+        this.pendingRequestsHM = qNode.getPendingRequestsHM();
+
+        // Whenever currentFloor changes, returns list of Rooms for selected Floor
+        this.currentFloorRoomsLD = Transformations.switchMap(currentFloorLD, new Function<Floor, LiveData<List<Room>>>() {
             @Override
             public LiveData<List<Room>> apply(Floor floor) {
                 return roomRepository.getRoomsByFloor(floor);
             }
         });
-        this.positionObserver = qNode.getCurrentPositions();
-        this.alertObserver = Transformations.map(qNode.getPhaseMessageLD(), new Function<PhaseMessage, Integer>() {
+
+        // Whenever PhaseMessage changes, transform it to invoke corresponding alert on View
+        this.alertLD = Transformations.map(qNode.getPhaseMessageLD(), new Function<PhaseMessage, Integer>() {
             @Override
             public Integer apply(PhaseMessage currentPhaseMessage) {
                 if(currentPhaseMessage == GOAL_REACHED){
-                    if(appNavPhase.getValue() == REACHING_ORIGIN){
+                    if(appNavPhaseLD.getValue() == REACHING_ORIGIN){
                         return R.string.origin_reached_msg;
                     }
-                    else if(appNavPhase.getValue() == REACHING_DESTINATION){
+                    else if(appNavPhaseLD.getValue() == REACHING_DESTINATION){
                         return R.string.destination_reached_msg;
                     }
                 }
@@ -79,14 +94,20 @@ public class MapViewModel extends AndroidViewModel {
                 return R.string.empty;
             }
         });
-        this.multiNavPhaseLD = qNode.getMultiNavPhaseLD();
-        this.pendingRequests = qNode.getPendingRequests();
     }
 
+    // shut qNode down
+    public void shutdownNode() {
+        qNode.shutdown();
+    }
+
+    // Publishes selected origin to qNode
     public void publishOrigin(Way chosenWay) {
         String message;
-        Floor currentFloor = getCurrentFloor().getValue();
-        MapPosition currentPosition = positionObserver.get(currentFloor).getValue();
+        Floor currentFloor = getCurrentFloorLD().getValue();
+        // Get current floor's robot's position on map
+        MapPosition currentPosition = positionsHM.get(currentFloor).getValue();
+        // Get nearest known room to that position, by euclidean distance
         Room nearest = getNearestRoom(currentPosition);
         if (origin == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_origin_empty);
@@ -94,14 +115,19 @@ public class MapViewModel extends AndroidViewModel {
            qNode.publishGoal(nearest, origin, chosenWay);
            message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), origin);
         }
-        toastObserver.postValue(message);
-        this.appNavPhase.setValue(REACHING_ORIGIN);
+        // Post feedback message to toast
+        toastLD.postValue(message);
+        // Change navPhase to next
+        this.appNavPhaseLD.setValue(REACHING_ORIGIN);
     }
 
+    // Publishes selected destination to qNode
     public void publishDestination(Way chosenWay){
         String message;
-        Floor currentFloor = this.currentFloor.getValue();
-        MapPosition currentPosition = positionObserver.get(currentFloor).getValue();
+        Floor currentFloor = this.currentFloorLD.getValue();
+        // Get current floor's robot's position on map
+        MapPosition currentPosition = positionsHM.get(currentFloor).getValue();
+        // Get nearest known room to that position, by euclidean distance
         Room nearest = getNearestRoom(currentPosition);
         if (destination == null) {
             message = getApplication().getApplicationContext().getString(R.string.publish_error_msg_destination_empty);
@@ -109,73 +135,143 @@ public class MapViewModel extends AndroidViewModel {
             qNode.publishGoal(nearest, destination, chosenWay);
             message = String.format(getApplication().getApplicationContext().getString(R.string.publish_success_msg), destination);
         }
-        toastObserver.postValue(message);
-        this.appNavPhase.setValue(REACHING_DESTINATION);
+        // Post feedback message to toast
+        toastLD.postValue(message);
+        // Change navPhase to next
+        this.appNavPhaseLD.setValue(REACHING_DESTINATION);
     }
 
+    // Publishes a cancel message to qNode
     public void publishCancel() {
-        Floor currentFloor = this.currentFloor.getValue();
-        List<Goal> pendingGoals = pendingRequests.get(currentFloor).getValue();
+        Floor currentFloor = this.currentFloorLD.getValue();
+        // Get current floor's robot's pending goals
+        List<Goal> pendingGoals = pendingRequestsHM.get(currentFloor).getValue();
+        // if pending goals are null, show feedback
         if(pendingGoals == null){
-            toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.error_empty_cancel));
+            toastLD.postValue(getApplication().getApplicationContext().getString(R.string.error_empty_cancel));
             return;
         }
+        // if there are not pending goal, show feedback
         if(pendingGoals.size() == 0){
-            toastObserver.postValue(getApplication().getApplicationContext().getString(R.string.error_empty_cancel));
+            toastLD.postValue(getApplication().getApplicationContext().getString(R.string.error_empty_cancel));
             return;
         }
         String userId = qNode.getUserId();
+        // Get latest goal, which is the one to be cancelled
         Goal firstGoal = pendingGoals.get(0);
+        // If current user requested that goal, cancel it. Otherwise do nothing
         if (userId.compareTo(firstGoal.getUserName()) == 0) {
-            qNode.publishCancel(firstGoal.getGoalSeq(), false, currentFloor, currentFloor, null); // TODO
-            appNavPhase.setValue(WAITING_USER_INPUT);
+            qNode.publishCancel(firstGoal.getGoalSeq(), false, currentFloor, currentFloor, null);
+            appNavPhaseLD.setValue(WAITING_USER_INPUT);
         }
     }
 
-    public MutableLiveData<String> getToastObserver() {
-        return toastObserver;
+    // Lift is needed if current goal's floor is different to current floor
+    public boolean isLiftNeeded(){
+        if(emptyRoute()){
+            return false;
+        }
+        Floor goalFloor = getCurrentGoalFloor();
+        return goalFloor != currentFloorLD.getValue();
     }
 
-    public LiveData<List<Room>> getCurrentFloorRooms() {
-        return this.currentFloorRooms;
+    // Route is empty if origin or destination are null
+    public boolean emptyRoute(){
+        return origin == null || destination == null;
     }
 
-    public MutableLiveData<Floor> getCurrentFloor() {
-        return this.currentFloor;
-    }
-    public LiveData<Integer> getAlertObserver() {
-        return this.alertObserver;
-    }
-    public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){return this.multiNavPhaseLD;}
-    public MutableLiveData<MapPosition> getPositionObserver(Floor f){return this.positionObserver.get(f);}
-
-
-    public void selectFloor(Floor floor) {
-        this.currentFloor.setValue(floor);
+    // Decides whether destination is on current floor or not
+    // Useful when we want decide to invoke stairs/lift dialog
+    public boolean destOnCurrentFloor() {
+        if(destination == null){
+            return false;
+        }
+        Floor currentFloor = this.currentFloorLD.getValue();
+        Floor destFloor = Floor.getFromDouble(destination.getFloor());
+        return currentFloor == destFloor;
     }
 
+    // Returns current goal's floor's pending request amount
+    public int getGoalFloorPending(){
+        Floor goalFloor = getCurrentGoalFloor();
+        List<Goal> pending = pendingRequestsHM.get(goalFloor).getValue();
+        if(pending == null){
+            return 0;
+        }
+        return pending.size();
+    }
 
+    // Returns current goal's Floor.
+    // Current goal depends on app navPhase
+    public Floor getCurrentGoalFloor(){
+        Floor goalFloor;
+        // goal floor is origin's floor
+        if(appNavPhaseLD.getValue() == WAITING_USER_INPUT){
+            goalFloor = Floor.values()[(int) origin.getFloor()];
+        }
+        // goal floor is destination's floor
+        else{ // appNavPhase != WAITING_USER_INPUT
+            goalFloor = Floor.values()[(int) destination.getFloor()];
+        }
+        return goalFloor;
+    }
+
+    // Origin and Destination getters and setters
     public void selectOrigin(Room origin) {
         this.origin = origin;
     }
-
     public void selectDestination(Room dest) {
         this.destination = dest;
     }
+    public Room getDestination() {
+        return this.destination;
+    }
 
+    // (Mutable)LiveData getters and setters
+    public LiveData<List<Room>> getCurrentFloorRoomsLD() {
+        return this.currentFloorRoomsLD;
+    }
+    public LiveData<Integer> getAlertLD() {
+        return this.alertLD;
+    }
+    public LiveData<AppNavPhase> getAppNavPhaseLD(){
+        return this.appNavPhaseLD;
+    }
     public LiveData<List<Room>> getAllRoomsLD(){
         return this.allRoomsLD;
     }
+    public void resetAppNavPhase(){
+        this.appNavPhaseLD.setValue(WAITING_USER_INPUT);
+    }
+    public MutableLiveData<Floor> getCurrentFloorLD() {
+        return this.currentFloorLD;
+    }
+    public void selectFloor(Floor floor) {
+        this.currentFloorLD.setValue(floor);
+    }
+    public MutableLiveData<String> getToastLD() {
+        return toastLD;
+    }
+    public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){
+        return this.multiNavPhaseLD;
+    }
+    public MutableLiveData<MapPosition> getPositionObserver(Floor f){
+        return this.positionsHM.get(f);
+    }
 
+    // Returns nearest known Room to current MapPosition
     private Room getNearestRoom(MapPosition current) {
-        List<Room> rooms = getCurrentFloorRooms().getValue();
+        // Nearest room will be in current floor's Room list
+        List<Room> rooms = getCurrentFloorRoomsLD().getValue();
 
-        // current Floor always has a value
+        // current Floor always has a value, so current floor room's list will also always have a value
         assert rooms != null;
+        // Start with first room on the list
         Room nearestRoom = rooms.get(0);
+        // Compute square distance from current MapPosition and Room
         double nearestDistance = current.dSquare(nearestRoom.getPosition());
 
-        // iterate through other elements
+        // iterate through all other elements on the list
         for (Room r : rooms.subList(1, rooms.size())) {
             MapPosition pos = r.getPosition();
             double distance = pos.dSquare(current);
@@ -185,63 +281,7 @@ public class MapViewModel extends AndroidViewModel {
             }
         }
 
+        // Nearest room will be the Room who's square distance is lower than all other Rooms in current Floor
         return nearestRoom;
-    }
-
-    public Room getDestination() {
-        return this.destination;
-    }
-
-    public LiveData<AppNavPhase> getAppNavPhase(){
-        return this.appNavPhase;
-    }
-
-    public void resetAppNavPhase(){
-        this.appNavPhase.setValue(WAITING_USER_INPUT);
-    }
-
-    public void shutdownNode() {
-        qNode.shutdown();
-    }
-
-    public boolean isLiftNeeded(){
-        if(emptyRoute()){
-            return false;
-        }
-        Floor goalFloor = getGoalFloor();
-        return goalFloor != currentFloor.getValue();
-    }
-
-    public int getGoalPendingReq(){
-        Floor goalFloor = getGoalFloor();
-        List<Goal> pending = pendingRequests.get(goalFloor).getValue();
-        if(pending == null){
-            return 0;
-        }
-        return pending.size();
-    }
-
-    public Floor getGoalFloor(){
-        Floor goalFloor;
-        if(appNavPhase.getValue() == WAITING_USER_INPUT){
-            goalFloor = Floor.values()[(int) origin.getFloor()];
-        }
-        else{ // appNavPhase != WAITING_USER_INPUT
-            goalFloor = Floor.values()[(int) destination.getFloor()];
-        }
-        return goalFloor;
-    }
-
-    public boolean emptyRoute(){
-        return origin == null || destination == null;
-    }
-
-    public boolean destOnCurrentFloor() {
-        if(destination == null){
-            return false;
-        }
-        Floor currentFloor = this.currentFloor.getValue();
-        Floor destFloor = Floor.getFromDouble(destination.getFloor());
-        return currentFloor == destFloor;
     }
 }

@@ -38,38 +38,50 @@ import std_srvs.EmptyRequest;
 import std_srvs.EmptyResponse;
 
 public class QNode extends AbstractNodeMain {
+    // Singleton pattern instance
     private static QNode INSTANCE = null;
 
+    // Node publishers
     private Publisher<Goal> pubGoal;
     private Publisher<CancelRequest> pubCancel;
 
+    // Service to clear Global Costmap
     private ServiceClient<EmptyRequest, EmptyResponse> clearCostmapClient;
 
-    private HashMap<Floor, Subscriber<PoseWithCovarianceStamped>> positionSubs;
-    private HashMap<Floor, Subscriber<PendingGoals>> pendingReqSubs;
+    // Node subscribers
+    private HashMap<Floor, Subscriber<PoseWithCovarianceStamped>> positionSubHM;
+    private HashMap<Floor, Subscriber<PendingGoals>> pendingReqSubHM;
     private Subscriber<std_msgs.Int8> subNavPhase;
     private Subscriber<std_msgs.Int8> subDialogMessage;
 
-    private final HashMap<Floor, MutableLiveData<MapPosition>> currentPositions;
-    private final HashMap<Floor, MutableLiveData<List<Goal>>> pendingRequests;
+    // All MutableLiveData to expose ROS system's current data
+    private final HashMap<Floor, MutableLiveData<MapPosition>> currentPositionsHM;
+    private final HashMap<Floor, MutableLiveData<List<Goal>>> pendingRequestsHM;
     private final MutableLiveData<PhaseMessage> phaseMessageLD;
     private final MutableLiveData<MultiNavPhase> multiNavPhaseLD;
 
+    // ConnectedNode will be injected through MainActivity (RosActivity)
     private ConnectedNode connectedNode;
 
+    // User Id will allow to differentiate possible different users in the system
     private final String userId;
 
-    private int sequenceNumber;
+    // Will increment with each goal sent
+    private int goalSequenceNumber;
 
+    // Singleton pattern, private constructor
     private QNode() {
+        // Get random UUID and set its first four characters as current instance's userID
         this.userId = UUID.randomUUID().toString().substring(0,4);
-        this.sequenceNumber = 0;
-        this.currentPositions = new HashMap<Floor, MutableLiveData<MapPosition>>(){{
+        this.goalSequenceNumber = 0;
+        // Initialize current position's LiveData HashMap
+        this.currentPositionsHM = new HashMap<Floor, MutableLiveData<MapPosition>>(){{
             for(Floor floor: Floor.values()){
                 put(floor, new MutableLiveData<MapPosition>());
             }
         }};
-        this.pendingRequests = new HashMap<Floor, MutableLiveData<List<Goal>>>(){{
+        // Initialize pending requests' LiveData HashMap
+        this.pendingRequestsHM = new HashMap<Floor, MutableLiveData<List<Goal>>>(){{
             for(Floor floor: Floor.values()){
                 put(floor, new MutableLiveData<List<Goal>>());
             }
@@ -78,6 +90,7 @@ public class QNode extends AbstractNodeMain {
         this.multiNavPhaseLD = new MutableLiveData<>();
     }
 
+    // Singleton lazy initialization
     public static synchronized QNode getInstance(){
         if(INSTANCE == null){
             INSTANCE = new QNode();
@@ -85,11 +98,15 @@ public class QNode extends AbstractNodeMain {
         return INSTANCE;
     }
 
+    // Node's name will be base name + current instance's userId
+    // This will allow to differentiate different users' nodes
     public GraphName getDefaultNodeName() {
         String GRAPH_NAME_BASE = "GidabotApp/QNode_";
         return GraphName.of(GRAPH_NAME_BASE + userId);
     }
 
+    // onStart event will initialize all publishers and subscribers needed
+    // ConnectedNode will be the the node received from nodeMainExecutor
     public void onStart(final ConnectedNode connectedNode) {
         this.connectedNode = connectedNode;
 
@@ -99,37 +116,42 @@ public class QNode extends AbstractNodeMain {
         pubCancel = connectedNode.newPublisher("/cancel_request", CancelRequest._TYPE);
         pubCancel.setLatchMode(true);
 
-        positionSubs = new HashMap<>();
-        final String amcl_topic_template = "/%s/amcl_pose";
-        for(final Floor floor: Floor.values()){
-            String topic = String.format(amcl_topic_template, floor.getRobotNameShort());
-            Subscriber<PoseWithCovarianceStamped> subscriber = connectedNode.newSubscriber(topic, PoseWithCovarianceStamped._TYPE);
-            subscriber.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
-                @Override
-                public void onNewMessage(PoseWithCovarianceStamped message) {
-                    MapPosition position = new MapPosition(message);
-                    currentPositions.get(floor).postValue(position);
-                }
-            });
-            positionSubs.put(floor,subscriber);
-        }
+        // Initialize position subscribers' HashMap with a subscriber for each Floor (and hence, each Robot)
+        positionSubHM = new HashMap<Floor, Subscriber<PoseWithCovarianceStamped>>(){{
+            final String amcl_topic_template = "/%s/amcl_pose";
+            for(final Floor floor: Floor.values()) {
+                String topic = String.format(amcl_topic_template, floor.getRobotNameShort());
+                Subscriber<PoseWithCovarianceStamped> subscriber = connectedNode.newSubscriber(topic, PoseWithCovarianceStamped._TYPE);
+                subscriber.addMessageListener(new MessageListener<PoseWithCovarianceStamped>() {
+                    @Override
+                    public void onNewMessage(PoseWithCovarianceStamped message) {
+                        MapPosition position = new MapPosition(message);
+                        currentPositionsHM.get(floor).postValue(position);
+                    }
+                });
+                put(floor, subscriber);
+            }
+        }};
 
-        pendingReqSubs = new HashMap<>();
-        final String pReq_topic_template = "/%s/pending_requests";
-        for(final Floor floor: Floor.values()){
-            String topic = String.format(pReq_topic_template, floor.getRobotNameShort());
-            Subscriber<PendingGoals> subscriber = connectedNode.newSubscriber(topic, PendingGoals._TYPE);
-            subscriber.addMessageListener(new MessageListener<PendingGoals>() {
-                @Override
-                public void onNewMessage(PendingGoals message) {
-                    List<Goal> pendingGoals = message.getGoals();
-                    pendingRequests.get(floor).postValue(pendingGoals);
-                }
-            });
-            pendingReqSubs.put(floor,subscriber);
-        }
+        // Initialize pending requests' subscribers' HashMap with a subscriber for each Floor (and hence, each Robot)
+        pendingReqSubHM = new HashMap<Floor, Subscriber<PendingGoals>>(){{
+            final String pReq_topic_template = "/%s/pending_requests";
+            for(final Floor floor: Floor.values()){
+                String topic = String.format(pReq_topic_template, floor.getRobotNameShort());
+                Subscriber<PendingGoals> subscriber = connectedNode.newSubscriber(topic, PendingGoals._TYPE);
+                subscriber.addMessageListener(new MessageListener<PendingGoals>() {
+                    @Override
+                    public void onNewMessage(PendingGoals message) {
+                        List<Goal> pendingGoals = message.getGoals();
+                        pendingRequestsHM.get(floor).postValue(pendingGoals);
+                    }
+                });
+                put(floor,subscriber);
+            }
+        }};
 
 
+        // Nav Phase subscriber connection
         subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
         subNavPhase.addMessageListener(new MessageListener<Int8>() {
             @Override
@@ -140,6 +162,7 @@ public class QNode extends AbstractNodeMain {
             }
         });
 
+        // Dialog QT message subscriber connection
         subDialogMessage = connectedNode.newSubscriber("/dialog_qt_message", Int8._TYPE);
         subDialogMessage.addMessageListener(new MessageListener<Int8>() {
             @Override
@@ -159,27 +182,27 @@ public class QNode extends AbstractNodeMain {
 
     }
 
-
+    // Publishes a goal, posting currentRoom, goal and chosen way as information
+    // for the robot to make the correct path
     public void publishGoal(Room current, Room goal, Way chosenWay){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
-        // Clear Global costmap
+        // Clear Global costmap. This clears current stored obstacles, to prevent errors, such as the robot getting stuck
         clearGlobalCostmap();
 
         Goal message = topicMessageFactory.newFromType(Goal._TYPE);
-
-        message.setGoalSeq(sequenceNumber);
+        message.setGoalSeq(goalSequenceNumber);
         message.setInitialFloor((float) current.getFloor());
         message.setGoalFloor((float) goal.getFloor());
 
+        // Initial pose will be current Room's mapPosition coordinates
         Point initial_pose = topicMessageFactory.newFromType(Point._TYPE);
-
         initial_pose.setX(current.getX());
         initial_pose.setY(current.getY());
         initial_pose.setZ(current.getZ());
         message.setInitialPose(initial_pose);
 
-
+        // Goal pose will be current Room's mapPosition coordinates
         Point goal_pose = topicMessageFactory.newFromType(Point._TYPE);
         goal_pose.setX(goal.getX());
         goal_pose.setY(goal.getY());
@@ -188,6 +211,8 @@ public class QNode extends AbstractNodeMain {
 
         message.setIntermediateRobot(false); //TODO
         message.setIntermediateFloor((float)0.0); //TODO
+
+        // If not null, way will be chosenWay argument
         String way = "";
         if (chosenWay != null){
            way = chosenWay.toString();
@@ -198,11 +223,12 @@ public class QNode extends AbstractNodeMain {
         message.setLanguage("EU");
         message.setUserName(this.userId);
 
+        // Publish built message and increment sequenceNumber
         pubGoal.publish(message);
-        this.sequenceNumber++;
+        this.goalSequenceNumber++;
     }
 
-
+    // Publishes a cancel request message
     public void publishCancel(int goal_seq, boolean intermediateRobot, Floor initialFloor, Floor goalFloor, Floor intermediateFloor){
         MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
@@ -211,7 +237,7 @@ public class QNode extends AbstractNodeMain {
         message.setIntermediateRobot(intermediateRobot);
         message.setInitialFloor((float) initialFloor.getFloorCode());
         message.setGoalFloor((float) goalFloor.getFloorCode());
-        message.setRequestFloor((float) initialFloor.getFloorCode()); // IMPORTANTE: hau gabe ez doa
+        message.setRequestFloor((float) initialFloor.getFloorCode()); // !! Important, if not set correctly, it won't work
         if (intermediateRobot){
             message.setIntermediateFloor((float) intermediateFloor.getFloorCode());
         }
@@ -220,7 +246,7 @@ public class QNode extends AbstractNodeMain {
     }
 
 
-
+    // Clears global costmap, sending an empty request to clear costmap topic
     public void clearGlobalCostmap(){
         MessageFactory requestMessageFactory = connectedNode.getServiceRequestMessageFactory();
 
@@ -244,35 +270,14 @@ public class QNode extends AbstractNodeMain {
         }
     }
 
-
-    public MutableLiveData<PhaseMessage> getPhaseMessageLD(){
-        return this.phaseMessageLD;
-    }
-
-
-    public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){
-        return this.multiNavPhaseLD;
-    }
-
-
-    public HashMap<Floor, MutableLiveData<MapPosition>> getCurrentPositions(){
-        return this.currentPositions;
-    }
-
-    public HashMap<Floor, MutableLiveData<List<Goal>>> getPendingRequests(){
-        return this.pendingRequests;
-    }
-
-    public String getUserId(){
-        return this.userId;
-    }
-
+    // Shuts down every powered subscriber and listener
+    // Finally sets instance to null
     public void shutdown() {
         try {
-            for(Subscriber<PoseWithCovarianceStamped> sub: positionSubs.values()){
+            for(Subscriber<PoseWithCovarianceStamped> sub: positionSubHM.values()){
                 sub.shutdown();
             }
-            for(Subscriber<PendingGoals> sub: pendingReqSubs.values()){
+            for(Subscriber<PendingGoals> sub: pendingReqSubHM.values()){
                 sub.shutdown();
             }
 
@@ -290,6 +295,23 @@ public class QNode extends AbstractNodeMain {
             INSTANCE = null;
         }
 
+    }
+
+    // Getters
+    public MutableLiveData<PhaseMessage> getPhaseMessageLD(){
+        return this.phaseMessageLD;
+    }
+    public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){
+        return this.multiNavPhaseLD;
+    }
+    public HashMap<Floor, MutableLiveData<MapPosition>> getCurrentPositionsHM(){
+        return this.currentPositionsHM;
+    }
+    public HashMap<Floor, MutableLiveData<List<Goal>>> getPendingRequestsHM(){
+        return this.pendingRequestsHM;
+    }
+    public String getUserId(){
+        return this.userId;
     }
 
 }

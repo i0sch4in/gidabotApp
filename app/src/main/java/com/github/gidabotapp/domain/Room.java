@@ -53,10 +53,6 @@ public class Room {
         return position.getZ();
     }
 
-    public boolean equals(Room room2){
-        return this.num.compareTo(room2.num) == 0;
-    }
-
     @NonNull
     @Override
     public String toString(){

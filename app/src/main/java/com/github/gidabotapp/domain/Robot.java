@@ -4,7 +4,7 @@ package com.github.gidabotapp.domain;
 import com.github.gidabotapp.R;
 
 public enum Robot{
-    // StartPoint => 000 - Fakultateko sarrera nagusia
+    // StartPoint => 000 - Fakultateko Sarrera Nagusia
     TARTALO ("Tartalo",     R.drawable.tartalo_small,3.5503, -18.4937),
 
     // StartPoint => 122 - Dekanotza

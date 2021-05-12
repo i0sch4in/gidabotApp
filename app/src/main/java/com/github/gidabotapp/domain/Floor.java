@@ -37,9 +37,11 @@ public enum Floor {
     public int getFloorCode(){
         return this.ordinal();
     }
+
     public String getRobotNameShort(){
         return this.robot.getShortName();
     }
+
     public String getRobotNameLong(){
         return this.robot.longName;
     }

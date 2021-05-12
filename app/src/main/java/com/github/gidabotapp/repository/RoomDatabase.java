@@ -27,7 +27,8 @@ public abstract class RoomDatabase extends androidx.room.RoomDatabase {
                 if(INSTANCE == null){
                     INSTANCE = androidx.room.Room.databaseBuilder(context,
                             RoomDatabase.class, db_name)
-//                            .addCallback(populateDB)
+                            // Populate database with stored information at assets/Rooms.db. This is only executed on app's first launch,
+                            // Which means that if you want to repopulate database you will have to uninstall the app
                             .createFromAsset("database/"+db_name)
                             .build();
                     Log.i("DAO", "Database instantiated");

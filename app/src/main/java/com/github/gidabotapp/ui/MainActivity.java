@@ -19,9 +19,6 @@ public class MainActivity extends RosActivity {
     NodeConfiguration nodeConfiguration;
     AlertDialog errorAlert;
 
-    // TODO: strings.xml fitxategia erabili string-entzat
-    // TODO: Intent = another activity -> MVVM pattern
-    // TODO: beste solairuetan funtzionatzeko -> beste robotekn?
     public MainActivity() {
         super("GidabotApp", "GidabotApp");
     }

@@ -53,18 +53,16 @@ import java.util.Locale;
 
 public class RouteSelectActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    private GoogleMap map;
+    private HashMap<Floor, TileOverlay> tileOverlays;
     private HashMap<Floor, Marker> robotMarkers;
     private Marker markerOrigin, markerDest;
 
     private MapViewModel viewModel;
 
-    private GoogleMap map;
-
     private Button publishBtn, cancelBtn;
     private AutoCompleteTextView act_origin, act_destination, act_floor;
 
-    private final int MAX_MAP_ZOOM = 3;
-    private HashMap<Floor, TileOverlay> tileOverlays;
     public RouteSelectActivity() {
     }
 
@@ -74,11 +72,12 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         setContentView(R.layout.activity_route_select);
 
         viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())).get(MapViewModel.class);
-        viewModel.getToastObserver().observe(this, new Observer<String>() {
+        viewModel.getToastLD().observe(this, new Observer<String>() {
             @Override
             public void onChanged(String message) {
                 View bottom = findViewById(R.id.mapFragment);
                 final Snackbar snackbar = Snackbar.make(bottom,message,Snackbar.LENGTH_INDEFINITE);
+                snackbar.setActionTextColor(ContextCompat.getColor(getApplicationContext(), R.color.primaryTextColor));
                 snackbar.setAction(R.string.accept_btn, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -88,7 +87,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 snackbar.show();
             }
         });
-        viewModel.getAlertObserver().observe(this, new Observer<Integer>() {
+        viewModel.getAlertLD().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer stringResId) {
                 if(stringResId == R.string.empty){
@@ -105,8 +104,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                     if(viewModel.emptyRoute()){
                         return;
                     }
-                    int floorCode = viewModel.getGoalFloor().getFloorCode();
-                    int pendingRequests = viewModel.getGoalPendingReq();
+                    int floorCode = viewModel.getCurrentGoalFloor().getFloorCode();
+                    int pendingRequests = viewModel.getGoalFloorPending();
                     String message = String.format(getString(stringResId), floorCode, pendingRequests);
                     showAlert(message);
                 }
@@ -133,7 +132,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                 act_destination.setAdapter(adapterAllRooms);
             }
         });
-        viewModel.getAppNavPhase().observe(this, new Observer<AppNavPhase>() {
+        viewModel.getAppNavPhaseLD().observe(this, new Observer<AppNavPhase>() {
             @Override
             public void onChanged(AppNavPhase phase) {
                 updateButtonsLock(phase);
@@ -217,7 +216,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
-        viewModel.getCurrentFloorRooms().observe(this, new Observer<List<Room>>() {
+        viewModel.getCurrentFloorRoomsLD().observe(this, new Observer<List<Room>>() {
             @Override
             public void onChanged(List<Room> rooms) {
                 ArrayAdapter<Room> adapterFloorRooms = new ArrayAdapter<>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, rooms);
@@ -227,7 +226,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
-        viewModel.getCurrentFloor().observe(this, new Observer<Floor>() {
+        viewModel.getCurrentFloorLD().observe(this, new Observer<Floor>() {
             @Override
             public void onChanged(Floor floor) {
                 showTiles(floor);
@@ -241,43 +240,10 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         mapFragment.getMapAsync(this);
     }
 
-    private void updateOriginMarker(Room origin) {
-        Floor currentFloor = viewModel.getCurrentFloor().getValue();
-        assert currentFloor != null;
-        LatLng position = origin.getPosition().toLatLng(currentFloor);
-        if(markerOrigin == null){
-            BitmapDescriptor icon = bitmapDescriptorFromVector(this, R.drawable.ic_origin);
-            markerOrigin = map.addMarker(new MarkerOptions()
-                .icon(icon)
-                .position(position)
-            );
-        }
-        else{
-            markerOrigin.setPosition(position);
-            markerOrigin.setVisible(true);
-        }
-    }
-
-    private void updateDestMarker(Room destination) {
-        Floor destFloor = Floor.getFromDouble(destination.getFloor());
-        LatLng position = destination.getPosition().toLatLng(destFloor);
-        if(markerDest == null){
-            BitmapDescriptor icon = bitmapDescriptorFromVector(this, R.drawable.ic_destination);
-            markerDest = map.addMarker(new MarkerOptions()
-                    .icon(icon)
-                    .position(position)
-                    .visible(true)
-            );
-        }
-        else {
-            markerDest.setPosition(position);
-        }
-        boolean visible = viewModel.destOnCurrentFloor();
-        markerDest.setVisible(visible);
-    }
-
     @Override
     public void onMapReady(GoogleMap map) {
+        final int MAX_MAP_ZOOM = 3;
+
         this.map = map;
 
         map.setMapType(GoogleMap.MAP_TYPE_NONE);
@@ -289,10 +255,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         LatLngBounds bounds = new LatLngBounds(SOUTHWEST_BOUND,NORTHEAST_BOUND);
         map.setLatLngBoundsForCameraTarget(bounds);
 
-        /*
-         * Set custom onClickListener for all markers, so that it only shows Marker's information (if it has any),
-         * and hides Google's default buttons, which we don't want.
-         */
+        // Set custom onClickListener for all markers, so that it only shows Marker's information (if it has any),
+        // and hides Google's default buttons, which we don't want.
         final Marker[] lastOpened = {null};
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
@@ -318,10 +282,75 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
+        // Initialize robot marker on starting floor
         showRobotMarker(Floor.getStartingFloor());
+        // Initialize tiles on starting floor
         showTiles(Floor.getStartingFloor());
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // Remove all (Mutable)LiveData observers
+        viewModel.getCurrentFloorLD().removeObservers(this);
+        viewModel.getToastLD().removeObservers(this);
+        viewModel.getAlertLD().removeObservers(this);
+        for(Floor floor: Floor.values()){
+            viewModel.getPositionObserver(floor).removeObservers(this);
+        }
+        viewModel.getCurrentFloorRoomsLD().removeObservers(this);
+        viewModel.getMultiNavPhaseLD().removeObservers(this);
+
+        // Shut down robot query Node (qNode)
+        viewModel.shutdownNode();
+    }
+
+    // Update origin's marker position.
+    // Origin is always on current floor, so always sets it visible.
+    private void updateOriginMarker(Room origin) {
+        Floor currentFloor = viewModel.getCurrentFloorLD().getValue();
+        assert currentFloor != null;
+        LatLng position = origin.getPosition().toLatLng(currentFloor);
+
+        // If null, instantiate it with proper icon
+        if(markerOrigin == null){
+            BitmapDescriptor icon = bitmapDescriptorFromVector(this, R.drawable.ic_origin);
+            markerOrigin = map.addMarker(new MarkerOptions()
+                .icon(icon)
+                .position(position)
+            );
+        }
+        else { // Already instantiated, so just update position and set it visible.
+            markerOrigin.setPosition(position);
+            markerOrigin.setVisible(true);
+        }
+    }
+
+    // Updates destination's marker.
+    // Destination is not always on current floor, so depending on that set it visible or not.
+    private void updateDestMarker(Room destination) {
+        Floor destFloor = Floor.getFromDouble(destination.getFloor());
+        LatLng position = destination.getPosition().toLatLng(destFloor);
+
+        // If null, instantiate it with proper icon
+        if(markerDest == null){
+            BitmapDescriptor icon = bitmapDescriptorFromVector(this, R.drawable.ic_destination);
+            markerDest = map.addMarker(new MarkerOptions()
+                    .icon(icon)
+                    .position(position)
+                    .visible(true)
+            );
+        }
+        else { // Already instantiated, so update position
+            markerDest.setPosition(position);
+        }
+        // if currentFloor = destinationFloor then set it visible
+        boolean visible = viewModel.destOnCurrentFloor(); // true if dest.floor = currentFloor
+        markerDest.setVisible(visible);
+    }
+
+    // Temporarily disabled, it generates quite a lot of bugs
     private void updateButtonsLock(AppNavPhase phase) {
 //         if (phase == AppNavPhase.WAITING_USER_INPUT){
 //            act_origin.setEnabled(true);
@@ -339,34 +368,40 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 //        }
     }
 
+    // Shows standard alert. One accept button that dismisses the alert
     private void showAlert(String msg) {
          MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(getString(R.string.alert_title)) // Informazioa
+                .setTitle(getString(R.string.alert_title))
                 .setMessage(msg)
                 .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) { // Ados
+                    public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 });
         dialog.show();
     }
 
+    // Shows next goal alert. Two buttons that decide whether the route continues or stops.
     private void showNextGoalAlert(){
         String message = String.format(getString(R.string.origin_reached_msg),viewModel.getDestination());
         MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.alert_title) // Informazioa
+                .setTitle(R.string.alert_title)
                 .setMessage(message)
+                // Accept button -->  publish destination
                 .setPositiveButton(R.string.accept_btn, new DialogInterface.OnClickListener() { // Ados
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        // If it is a multilevel request, show lift alert, which will publish destination depending on the choice
                         if(viewModel.isLiftNeeded()){
                             showLiftAlert();
                             return;
                         }
-                        viewModel.publishDestination(null); // publish destination
+                        // Otherwise it is a single floor request, so publish destination with Null Way
+                        viewModel.publishDestination(null);
                     }
                 })
+                // Cancel button --> reset appNavPhase (phase == WAIT_USER_INPUT) and dismiss alert
                 .setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() { // Ezeztatu
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -374,6 +409,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                         dialog.dismiss();
                     }
                 })
+                // Cancel event (tap out) --> reset appNavPhase (phase == WAIT_USER_INPUT)
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
@@ -383,6 +419,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         dialog.show();
     }
 
+    // Show end route alert and reset AppNavPhase
     private void showRouteEndAlert() {
         String message = getString(R.string.destination_reached_msg); // Iritsi zara zure helburura
         MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(this)
@@ -403,6 +440,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         dialog.show();
     }
 
+    // Shows a dialog to choose between Lift and Stairs
     private void showLiftAlert(){
         String lift = getString(Way.LIFT.getResourceId());
         String stairs = getString(Way.STAIRS.getResourceId());
@@ -413,12 +451,12 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Way chosenWay = Way.values()[which];
-                        // publish goal
-                        if(viewModel.getAppNavPhase().getValue() == AppNavPhase.WAITING_USER_INPUT){
+                        // if road has not started, current goal is origin
+                        if(viewModel.getAppNavPhaseLD().getValue() == AppNavPhase.WAITING_USER_INPUT){
                             viewModel.publishOrigin(chosenWay);
                         }
-                        // publish destination
-                        if(viewModel.getAppNavPhase().getValue() == AppNavPhase.REACHING_ORIGIN){
+                        // if road has already started, current goal is destination
+                        if(viewModel.getAppNavPhaseLD().getValue() == AppNavPhase.REACHING_ORIGIN){
                             viewModel.publishDestination(chosenWay);
                         }
                     }
@@ -433,17 +471,19 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         dialog.show();
     }
 
+    // Centers camera on current floor's robot
     private void setCameraOnRobot() {
-        Floor currentFloor = viewModel.getCurrentFloor().getValue();
+        Floor currentFloor = viewModel.getCurrentFloorLD().getValue();
         map.animateCamera(CameraUpdateFactory.newLatLng(robotMarkers.get(currentFloor).getPosition()));
     }
 
+    // Shows tiles in current floor. If tiles hashmap is null, instantiate it with all floors' tiles.
     private void showTiles(Floor currentFloor) {
         if (map == null){
             return;
         }
         if(tileOverlays == null) {
-            initializeTileOverlays();
+            tileOverlays = initTileOverlays();
         }
 
         for(Floor floor: tileOverlays.keySet()){
@@ -456,21 +496,13 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
 
-    public void initializeTileOverlays(){
-        tileOverlays = new HashMap<>();
-        for (Floor floor: Floor.values()){
-            TileProvider provider = getFloorTileProvider(floor);
-            TileOverlay overlay = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
-            tileOverlays.put(floor,overlay);
-        }
-    }
-
+    // Shows marker of robot in given floor. If markers hashmap is null, instantiate it with all robot's markers.
     private void showRobotMarker(Floor currentFloor) {
         if(map == null){
             return;
         }
         if(robotMarkers == null){
-            initializeRobotMarkers();
+            robotMarkers = initRobotMarkers();
         }
 
         for(Floor floor : robotMarkers.keySet()){
@@ -483,19 +515,21 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
+    // Updates marker of robot in given floor. If markers hashmap is null, instantiate it with all robot's markers.
     private void updateRobotMarker(Floor currentFloor, MapPosition position) {
         if(map == null){
             return;
         }
         if(robotMarkers == null){
-            initializeRobotMarkers();
+            robotMarkers = initRobotMarkers();
         }
         LatLng currentLatLng = position.toLatLng(currentFloor);
         robotMarkers.get(currentFloor).setPosition(currentLatLng);
     }
 
-    private void initializeRobotMarkers() {
-        robotMarkers = new HashMap<Floor, Marker>(){{
+    // Instantiate Robot Markers' hashmap with all robot icons
+    private HashMap<Floor,Marker> initRobotMarkers() {
+        return new HashMap<Floor, Marker>(){{
             for(Floor floor: Floor.values()){
                 Marker marker = map.addMarker(new MarkerOptions()
                     .title(floor.getRobotNameLong())
@@ -508,12 +542,8 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         }};
     }
 
-    private boolean tileNotAvailable(int zoom) {
-        final int MIN_MAP_ZOOM = 0;
-
-        return (zoom < MIN_MAP_ZOOM || zoom > MAX_MAP_ZOOM);
-    }
-
+    // Gets a TileProvider for given floor.
+    // Tiles are loaded from assets/map_tiles
     private TileProvider getFloorTileProvider(final Floor currentFloor){
         TileProvider floorTileProvider;
         floorTileProvider = new TileProvider() {
@@ -523,9 +553,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
 
             @Override
             public Tile getTile(int x, int y, int zoom) {
-                if (tileNotAvailable(zoom)) {
-                    return null;
-                }
                 String s = String.format(Locale.US, FLOOR_MAP_URL_FORMAT, currentFloor.getFloorCode(), zoom, x, y);
                 try {
                     InputStream is = getApplication().getAssets().open(s);
@@ -543,6 +570,23 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         return floorTileProvider;
     }
 
+    // Initializes Tile Overlays hashmap.
+    public HashMap<Floor,TileOverlay> initTileOverlays(){
+        return new HashMap<Floor, TileOverlay>(){
+            {
+                for (Floor floor : Floor.values()) {
+                    // Take a tileProvider for current floor
+                    TileProvider provider = getFloorTileProvider(floor);
+                    // add TileOverlay to map with generated TileProvider
+                    TileOverlay overlay = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+                    // Put tileOverlay into hashmap
+                    put(floor, overlay);
+                }
+            }};
+    }
+
+    // Provides a bitmapDescriptor for given drawable resource.
+    // Needed to draw Origin and Destination markers from vector assets.
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         assert vectorDrawable != null;
@@ -553,20 +597,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         Canvas canvas = new Canvas(bitmap);
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        viewModel.getCurrentFloor().removeObservers(this);
-        viewModel.getToastObserver().removeObservers(this);
-        viewModel.getAlertObserver().removeObservers(this);
-        for(Floor floor: Floor.values()){
-            viewModel.getPositionObserver(floor).removeObservers(this);
-        }
-        viewModel.getCurrentFloorRooms().removeObservers(this);
-        viewModel.getMultiNavPhaseLD().removeObservers(this);
-        viewModel.shutdownNode();
     }
 
 }

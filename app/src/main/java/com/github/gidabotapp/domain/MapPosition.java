@@ -1,8 +1,6 @@
 package com.github.gidabotapp.domain;
 
 
-import android.util.Log;
-
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Locale;
@@ -38,24 +36,31 @@ public class MapPosition {
         return z;
     }
 
-    // Beste puntu batekiko distantzia euklidearra (karratua) kalkulatu
-    // ez da erroa erabiltzen -> distance square
+    // Returns square distance to given other Position
+    // Real distance is not meaningful, hence root is not computed
     public double dSquare(MapPosition otherPos){
         double dx = otherPos.x - this.x;
         double dy = otherPos.y - this.y;
         return dx * dx + dy * dy;
     }
 
+    // Converts MapPoint to Latitude and Longitude
+    // Conversion depends on floor, so floor is given as an argument
     public LatLng toLatLng(Floor floor){
+        // Map's Latitude and Longitude Bounds
         final double[] LAT_BOUNDS = new double[]{-65 , +65};
         final double[] LNG_BOUNDS = new double[]{-180, +180};
 
+        // Convert X coordinate to Longitude
         double lng = rangeConversion(floor.getXBounds(), LNG_BOUNDS, x);
+        // Convert Y coordinate to Latitude
         double lat = rangeConversion(floor.getYBounds(), LAT_BOUNDS, y);
 
         return new LatLng(lat,lng);
     }
 
+
+    // Converts old value from old_bounds range to new_bounds range
     public double rangeConversion(double[] old_bounds, double[] new_bounds, double old_value) {
         double old_range = (old_bounds[1] - old_bounds[0]);
         double new_range = (new_bounds[1] - new_bounds[0]);
