@@ -169,8 +169,8 @@ public class QNode extends AbstractNodeMain {
         Goal message = topicMessageFactory.newFromType(Goal._TYPE);
 
         message.setGoalSeq(sequenceNumber);
-        message.setInitialFloor((float) current.getFloor());
-        message.setGoalFloor((float) goal.getFloor());
+        message.setInitialFloor(current.getFloorCode());
+        message.setGoalFloor(goal.getFloorCode());
 
         Point initial_pose = topicMessageFactory.newFromType(Point._TYPE);
 

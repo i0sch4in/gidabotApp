@@ -259,7 +259,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void updateDestMarker(Room destination) {
-        Floor destFloor = Floor.getFromDouble(destination.getFloor());
+        Floor destFloor = destination.getFloor();
         LatLng position = destination.getPosition().toLatLng(destFloor);
         if(markerDest == null){
             BitmapDescriptor icon = bitmapDescriptorFromVector(this, R.drawable.ic_destination);

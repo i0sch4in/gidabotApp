@@ -224,10 +224,10 @@ public class MapViewModel extends AndroidViewModel {
     public Floor getGoalFloor(){
         Floor goalFloor;
         if(appNavPhase.getValue() == WAITING_USER_INPUT){
-            goalFloor = Floor.values()[(int) origin.getFloor()];
+            goalFloor = origin.getFloor();
         }
         else{ // appNavPhase != WAITING_USER_INPUT
-            goalFloor = Floor.values()[(int) destination.getFloor()];
+            goalFloor = destination.getFloor();
         }
         return goalFloor;
     }
@@ -241,7 +241,7 @@ public class MapViewModel extends AndroidViewModel {
             return false;
         }
         Floor currentFloor = this.currentFloor.getValue();
-        Floor destFloor = Floor.getFromDouble(destination.getFloor());
+        Floor destFloor = destination.getFloor();
         return currentFloor == destFloor;
     }
 }

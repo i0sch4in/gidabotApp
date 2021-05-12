@@ -6,27 +6,35 @@ import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import com.github.gidabotapp.repository.FloorConverters;
 
 @Entity (tableName = "rooms")
 public class Room {
     @PrimaryKey @NonNull
     private final String num;
 
-    private final double floor;
+    @TypeConverters(FloorConverters.class)
+    private final Floor floor;
     private final String name;
 
     @Embedded
     private final MapPosition position;
 
-    public Room(double floor, String num, String name, MapPosition position){
+    public Room(Floor floor, String num, String name, MapPosition position){
         this.floor = floor;
         this.num = num;
         this.name = name;
         this.position = position;
     }
 
-    public double getFloor() {
+    public Floor getFloor() {
         return floor;
+    }
+
+    public float getFloorCode(){
+        return floor.ordinal();
     }
 
     public String getNum() {
