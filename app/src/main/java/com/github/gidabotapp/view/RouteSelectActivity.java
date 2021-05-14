@@ -1,4 +1,4 @@
-package com.github.gidabotapp.ui;
+package com.github.gidabotapp.view;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -20,7 +20,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 
 import com.github.gidabotapp.R;
-import com.github.gidabotapp.domain.AppNavPhase;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
 import com.github.gidabotapp.domain.Room;
@@ -571,7 +570,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
     }
 
     // Initializes Tile Overlays hashmap.
-    public HashMap<Floor,TileOverlay> initTileOverlays(){
+    private HashMap<Floor,TileOverlay> initTileOverlays(){
         return new HashMap<Floor, TileOverlay>(){
             {
                 for (Floor floor : Floor.values()) {

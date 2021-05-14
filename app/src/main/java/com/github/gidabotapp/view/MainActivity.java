@@ -1,4 +1,4 @@
-package com.github.gidabotapp.ui;
+package com.github.gidabotapp.view;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -39,13 +39,12 @@ public class MainActivity extends RosActivity {
         errorAlert = new AlertDialog.Builder(this).create();
         errorAlert.setTitle(getString(R.string.master_error_title));
         errorAlert.setMessage(getString(R.string.master_error_msg));
+        errorAlert.setCancelable(false);
         errorAlert.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.accept_btn),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = getIntent();
                         finish();
-                        startActivity(intent);
                     }
                 });
 
@@ -72,6 +71,7 @@ public class MainActivity extends RosActivity {
         nodeMainExecutor.execute(qNode, nodeConfiguration);
 
         Intent intent = new Intent(getApplicationContext(), RouteSelectActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
 

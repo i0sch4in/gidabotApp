@@ -23,7 +23,7 @@
     <string name="alert_title">Informazioa</string>
     <string name="accept_btn">Ados</string>
     <string name="cancel_btn">Ezeztatu</string>
-    <string name="master_error_msg">Ez duzu Masterrarekin konexioa zehaztu. Sakatu botoia aplikazioa berrabiarazteko.</string>
+    <string name="master_error_msg">Ez duzu Masterrarekin konexioa zehaztu. Berrabiarazi aplikazioa, mesedez.</string>
     <string name="master_error_title">Errorea</string>
     <string name="cancel_msg_error">Ezin izan da ibilbidea bertan behera utzi.</string>
     <string name="hint_destination">Nora zoaz?</string>

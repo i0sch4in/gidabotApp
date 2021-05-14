@@ -9,11 +9,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
-import com.github.gidabotapp.domain.AppNavPhase;
+import com.github.gidabotapp.view.AppNavPhase;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
-import com.github.gidabotapp.domain.MultiNavPhase;
-import com.github.gidabotapp.domain.PhaseMessage;
+import com.github.gidabotapp.repository.MultiNavPhase;
+import com.github.gidabotapp.repository.PhaseMessage;
 import com.github.gidabotapp.domain.Way;
 import com.github.gidabotapp.repository.QNode;
 import com.github.gidabotapp.R;
@@ -25,8 +25,8 @@ import java.util.List;
 
 import multilevel_navigation_msgs.Goal;
 
-import static com.github.gidabotapp.domain.AppNavPhase.*;
-import static com.github.gidabotapp.domain.PhaseMessage.GOAL_REACHED;
+import static com.github.gidabotapp.view.AppNavPhase.*;
+import static com.github.gidabotapp.repository.PhaseMessage.GOAL_REACHED;
 
 public class MapViewModel extends AndroidViewModel {
     private static QNode qNode;

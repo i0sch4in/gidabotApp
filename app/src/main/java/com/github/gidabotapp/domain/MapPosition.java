@@ -61,7 +61,7 @@ public class MapPosition {
 
 
     // Converts old value from old_bounds range to new_bounds range
-    public double rangeConversion(double[] old_bounds, double[] new_bounds, double old_value) {
+    private double rangeConversion(double[] old_bounds, double[] new_bounds, double old_value) {
         double old_range = (old_bounds[1] - old_bounds[0]);
         double new_range = (new_bounds[1] - new_bounds[0]);
         return (((old_value - old_bounds[0]) * new_range) / old_range) + new_bounds[0];

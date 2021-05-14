@@ -6,8 +6,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
-import com.github.gidabotapp.domain.MultiNavPhase;
-import com.github.gidabotapp.domain.PhaseMessage;
 import com.github.gidabotapp.domain.Room;
 import com.github.gidabotapp.domain.Way;
 
@@ -291,6 +289,7 @@ public class QNode extends AbstractNodeMain {
 
             connectedNode.shutdown();
         }
+        catch (Exception ignored){}
         finally {
             INSTANCE = null;
         }

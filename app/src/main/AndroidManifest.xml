@@ -16,12 +16,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GidabotApp"
         tools:replace="android:icon">
-        <activity android:name=".ui.RouteSelectActivity" />
+        <activity android:name=".view.RouteSelectActivity" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCgRT_xWYLCPhGEBmuP6KDhR-hywPMSqJA" />
 
-        <activity android:name=".ui.MainActivity">
+        <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

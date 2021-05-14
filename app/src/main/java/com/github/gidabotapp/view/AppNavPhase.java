@@ -1,4 +1,4 @@
-package com.github.gidabotapp.domain;
+package com.github.gidabotapp.view;
 
 public enum AppNavPhase {
     WAITING_USER_INPUT,
