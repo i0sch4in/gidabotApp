@@ -20,6 +20,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 
 import com.github.gidabotapp.R;
+import com.github.gidabotapp.data.AppNavPhase;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
 import com.github.gidabotapp.domain.Room;
@@ -116,7 +117,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         });
 
         for(final Floor floor: Floor.values()){
-            viewModel.getPositionObserver(floor).observe(this, new Observer<MapPosition>() {
+            viewModel.getPositionLD(floor).observe(this, new Observer<MapPosition>() {
                 @Override
                 public void onChanged(MapPosition position) {
                     updateRobotMarker(floor, position);
@@ -296,7 +297,7 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
         viewModel.getToastLD().removeObservers(this);
         viewModel.getAlertLD().removeObservers(this);
         for(Floor floor: Floor.values()){
-            viewModel.getPositionObserver(floor).removeObservers(this);
+            viewModel.getPositionLD(floor).removeObservers(this);
         }
         viewModel.getCurrentFloorRoomsLD().removeObservers(this);
         viewModel.getMultiNavPhaseLD().removeObservers(this);

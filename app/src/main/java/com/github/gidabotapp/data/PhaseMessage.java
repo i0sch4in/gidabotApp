@@ -1,4 +1,4 @@
-package com.github.gidabotapp.repository;
+package com.github.gidabotapp.data;
 
 import com.github.gidabotapp.R;
 

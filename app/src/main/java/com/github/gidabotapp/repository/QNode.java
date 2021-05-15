@@ -4,6 +4,8 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.github.gidabotapp.data.MultiNavPhase;
+import com.github.gidabotapp.data.PhaseMessage;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
 import com.github.gidabotapp.domain.Room;

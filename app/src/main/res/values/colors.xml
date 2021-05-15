@@ -11,12 +11,14 @@
     <color name="maps_blue">#4A89F3</color>
     <color name="maps_red">#DD4B3E</color>
     <color name="maps_green">#1EA362</color>
-    <color name="primaryColor">#651fff</color>
-    <color name="primaryLightColor">#a255ff</color>
-    <color name="primaryDarkColor">#0100ca</color>
-    <color name="secondaryColor">#b388ff</color>
-    <color name="secondaryLightColor">#e7b9ff</color>
-    <color name="secondaryDarkColor">#805acb</color>
-    <color name="primaryTextColor">#ffffff</color>
+
+<!--https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=2979FF&secondary.color=00E676-->
+    <color name="primaryColor">#2979ff</color>
+    <color name="primaryLightColor">#75a7ff</color>
+    <color name="primaryDarkColor">#004ecb</color>
+    <color name="secondaryColor">#00e676</color>
+    <color name="secondaryLightColor">#66ffa6</color>
+    <color name="secondaryDarkColor">#00b248</color>
+    <color name="primaryTextColor">#000000</color>
     <color name="secondaryTextColor">#000000</color>
 </resources>

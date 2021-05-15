@@ -1,4 +1,4 @@
-package com.github.gidabotapp.repository;
+package com.github.gidabotapp.data;
 
 public enum MultiNavPhase {
     WAIT_NAVIGATION,
