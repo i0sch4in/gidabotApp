@@ -10,7 +10,7 @@
     </style>
 
     <style name="customSnackbar" parent="Widget.MaterialComponents.Snackbar" >
-        <item name="android:background">@color/primaryLightColor</item>
+        <item name="android:background">@color/secondaryDarkColor</item>
         <item name="android:textColor">@color/primaryTextColor</item>
     </style>
 </resources>

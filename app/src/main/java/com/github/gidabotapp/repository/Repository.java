@@ -27,7 +27,7 @@ import static com.github.gidabotapp.data.AppNavPhase.REACHING_DESTINATION;
 import static com.github.gidabotapp.data.AppNavPhase.REACHING_ORIGIN;
 import static com.github.gidabotapp.data.AppNavPhase.WAITING_USER_INPUT;
 
-public class RoomRepository {
+public class Repository {
     private final RoomRepositoryDAO roomDao;
     private final QNode qNode;
 
@@ -35,7 +35,7 @@ public class RoomRepository {
     private final MutableLiveData<Integer> toastLD;
     private final MutableLiveData<AppNavPhase> appNavPhaseLD;
 
-    public RoomRepository(Context appContext){
+    public Repository(Context appContext){
         RoomDatabase db = RoomDatabase.getInstance(appContext);
         roomDao = db.roomRepositoryDAO();
         qNode = QNode.getInstance();

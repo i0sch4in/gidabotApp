@@ -1,7 +1,6 @@
 package com.github.gidabotapp.viewmodel;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
@@ -12,15 +11,13 @@ import androidx.lifecycle.Transformations;
 
 import com.github.gidabotapp.R;
 import com.github.gidabotapp.data.AppNavPhase;
-import com.github.gidabotapp.data.PhaseMessage;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
 import com.github.gidabotapp.data.MultiNavPhase;
 import com.github.gidabotapp.domain.Room;
 import com.github.gidabotapp.domain.Way;
-import com.github.gidabotapp.repository.RoomRepository;
+import com.github.gidabotapp.repository.Repository;
 
-import java.util.HashMap;
 import java.util.List;
 
 import multilevel_navigation_msgs.Goal;
@@ -28,7 +25,7 @@ import multilevel_navigation_msgs.Goal;
 import static com.github.gidabotapp.data.AppNavPhase.*;
 
 public class MapViewModel extends AndroidViewModel {
-    private final RoomRepository roomRepository;
+    private final Repository repository;
 
     private final LiveData<List<Room>> currentFloorRoomsLD;
     private final MutableLiveData<Floor> currentFloorLD;
@@ -42,7 +39,7 @@ public class MapViewModel extends AndroidViewModel {
 
         // Instantiate Room repository with application's context,
         // in order to be able to query data from database
-        roomRepository = new RoomRepository(application.getApplicationContext());
+        repository = new Repository(application.getApplicationContext());
 
         this.currentFloorLD = new MutableLiveData<>(Floor.getStartingFloor());
 
@@ -53,17 +50,17 @@ public class MapViewModel extends AndroidViewModel {
         this.currentFloorRoomsLD = Transformations.switchMap(currentFloorLD, new Function<Floor, LiveData<List<Room>>>() {
             @Override
             public LiveData<List<Room>> apply(Floor floor) {
-                return roomRepository.getRoomsByFloor(floor);
+                return repository.getRoomsByFloor(floor);
             }
         });
 
-        this.toastLD = Transformations.map(roomRepository.getToastLD(), new Function<Integer, String>() {
+        this.toastLD = Transformations.map(repository.getToastLD(), new Function<Integer, String>() {
             @Override
             public String apply(Integer input) {
                 String message = getApplication().getString(input);
                 if(input == R.string.publish_success_msg) {
                     Room goal = origin;
-                    if (roomRepository.getAppNavPhaseLD().getValue() == REACHING_DESTINATION) {
+                    if (repository.getAppNavPhaseLD().getValue() == REACHING_DESTINATION) {
                         goal = destination;
                     }
                     return String.format(message, goal);
@@ -76,7 +73,7 @@ public class MapViewModel extends AndroidViewModel {
 
     // shut qNode down
     public void shutdownNode() {
-        roomRepository.qNodeShutdown();
+        repository.qNodeShutdown();
     }
 
     // Publishes selected origin to qNode
@@ -84,12 +81,12 @@ public class MapViewModel extends AndroidViewModel {
         // Get current floor (won't be null)
         Floor currentFloor = this.currentFloorLD.getValue();
         // Get current floor's robot's position on map
-        MapPosition currentPosition = roomRepository.getCurrentPositionsHM().get(currentFloor).getValue();
+        MapPosition currentPosition = repository.getCurrentPositionsHM().get(currentFloor).getValue();
         // Get nearest known room to that position, by euclidean distance
         assert currentPosition != null;
         Room nearest = getNearestRoom(currentPosition);
         // Publish origin to ros Node
-        roomRepository.publishOrigin(nearest, origin, chosenWay);
+        repository.publishOrigin(nearest, origin, chosenWay);
     }
 
     // Publishes selected destination to qNode
@@ -97,18 +94,18 @@ public class MapViewModel extends AndroidViewModel {
         // Get current floor (won't be null)
         Floor currentFloor = this.currentFloorLD.getValue();
         // Get current floor's robot's position on map
-        MapPosition currentPosition = roomRepository.getCurrentPositionsHM().get(currentFloor).getValue();
+        MapPosition currentPosition = repository.getCurrentPositionsHM().get(currentFloor).getValue();
         // Get nearest known room to that position, by euclidean distance
         assert currentPosition != null;
         Room nearest = getNearestRoom(currentPosition);
         // Publish destination to ros Node
-        roomRepository.publishDestination(nearest, destination, chosenWay);
+        repository.publishDestination(nearest, destination, chosenWay);
     }
 
     // Publishes a cancel message to qNode
     public void publishCancel() {
         Floor currentFloor = this.currentFloorLD.getValue();
-        roomRepository.publishCancel(currentFloor);
+        repository.publishCancel(currentFloor);
     }
 
     // Lift is needed if current goal's floor is different to current floor
@@ -139,7 +136,7 @@ public class MapViewModel extends AndroidViewModel {
     // Returns current goal's floor's pending request amount
     public int getGoalFloorPending(){
         Floor goalFloor = getCurrentGoalFloor();
-        List<Goal> pending = roomRepository.getPendingRequestsHM().get(goalFloor).getValue();
+        List<Goal> pending = repository.getPendingRequestsHM().get(goalFloor).getValue();
         if(pending == null){
             return 0;
         }
@@ -151,7 +148,7 @@ public class MapViewModel extends AndroidViewModel {
     public Floor getCurrentGoalFloor(){
         Floor goalFloor;
         // goal floor is origin's floor
-        if(roomRepository.getAppNavPhaseLD().getValue() == WAITING_USER_INPUT){
+        if(repository.getAppNavPhaseLD().getValue() == WAITING_USER_INPUT){
             goalFloor = Floor.values()[(int) origin.getFloor()];
         }
         // goal floor is destination's floor
@@ -177,16 +174,16 @@ public class MapViewModel extends AndroidViewModel {
         return this.currentFloorRoomsLD;
     }
     public LiveData<Integer> getAlertLD() {
-        return roomRepository.getAlertLD();
+        return repository.getAlertLD();
     }
     public LiveData<AppNavPhase> getAppNavPhaseLD(){
-        return roomRepository.getAppNavPhaseLD();
+        return repository.getAppNavPhaseLD();
     }
     public LiveData<List<Room>> getAllRoomsLD(){
-        return roomRepository.getAllRooms();
+        return repository.getAllRooms();
     }
     public void resetAppNavPhase(){
-        roomRepository.getAppNavPhaseLD().setValue(WAITING_USER_INPUT);
+        repository.getAppNavPhaseLD().setValue(WAITING_USER_INPUT);
     }
     public MutableLiveData<Floor> getCurrentFloorLD() {
         return this.currentFloorLD;
@@ -198,10 +195,10 @@ public class MapViewModel extends AndroidViewModel {
         return this.toastLD;
     }
     public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){
-        return roomRepository.getMultiNavPhaseLD();
+        return repository.getMultiNavPhaseLD();
     }
     public MutableLiveData<MapPosition> getPositionLD(Floor f){
-        return roomRepository.getCurrentPositionsHM().get(f);
+        return repository.getCurrentPositionsHM().get(f);
     }
 
     // Returns nearest known Room to current MapPosition
