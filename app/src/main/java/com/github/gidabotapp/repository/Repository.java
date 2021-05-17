@@ -132,9 +132,6 @@ public class Repository {
     public LiveData<Integer> getAlertLD(){
         return this.alertLD;
     }
-    public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){
-        return qNode.getMultiNavPhaseLD();
-    }
     public MutableLiveData<Integer> getToastLD(){
         return this.toastLD;
     }

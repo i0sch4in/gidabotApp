@@ -300,7 +300,6 @@ public class RouteSelectActivity extends AppCompatActivity implements OnMapReady
             viewModel.getPositionLD(floor).removeObservers(this);
         }
         viewModel.getCurrentFloorRoomsLD().removeObservers(this);
-        viewModel.getMultiNavPhaseLD().removeObservers(this);
 
         // Shut down robot query Node (qNode)
         viewModel.shutdownNode();

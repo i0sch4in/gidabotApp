@@ -194,9 +194,6 @@ public class MapViewModel extends AndroidViewModel {
     public LiveData<String> getToastLD() {
         return this.toastLD;
     }
-    public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){
-        return repository.getMultiNavPhaseLD();
-    }
     public MutableLiveData<MapPosition> getPositionLD(Floor f){
         return repository.getCurrentPositionsHM().get(f);
     }

@@ -4,7 +4,6 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.github.gidabotapp.data.MultiNavPhase;
 import com.github.gidabotapp.data.PhaseMessage;
 import com.github.gidabotapp.domain.Floor;
 import com.github.gidabotapp.domain.MapPosition;
@@ -51,14 +50,12 @@ public class QNode extends AbstractNodeMain {
     // Node subscribers
     private HashMap<Floor, Subscriber<PoseWithCovarianceStamped>> positionSubHM;
     private HashMap<Floor, Subscriber<PendingGoals>> pendingReqSubHM;
-    private Subscriber<std_msgs.Int8> subNavPhase;
     private Subscriber<std_msgs.Int8> subDialogMessage;
 
     // All MutableLiveData to expose ROS system's current data
     private final HashMap<Floor, MutableLiveData<MapPosition>> currentPositionsHM;
     private final HashMap<Floor, MutableLiveData<List<Goal>>> pendingRequestsHM;
     private final MutableLiveData<PhaseMessage> phaseMessageLD;
-    private final MutableLiveData<MultiNavPhase> multiNavPhaseLD;
 
     // ConnectedNode will be injected through MainActivity (RosActivity)
     private ConnectedNode connectedNode;
@@ -87,7 +84,6 @@ public class QNode extends AbstractNodeMain {
             }
         }};
         this.phaseMessageLD = new MutableLiveData<>();
-        this.multiNavPhaseLD = new MutableLiveData<>();
     }
 
     // Singleton lazy initialization
@@ -150,17 +146,6 @@ public class QNode extends AbstractNodeMain {
             }
         }};
 
-
-        // Nav Phase subscriber connection
-        subNavPhase = connectedNode.newSubscriber("/nav_phase", Int8._TYPE);
-        subNavPhase.addMessageListener(new MessageListener<Int8>() {
-            @Override
-            public void onNewMessage(Int8 message) {
-                int i = message.getData();
-                MultiNavPhase currentNavPhase = MultiNavPhase.values()[i];
-                multiNavPhaseLD.postValue(currentNavPhase);
-            }
-        });
 
         // Dialog QT message subscriber connection
         subDialogMessage = connectedNode.newSubscriber("/dialog_qt_message", Int8._TYPE);
@@ -282,7 +267,6 @@ public class QNode extends AbstractNodeMain {
             }
 
             subDialogMessage.shutdown();
-            subNavPhase.shutdown();
 
             pubCancel.shutdown();
             pubGoal.shutdown();
@@ -301,9 +285,6 @@ public class QNode extends AbstractNodeMain {
     // Getters
     public MutableLiveData<PhaseMessage> getPhaseMessageLD(){
         return this.phaseMessageLD;
-    }
-    public MutableLiveData<MultiNavPhase> getMultiNavPhaseLD(){
-        return this.multiNavPhaseLD;
     }
     public HashMap<Floor, MutableLiveData<MapPosition>> getCurrentPositionsHM(){
         return this.currentPositionsHM;
