@@ -9,7 +9,8 @@ import glob, os, shutil
 
 os.chdir("./svg")
 for file in glob.glob("*.svg"):
-    output = file[:-4] + '.pdf'
+    short_name = file.split('!')[-1]
+    output = short_name[:-4] + '.pdf'
     with open(file, 'r') as f:
         doc = ET.parse(f)
         for elem in doc.xpath("//*[local-name() = 'text' and text()='UNREGISTERED']"):
