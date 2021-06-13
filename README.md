@@ -10,7 +10,7 @@
 This app is my Bachelor final project for my Bachelor's Degree in Informatics Engineering 
 [@University of the Basque Country](https://www.ehu.eus/en/web/informatika-fakultatea).
 
-Its main goal is to make an Android GUI for the [GidaBot](https://link.springer.com/article/10.1007/s11370-019-00285-8)
+Its main goal is to make provide Android GUI for the [GidaBot](https://link.springer.com/article/10.1007/s11370-019-00285-8)
 navigation-system developed by [RSAIT](http://www.sc.ehu.es/ccwrobot/) research group.
 
 ## What is GidaBot?
@@ -24,7 +24,7 @@ navigation-system developed by [RSAIT](http://www.sc.ehu.es/ccwrobot/) research 
 - It uses `android_core` package's [`RosActivity`](https://rosjava.github.io/android_core/latest/javadoc/org/ros/android/RosActivity.html) class to establish connection with ROS Master
 - Multifloor navigation
 - Material Design graphical interface
-- Shows every Robot's position in a [map](./app/src/main/java/com/github/gidabotapp/view/RouteSelectActivity.java) (built over [GoogleMap](https://developers.google.com/maps/documentation/android-sdk/overview))
+- Shows every robot's position in a [map](./app/src/main/java/com/github/gidabotapp/view/RouteSelectActivity.java) (built over [GoogleMap](https://developers.google.com/maps/documentation/android-sdk/overview))
 
 
 ## Architecture
