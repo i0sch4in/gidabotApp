@@ -1,187 +1,235 @@
-Task,Subject,Category,Start,End,Rest,Total,Total(mins)
-jk desb taula,GrAL,Dokumentazio,"Jun 2, 2021 22:55","Jun 2, 2021 23:30",,35m,35
-jk,GrAL,Dokumentazio,"Jun 2, 2021 15:10","Jun 2, 2021 16:55",,1h 45m,105
-sarrera + jk,GrAL,Dokumentazio,"Jun 2, 2021 11:15","Jun 2, 2021 13:30",,2h 15m,135
-sarrera + jarraipen eta kontrola,GrAL,Dokumentazio,"Jun 1, 2021 18:40","Jun 1, 2021 20:15",,1h 35m,95
-aurrekariak + teknologiak errepaso,GrAL,Dokumentazio,"Jun 1, 2021 14:45","Jun 1, 2021 15:15",,30m,30
-ros,GrAL,Dokumentazio,"Jun 1, 2021 11:15","Jun 1, 2021 13:15",,2h 0m,120
-ros,GrAL,Dokumentazio,"May 31, 2021 15:45","May 31, 2021 16:40",,55m,55
-teknologiak + errepaso,GrAL,Dokumentazio,"May 31, 2021 10:35","May 31, 2021 13:00",,2h 25m,145
-teknologiak,GrAL,Dokumentazio,"May 30, 2021 23:30","May 31, 2021 0:55",,1h 25m,85
-teknologiak,GrAL,Dokumentazio,"May 30, 2021 17:55","May 30, 2021 19:25",,1h 30m,90
-sekuentzia diagramak,GrAL,Diseinua,"May 30, 2021 16:40","May 30, 2021 17:45",,1h 5m,65
-sekuentzia diagramak,GrAL,Diseinua,"May 30, 2021 11:25","May 30, 2021 13:50",,2h 25m,145
-aurrekariak,GrAL,Dokumentazio,"May 29, 2021 16:50","May 29, 2021 19:10",,2h 20m,140
-demo,GrAL,Defentsa,"May 28, 2021 22:30","May 29, 2021 0:30",,2h 0m,120
-aurrekariak,GrAL,Dokumentazio,"May 28, 2021 15:40","May 28, 2021 16:20",,40m,40
-errepaso + 3.it,GrAL,Dokumentazio,"May 28, 2021 11:15","May 28, 2021 13:15",,2h 0m,120
-3. it,GrAL,Dokumentazio,"May 27, 2021 16:35","May 27, 2021 18:30",,1h 55m,115
-2. it,GrAL,Dokumentazio,"May 27, 2021 11:00","May 27, 2021 12:50",,1h 50m,110
-2. it,GrAL,Dokumentazio,"May 27, 2021 0:40","May 27, 2021 1:20",,40m,40
-2. it,GrAL,Dokumentazio,"May 26, 2021 14:50","May 26, 2021 16:30",,1h 40m,100
-2.it,GrAL,Dokumentazio,"May 26, 2021 10:40","May 26, 2021 12:40",,2h 0m,120
-2. it,GrAL,Dokumentazio,"May 25, 2021 22:45","May 25, 2021 23:50",,1h 5m,65
-2. it,GrAL,Dokumentazio,"May 25, 2021 19:15","May 25, 2021 20:25",,1h 10m,70
-1. it,GrAL,Dokumentazio,"May 25, 2021 11:10","May 25, 2021 12:40",,1h 30m,90
-1. it,GrAL,Dokumentazio,"May 24, 2021 23:40","May 25, 2021 0:45",,1h 5m,65
-s.g - 1. it,GrAL,Dokumentazio,"May 24, 2021 14:45","May 24, 2021 17:10",,2h 25m,145
-s.g - 1. it,GrAL,Dokumentazio,"May 24, 2021 12:50","May 24, 2021 14:40",,1h 50m,110
-memoria bigarren entrega (plan + e.b + diseinua),GrAL,Dokumentazio,"May 23, 2021 18:15","May 23, 2021 21:35",35,3h 20m,165
-planifikazioa + e.b,GrAL,Dokumentazio,"May 23, 2021 10:50","May 23, 2021 12:50",,2h 0m,120
-arkitektura,GrAL,Diseinua,"May 22, 2021 17:50","May 22, 2021 21:05",20,3h 15m,175
-planifikazioa + e.b,GrAL,Dokumentazio,"May 22, 2021 10:45","May 22, 2021 11:40",,55m,55
-planifikazioa + e.b,GrAL,,"May 21, 2021 14:15","May 21, 2021 16:10",,1h 55m,115
-planifikazioa + e.b,GrAL,Dokumentazio,"May 21, 2021 10:40","May 21, 2021 12:45",,2h 5m,125
-planifikazioa + e.b,GrAL,Dokumentazio,"May 19, 2021 16:45","May 19, 2021 17:20",,35m,35
-Plangintza + E.bilketa,GrAL,Dokumentazio,"May 19, 2021 11:55","May 19, 2021 13:15",,1h 20m,80
-eskakizunen bilketa,GrAL,Eskakizunen bilketa,"May 18, 2021 19:45","May 18, 2021 20:45",,1h 0m,60
-eskakizunen bilketa,GrAL,Eskakizunen bilketa,"May 17, 2021 10:20","May 17, 2021 12:15",,1h 55m,115
-eskakizunen bilketa,GrAL,Eskakizunen bilketa,"May 16, 2021 20:15","May 16, 2021 22:10",,1h 55m,115
-eskakizunen bilketa,GrAL,Eskakizunen bilketa,"May 16, 2021 16:00","May 16, 2021 17:30",,1h 30m,90
-eskakizunen bilketa,GrAL,Eskakizunen bilketa,"May 16, 2021 12:45","May 16, 2021 14:55",,2h 10m,130
-klase diagrama + arkitektura,GrAL,Diseinua,"May 16, 2021 11:40","May 16, 2021 12:45",,1h 5m,65
-klase diagrama,GrAL,Diseinua,"May 15, 2021 19:10","May 15, 2021 22:05",,2h 55m,175
-repository aldaketak,GrAL,Aplikazioa,"May 15, 2021 11:00","May 15, 2021 12:00",,1h 0m,60
-repository aldaketak,GrAL,Aplikazioa,"May 14, 2021 23:00","May 15, 2021 0:30",,1h 30m,90
-class diagram,GrAL,Diseinua,"May 14, 2021 15:05","May 14, 2021 17:00",15,1h 55m,100
-class diagram,GrAL,Diseinua,"May 14, 2021 11:15","May 14, 2021 13:35",,2h 20m,140
-use case diagram,GrAL,Diseinua,"May 14, 2021 0:00","May 14, 2021 1:00",,1h 0m,60
-bilera,GrAL,Jarraipen eta Kontrola,"May 13, 2021 10:00","May 13, 2021 12:00",,2h 0m,120
-refactoring,GrAL,Aplikazioa,"May 12, 2021 22:40","May 13, 2021 0:10",,1h 30m,90
-iterazioen banaketa + refactor,GrAL,Aplikazioa,"May 12, 2021 15:00","May 12, 2021 17:10",,2h 10m,130
-memoria → garapena pentsatu,GrAL,Dokumentazio,"May 12, 2021 11:30","May 12, 2021 13:45",,2h 15m,135
-use case diagram,GrAL,Diseinua,"May 12, 2021 10:30","May 12, 2021 11:30",,1h 0m,60
-migration azken saiakera,GrAL,Aplikazioa,"May 12, 2021 10:00","May 12, 2021 10:30",,30m,30
-dbrecover,GrAL,Aplikazioa,"May 11, 2021 23:15","May 12, 2021 0:30",,1h 15m,75
-datubase konponketak,GrAL,Aplikazioa,"May 11, 2021 18:30","May 11, 2021 19:10",,40m,40
-domeinu diagrama,GrAL,Dokumentazio,"May 11, 2021 16:50","May 11, 2021 18:30",,1h 40m,100
-refactoring,GrAL,Aplikazioa,"May 11, 2021 11:55","May 11, 2021 13:30",,1h 35m,95
-memoria,GrAL,Dokumentazio,"May 11, 2021 10:55","May 11, 2021 11:55",,1h 0m,60
-zuzenketak,GrAL,Aplikazioa,"May 10, 2021 15:55","May 10, 2021 17:40",,1h 45m,105
-zuzenketak,GrAL,Aplikazioa,"May 10, 2021 11:35","May 10, 2021 14:00",,2h 25m,145
-zuzenketak,GrAL,Aplikazioa,"May 9, 2021 19:15","May 9, 2021 21:00",,1h 45m,105
-zuzenketak,GrAL,Aplikazioa,"May 9, 2021 15:10","May 9, 2021 16:45",,1h 35m,95
-zuzenketak,GrAL,Aplikazioa,"May 9, 2021 12:55","May 9, 2021 14:00",,1h 5m,65
-bilera,GrAL,Jarraipen eta Kontrola,"May 4, 2021 10:45","May 4, 2021 11:45",,1h 0m,60
-multilevel,GrAL,Aplikazioa,"May 3, 2021 22:15","May 3, 2021 23:15",,1h 0m,60
-multilevel,GrAL,Aplikazioa,"May 3, 2021 15:15","May 3, 2021 17:00",,1h 45m,105
-multilevel,GrAL,Aplikazioa,"May 3, 2021 11:00","May 3, 2021 12:40",,1h 40m,100
-multilevel,GrAL,Aplikazioa,"May 2, 2021 16:15","May 2, 2021 19:15",,3h 0m,180
-multilevel,GrAL,Aplikazioa,"May 2, 2021 11:30","May 2, 2021 13:30",,2h 0m,120
-multilevel,GrAL,Aplikazioa,"May 1, 2021 20:20","May 1, 2021 22:30",,2h 10m,130
-multilevel,GrAL,Aplikazioa,"May 1, 2021 18:25","May 1, 2021 19:10",,45m,45
-multilevel,GrAL,Aplikazioa,"May 1, 2021 16:00","May 1, 2021 17:40",,1h 40m,100
-beste solaruak tolatlng,GrAL,Aplikazioa,"May 1, 2021 12:10","May 1, 2021 14:15",,2h 5m,125
-other robots install + fixes,GrAL,Aplikazioa,"Apr 30, 2021 19:45","Apr 30, 2021 21:30",,1h 45m,105
-multilevel labels,GrAL,Aplikazioa,"Apr 29, 2021 19:20","Apr 29, 2021 20:35",,1h 15m,75
-multifloor start,GrAL,Aplikazioa,"Apr 28, 2021 16:15","Apr 28, 2021 17:15",,1h 0m,60
-zuzenketak,GrAL,Aplikazioa,"Apr 25, 2021 17:50","Apr 25, 2021 19:50",,2h 0m,120
-toast,GrAL,Aplikazioa,"Apr 25, 2021 12:05","Apr 25, 2021 13:35",,1h 30m,90
-zuzenketak: publishRoute,GrAL,Aplikazioa,"Apr 24, 2021 21:05","Apr 24, 2021 23:15",,2h 10m,130
-zuzenketak: exposedDropdown,GrAL,Aplikazioa,"Apr 24, 2021 12:00","Apr 24, 2021 13:30",,1h 30m,90
-exposedDropdown,GrAL,Aplikazioa,"Apr 23, 2021 21:00","Apr 23, 2021 22:25",,1h 25m,85
-zuzenketak,GrAL,Aplikazioa,"Apr 23, 2021 18:30","Apr 23, 2021 19:40",,1h 10m,70
-"list error, point conversion",GrAL,Aplikazioa,"Apr 19, 2021 20:30","Apr 19, 2021 23:45",45,3h 15m,150
-bilera,GrAL,Jarraipen eta Kontrola,"Apr 19, 2021 12:20","Apr 19, 2021 14:40",,2h 20m,140
-db,GrAL,Aplikazioa,"Apr 18, 2021 16:45","Apr 18, 2021 19:00",,2h 15m,135
-db,GrAL,Aplikazioa,"Apr 18, 2021 11:15","Apr 18, 2021 13:50",,2h 35m,155
-database,GrAL,Aplikazioa,"Apr 17, 2021 12:10","Apr 17, 2021 15:15",,3h 5m,185
-juego logica,GrAL,Aplikazioa,"Apr 16, 2021 16:15","Apr 16, 2021 17:35",,1h 20m,80
-"shutdown, threading",GrAL,Aplikazioa,"Apr 15, 2021 18:20","Apr 15, 2021 19:20",,1h 0m,60
-,GrAL,,"Apr 14, 2021 19:05","Apr 14, 2021 20:00",,55m,55
-cancelrequest,GrAL,Aplikazioa,"Apr 13, 2021 23:55","Apr 14, 2021 1:00",,1h 5m,65
-"position observer, cancel",GrAL,Aplikazioa,"Apr 13, 2021 20:20","Apr 13, 2021 22:20",,2h 0m,120
-gui,GrAL,Aplikazioa,"Apr 12, 2021 21:00","Apr 12, 2021 22:00",,1h 0m,60
-design,GrAL,Aplikazioa,"Apr 12, 2021 15:05","Apr 12, 2021 17:15",,2h 10m,130
-alerts,GrAL,Aplikazioa,"Apr 11, 2021 15:50","Apr 11, 2021 18:25",,2h 35m,155
-"camera btn, alert",GrAL,Aplikazioa,"Apr 11, 2021 11:20","Apr 11, 2021 13:30",,2h 10m,130
-other tiles,GrAL,Aplikazioa,"Apr 11, 2021 0:25","Apr 11, 2021 1:50",,1h 25m,85
-mvvm livedata,GrAL,Aplikazioa,"Apr 10, 2021 17:05","Apr 10, 2021 21:40",50,4h 35m,225
-mvvm pattern,GrAL,Aplikazioa,"Apr 10, 2021 11:30","Apr 10, 2021 13:40",,2h 10m,130
-mvvm implementation,GrAL,Aplikazioa,"Apr 9, 2021 23:05","Apr 10, 2021 2:10",,3h 5m,185
-map position correction,GrAL,Aplikazioa,"Apr 9, 2021 15:05","Apr 9, 2021 16:35",,1h 30m,90
-marker positions adjust,GrAL,Aplikazioa,"Apr 8, 2021 23:05","Apr 9, 2021 0:25",,1h 20m,80
-map markers,GrAL,Aplikazioa,"Apr 8, 2021 15:40","Apr 8, 2021 17:45",,2h 5m,125
-maps,GrAL,Aplikazioa,"Apr 8, 2021 11:05","Apr 8, 2021 13:00",,1h 55m,115
-map transformation,GrAL,Aplikazioa,"Apr 7, 2021 22:50","Apr 8, 2021 0:30",,1h 40m,100
-map transformation,GrAL,Aplikazioa,"Apr 7, 2021 16:00","Apr 7, 2021 18:00",,2h 0m,120
-static qnode maps,GrAL,Aplikazioa,"Apr 7, 2021 12:05","Apr 7, 2021 13:40",,1h 35m,95
-android support,GrAL,Aplikazioa,"Apr 7, 2021 11:05","Apr 7, 2021 12:05",,1h 0m,60
-android fragment,GrAL,Aplikazioa,"Apr 6, 2021 21:45","Apr 6, 2021 23:00",,1h 15m,75
-rosactivity fragment,GrAL,Aplikazioa,"Apr 6, 2021 16:40","Apr 6, 2021 17:30",,50m,50
-"Activity, Intent",GrAL,Aplikazioa,"Apr 6, 2021 11:20","Apr 6, 2021 13:55",,2h 35m,155
-map marker,GrAL,Aplikazioa,"Apr 6, 2021 0:10","Apr 6, 2021 1:45",,1h 35m,95
-map -> imageview,GrAL,Aplikazioa,"Apr 5, 2021 10:20","Apr 5, 2021 14:35",20,4h 15m,235
-map tiles,GrAL,Aplikazioa,"Apr 5, 2021 0:05","Apr 5, 2021 2:45",,2h 40m,160
-Mapa,GrAL,Aplikazioa,"Apr 4, 2021 17:50","Apr 4, 2021 20:10",,2h 20m,140
-bilera,GrAL,Jarraipen eta Kontrola,"Mar 30, 2021 17:00","Mar 30, 2021 19:00",,2h 0m,120
-double listview,GrAL,Aplikazioa,"Mar 29, 2021 13:00","Mar 29, 2021 13:30",,30m,30
-ibilbide osoa,GrAL,Aplikazioa,"Mar 28, 2021 13:15","Mar 28, 2021 15:55",35,2h 40m,125
-xmlparser,GrAL,Aplikazioa,"Mar 27, 2021 20:50","Mar 27, 2021 21:50",,1h 0m,60
-listview refine,GrAL,Aplikazioa,"Mar 27, 2021 18:00","Mar 27, 2021 20:00",,2h 0m,120
-listview,GrAL,Aplikazioa,"Mar 26, 2021 16:55","Mar 26, 2021 18:55",,2h 0m,120
-listener (viewmodel),GrAL,Aplikazioa,"Mar 25, 2021 22:20","Mar 25, 2021 23:50",,1h 30m,90
-Qnode listener + costmap,GrAL,Aplikazioa,"Mar 25, 2021 14:30","Mar 25, 2021 17:00",,2h 30m,150
-Qnode,GrAL,Aplikazioa,"Mar 24, 2021 19:30","Mar 24, 2021 20:30",,1h 0m,60
-publish btn,GrAL,Aplikazioa,"Mar 24, 2021 17:10","Mar 24, 2021 18:55",,1h 45m,105
-app hasiera,GrAL,Aplikazioa,"Mar 23, 2021 22:55","Mar 24, 2021 0:45",,1h 50m,110
-app sortu + email,GrAL,Aplikazioa,"Mar 23, 2021 19:45","Mar 23, 2021 21:10",,1h 25m,85
-android threading,GrAL,Formakuntza,"Mar 23, 2021 0:00","Mar 23, 2021 0:40",,40m,40
-multilevel msgs,GrAL,Formakuntza,"Mar 22, 2021 16:10","Mar 22, 2021 18:20",,2h 10m,130
-multilevel msgs,GrAL,Formakuntza,"Mar 21, 2021 16:35","Mar 21, 2021 18:00",,1h 25m,85
-multilevel msgs,GrAL,Formakuntza,"Mar 21, 2021 11:55","Mar 21, 2021 14:00",,2h 5m,125
-multilevel msgs,GrAL,Formakuntza,"Mar 20, 2021 23:15","Mar 21, 2021 0:20",,1h 5m,65
-multilevel messages,GrAL,Formakuntza,"Mar 20, 2021 19:20","Mar 20, 2021 20:30",,1h 10m,70
-multilevel messages,GrAL,Formakuntza,"Mar 20, 2021 11:45","Mar 20, 2021 14:40",,2h 55m,175
-start navigation,GrAL,Formakuntza,"Mar 19, 2021 16:05","Mar 19, 2021 17:15",,1h 10m,70
-kokalekuak,GrAL,Formakuntza,"Mar 19, 2021 12:40","Mar 19, 2021 14:50",,2h 10m,130
-bilera ekaitzen bulego,GrAL,Jarraipen eta Kontrola,"Mar 17, 2021 12:30","Mar 17, 2021 14:30",,2h 0m,120
-listener (subscriber),GrAL,Formakuntza,"Mar 16, 2021 23:10","Mar 17, 2021 0:10",,1h 0m,60
-rostopic izena,GrAL,Formakuntza,"Mar 16, 2021 20:40","Mar 16, 2021 22:30",,1h 50m,110
-textview,GrAL,Formakuntza,"Mar 15, 2021 16:30","Mar 15, 2021 18:30",,2h 0m,120
-pubsub nodes,GrAL,Formakuntza,"Mar 14, 2021 23:00","Mar 15, 2021 0:10",,1h 10m,70
-movement,GrAL,Formakuntza,"Mar 14, 2021 16:25","Mar 14, 2021 18:40",,2h 15m,135
-messages,GrAL,Formakuntza,"Mar 13, 2021 23:35","Mar 14, 2021 0:45",,1h 10m,70
-messages,GrAL,Formakuntza,"Mar 13, 2021 16:40","Mar 13, 2021 18:30",,1h 50m,110
-erabilpenkasu,GrAL,Diseinua,"Mar 13, 2021 12:45","Mar 13, 2021 13:20",,35m,35
-kudeaketa plana bukatu,GrAL,plangintza,"Mar 10, 2021 16:20","Mar 10, 2021 17:10",,50m,50
-informazio-sistema,GrAL,plangintza,"Mar 9, 2021 23:15","Mar 9, 2021 23:50",,35m,35
-"kalitatea, informazio-sistema",GrAL,plangintza,"Mar 8, 2021 19:20","Mar 8, 2021 20:40",,1h 20m,80
-kalitatea,GrAL,plangintza,"Mar 8, 2021 12:20","Mar 8, 2021 13:55",,1h 35m,95
-kalitatea,GrAL,plangintza,"Mar 7, 2021 23:35","Mar 8, 2021 0:55",,1h 20m,80
-arriskuak,GrAL,plangintza,"Mar 7, 2021 19:05","Mar 7, 2021 20:30",,1h 25m,85
-arriskuak,GrAL,plangintza,"Mar 7, 2021 15:45","Mar 7, 2021 16:20",,35m,35
-arriskuak,GrAL,plangintza,"Mar 7, 2021 12:40","Mar 7, 2021 13:50",,1h 10m,70
-arriskuak,GrAL,plangintza,"Mar 6, 2021 19:40","Mar 6, 2021 21:05",,1h 25m,85
-arriskuak,GrAL,plangintza,"Mar 6, 2021 16:30","Mar 6, 2021 17:40",,1h 10m,70
-kudeaketa,GrAL,plangintza,"Mar 6, 2021 12:25","Mar 6, 2021 13:25",,1h 0m,60
-"memoria, besteak irakurri",GrAL,plangintza,"Mar 5, 2021 23:40","Mar 6, 2021 0:40",,1h 0m,60
-helburuak,GrAL,plangintza,"Mar 5, 2021 19:50","Mar 5, 2021 20:35",,45m,45
-"egutegia, kudeaketa",GrAL,plangintza,"Mar 4, 2021 17:45","Mar 4, 2021 20:30",20,2h 45m,145
-staruml watermark,GrAL,,"Mar 2, 2021 23:20","Mar 3, 2021 0:40",,1h 20m,80
-kudeaketa,GrAL,plangintza,"Mar 1, 2021 16:50","Mar 1, 2021 20:10",30,3h 20m,170
-arriskuen kudeaketa,GrAL,plangintza,"Feb 28, 2021 17:50","Feb 28, 2021 19:15",,1h 25m,85
-"helburuak, teknologiak",GrAL,plangintza,"Feb 22, 2021 18:30","Feb 22, 2021 19:00",,30m,30
-"gantt, helburuak",GrAL,plangintza,"Feb 21, 2021 17:30","Feb 21, 2021 19:45",,2h 15m,135
-gantt,GrAL,plangintza,"Feb 19, 2021 20:00",,,h 0m,0
-gantt,GrAL,plangintza,"Feb 19, 2021 12:45","Feb 19, 2021 13:35",,50m,50
-"atazak, gantt",GrAL,plangintza,"Feb 18, 2021 16:15","Feb 18, 2021 17:15",,1h 0m,60
-Atazak + Gantt,GrAL,plangintza,"Feb 15, 2021 16:15","Feb 15, 2021 18:15",,2h 0m,120
-2.3.1 LDE osatu,GrAL,plangintza,"Feb 14, 2021 17:30","Feb 14, 2021 20:15",20,2h 45m,145
-egitura + LDE,GrAL,plangintza,"Feb 13, 2021 20:15","Feb 13, 2021 21:55",,1h 40m,100
-Prototipoa sortu,GrAL,Aplikazioa,"Feb 11, 2021 15:30","Feb 11, 2021 18:40",20,3h 10m,170
-Beste GrALak begiratu,GrAL,Formakuntza,"Feb 10, 2021 18:15","Feb 10, 2021 20:30",10,2h 15m,125
-RosAndroid IPs,GrAL,Formakuntza,"Feb 8, 2021 20:00","Feb 8, 2021 21:00",,1h 0m,60
-Bilera,GrAL,Jarraipen eta Kontrola,"Feb 8, 2021 17:40","Feb 8, 2021 19:40",,2h 0m,120
-RosAndroid,GrAL,Formakuntza,"Feb 7, 2021 18:10","Feb 7, 2021 20:30",35,2h 20m,105
-RosAndroid,GrAL,Formakuntza,"Feb 6, 2021 16:35","Feb 6, 2021 19:45",,3h 10m,190
-RosAndroid debug,GrAL,Formakuntza,"Feb 6, 2021 12:35","Feb 6, 2021 13:35",,1h 0m,60
-RosAndroid + memoria,GrAL,Formakuntza,"Feb 5, 2021 17:40","Feb 5, 2021 19:30",,1h 50m,110
-RosAndroid debug,GrAL,Formakuntza,"Feb 4, 2021 17:30","Feb 4, 2021 18:45",,1h 15m,75
-RosAndroid probak,GrAL,Formakuntza,"Feb 2, 2021 20:00","Feb 2, 2021 20:45",,45m,45
-RosAndroid,GrAL,Formakuntza,"Feb 1, 2021 17:25","Feb 1, 2021 19:40",10,2h 15m,125
-Rosjava + RosAndroid,GrAL,Formakuntza,"Jan 31, 2021 18:50","Jan 31, 2021 19:45",10,55m,45
-Rosjava,GrAL,Formakuntza,"Jan 30, 2021 17:30","Jan 30, 2021 20:00",20,2h 30m,130
-Rosjava,GrAL,Formakuntza,"Jan 27, 2021 18:30","Jan 27, 2021 20:30",,2h 0m,120
-Bilera,GrAL,Jarraipen eta Kontrola,"Dec 12, 2020 0:00","Dec 12, 2020 1:00",,1h 0m,60
-bilera,GrAL,Jarraipen eta Kontrola,"Sep 30, 2020","Sep 30, 2020 2:30",,2h 30m,150
+Task,Category,Start,End,Rest,Total,Total(mins)
+aurkezpena aldaketak,Defentsa,"June 29, 2021 20:20","June 29, 2021 21:05",,45m,45
+bilera,Defentsa,"June 29, 2021 16:00","June 29, 2021 17:00",,1h 0m,60
+aurkezpena,Defentsa,"June 28, 2021 15:45","June 28, 2021 16:45",,1h 0m,60
+aurkezpena,Defentsa,"June 27, 2021 11:35","June 27, 2021 14:00",,2h 25m,145
+aurkezpena,Defentsa,"June 24, 2021 16:15","June 24, 2021 17:40",,1h 25m,85
+aurkezpena,Defentsa,"June 24, 2021 11:35","June 24, 2021 13:30",,1h 55m,115
+aurkezpena,Defentsa,"June 23, 2021 15:40","June 23, 2021 17:10",,1h 30m,90
+aurkezpena,Defentsa,"June 23, 2021 11:50","June 23, 2021 14:00",,2h 10m,130
+aurkezpena,Defentsa,"June 22, 2021 11:55","June 22, 2021 13:25",,1h 30m,90
+aurkezpena,Defentsa,"June 22, 2021 0:00","June 22, 2021 0:30",,30m,30
+aurkezpena,Defentsa,"June 21, 2021 12:00","June 21, 2021 13:50",,1h 50m,110
+errepaso eta entrega,Dokumentazio,"June 19, 2021 16:05","June 19, 2021 18:00",,1h 55m,115
+poster,Defentsa,"June 18, 2021 10:55","June 18, 2021 11:30",,35m,35
+poster,Defentsa,"June 17, 2021 20:00","June 17, 2021 20:45",,45m,45
+poster,Defentsa,"June 17, 2021 17:30","June 17, 2021 19:15",,1h 45m,105
+azken zuzenketak,Dokumentazio,"June 17, 2021 11:25","June 17, 2021 13:15",,1h 50m,110
+azken zuzenketak,Dokumentazio,"June 16, 2021 15:40","June 16, 2021 17:00",,1h 20m,80
+azken zuzenketak,Dokumentazio,"June 16, 2021 11:30","June 16, 2021 13:10",,1h 40m,100
+poster,Defentsa,"June 15, 2021 20:00","June 15, 2021 21:05",,1h 5m,65
+poster,Defentsa,"June 15, 2021 15:15","June 15, 2021 16:15",,1h 0m,60
+gidabot atal berria,Dokumentazio,"June 13, 2021 16:40","June 13, 2021 17:50",,1h 10m,70
+gidabot atal berria,Dokumentazio,"June 13, 2021 13:40","June 13, 2021 14:20",,40m,40
+gidabot atal berria,Dokumentazio,"June 13, 2021 10:20","June 13, 2021 11:40",,1h 20m,80
+gidabot atal berria,Dokumentazio,"June 12, 2021 9:45","June 12, 2021 10:15",,30m,30
+gidabot gehitu,Dokumentazio,"June 11, 2021 17:00","June 11, 2021 17:45",,45m,45
+zuzenketak + gidabot,Dokumentazio,"June 11, 2021 10:25","June 11, 2021 11:20",,55m,55
+errepaso igor + korreo,Dokumentazio,"June 10, 2021 19:05","June 10, 2021 19:25",,20m,20
+laburpena translate,Dokumentazio,"June 10, 2021 14:05","June 10, 2021 14:55",,50m,50
+errepaso,Dokumentazio,"June 10, 2021 10:25","June 10, 2021 11:50",,1h 25m,85
+errepaso,Dokumentazio,"June 9, 2021 16:25","June 9, 2021 17:00",,35m,35
+errepaso,Dokumentazio,"June 9, 2021 11:30","June 9, 2021 12:30",,1h 0m,60
+errepaso + arriskuanalisia,Dokumentazio,"June 8, 2021 20:30","June 8, 2021 22:25",,1h 55m,115
+errepaso,Dokumentazio,"June 8, 2021 11:45","June 8, 2021 12:30",,45m,45
+demo,Defentsa,"June 7, 2021 21:00","June 7, 2021 21:35",,35m,35
+errepaso,Dokumentazio,"June 7, 2021 20:10","June 7, 2021 20:55",,45m,45
+errepaso,Dokumentazio,"June 7, 2021 0:05","June 7, 2021 0:55",,50m,50
+errepaso,Dokumentazio,"June 6, 2021 20:00","June 6, 2021 20:30",,30m,30
+i.lezioak,Dokumentazio,"June 6, 2021 17:15","June 6, 2021 18:10",,55m,55
+readme,Dokumentazio,"June 6, 2021 15:35","June 6, 2021 16:05",,30m,30
+readme,Dokumentazio,"June 6, 2021 13:25","June 6, 2021 14:05",,40m,40
+i.lezioak + errepaso,Dokumentazio,"June 6, 2021 12:15","June 6, 2021 13:15",,1h 0m,60
+sd + errepaso azkar,Dokumentazio,"June 5, 2021 0:40","June 5, 2021 1:05",,25m,25
+readme,Dokumentazio,"June 4, 2021 16:50","June 4, 2021 17:05",,15m,15
+ondorioak,Dokumentazio,"June 4, 2021 15:40","June 4, 2021 16:30",,50m,50
+ondorioak,Dokumentazio,"June 4, 2021 10:55","June 4, 2021 13:10",10,2h 15m,125
+ondorioak,Dokumentazio,"June 3, 2021 20:00","June 3, 2021 21:30",,1h 30m,90
+jk,Jarraipen eta Kontrola,"June 3, 2021 15:10","June 3, 2021 16:35",,1h 25m,85
+jk ,Dokumentazio,"June 3, 2021 11:30","June 3, 2021 13:10",,1h 40m,100
+jk desb taula,Dokumentazio,"June 2, 2021 22:55","June 2, 2021 23:30",,35m,35
+jk,Dokumentazio,"June 2, 2021 15:10","June 2, 2021 16:55",,1h 45m,105
+sarrera + jk,Dokumentazio,"June 2, 2021 11:15","June 2, 2021 13:30",,2h 15m,135
+sarrera + jarraipen eta kontrola,Dokumentazio,"June 1, 2021 18:40","June 1, 2021 20:15",,1h 35m,95
+aurrekariak + teknologiak errepaso,Dokumentazio,"June 1, 2021 14:45","June 1, 2021 15:15",,30m,30
+ros,Dokumentazio,"June 1, 2021 11:15","June 1, 2021 13:15",,2h 0m,120
+ros,Dokumentazio,"May 31, 2021 15:45","May 31, 2021 16:40",,55m,55
+teknologiak + errepaso,Dokumentazio,"May 31, 2021 10:35","May 31, 2021 13:00",,2h 25m,145
+teknologiak,Dokumentazio,"May 30, 2021 23:30","May 31, 2021 0:55",,1h 25m,85
+teknologiak,Dokumentazio,"May 30, 2021 17:55","May 30, 2021 19:25",,1h 30m,90
+sekuentzia diagramak,Diseinua,"May 30, 2021 16:40","May 30, 2021 17:45",,1h 5m,65
+sekuentzia diagramak,Diseinua,"May 30, 2021 11:25","May 30, 2021 13:50",,2h 25m,145
+aurrekariak,Dokumentazio,"May 29, 2021 16:50","May 29, 2021 19:10",,2h 20m,140
+demo,Defentsa,"May 28, 2021 22:30","May 29, 2021 0:30",,2h 0m,120
+aurrekariak,Dokumentazio,"May 28, 2021 15:40","May 28, 2021 16:20",,40m,40
+errepaso + 3.it,Dokumentazio,"May 28, 2021 11:15","May 28, 2021 13:15",,2h 0m,120
+3. it,Dokumentazio,"May 27, 2021 16:35","May 27, 2021 18:30",,1h 55m,115
+2. it,Dokumentazio,"May 27, 2021 11:00","May 27, 2021 12:50",,1h 50m,110
+2. it,Dokumentazio,"May 27, 2021 0:40","May 27, 2021 1:20",,40m,40
+2. it,Dokumentazio,"May 26, 2021 14:50","May 26, 2021 16:30",,1h 40m,100
+2.it,Dokumentazio,"May 26, 2021 10:40","May 26, 2021 12:40",,2h 0m,120
+2. it,Dokumentazio,"May 25, 2021 22:45","May 25, 2021 23:50",,1h 5m,65
+2. it,Dokumentazio,"May 25, 2021 19:15","May 25, 2021 20:25",,1h 10m,70
+1. it,Dokumentazio,"May 25, 2021 11:10","May 25, 2021 12:40",,1h 30m,90
+1. it,Dokumentazio,"May 24, 2021 23:40","May 25, 2021 0:45",,1h 5m,65
+s.g - 1. it,Dokumentazio,"May 24, 2021 14:45","May 24, 2021 17:10",,2h 25m,145
+s.g - 1. it,Dokumentazio,"May 24, 2021 12:50","May 24, 2021 14:40",,1h 50m,110
+memoria bigarren entrega (plan + e.b + diseinua),Dokumentazio,"May 23, 2021 18:15","May 23, 2021 21:35",35,3h 20m,165
+planifikazioa + e.b,Dokumentazio,"May 23, 2021 10:50","May 23, 2021 12:50",,2h 0m,120
+arkitektura,Diseinua,"May 22, 2021 17:50","May 22, 2021 21:05",20,3h 15m,175
+planifikazioa + e.b,Dokumentazio,"May 22, 2021 10:45","May 22, 2021 11:40",,55m,55
+planifikazioa + e.b,,"May 21, 2021 14:15","May 21, 2021 16:10",,1h 55m,115
+planifikazioa + e.b,Dokumentazio,"May 21, 2021 10:40","May 21, 2021 12:45",,2h 5m,125
+planifikazioa + e.b,Dokumentazio,"May 19, 2021 16:45","May 19, 2021 17:20",,35m,35
+Plangintza + E.bilketa,Dokumentazio,"May 19, 2021 11:55","May 19, 2021 13:15",,1h 20m,80
+eskakizunen bilketa,Eskakizunen bilketa,"May 18, 2021 19:45","May 18, 2021 20:45",,1h 0m,60
+eskakizunen bilketa,Eskakizunen bilketa,"May 17, 2021 10:20","May 17, 2021 12:15",,1h 55m,115
+eskakizunen bilketa,Eskakizunen bilketa,"May 16, 2021 20:15","May 16, 2021 22:10",,1h 55m,115
+eskakizunen bilketa,Eskakizunen bilketa,"May 16, 2021 16:00","May 16, 2021 17:30",,1h 30m,90
+eskakizunen bilketa,Eskakizunen bilketa,"May 16, 2021 12:45","May 16, 2021 14:55",,2h 10m,130
+klase diagrama + arkitektura,Diseinua,"May 16, 2021 11:40","May 16, 2021 12:45",,1h 5m,65
+klase diagrama,Diseinua,"May 15, 2021 19:10","May 15, 2021 22:05",,2h 55m,175
+repository aldaketak,Aplikazioa,"May 15, 2021 11:00","May 15, 2021 12:00",,1h 0m,60
+repository aldaketak,Aplikazioa,"May 14, 2021 23:00","May 15, 2021 0:30",,1h 30m,90
+class diagram,Diseinua,"May 14, 2021 15:05","May 14, 2021 17:00",15,1h 55m,100
+class diagram,Diseinua,"May 14, 2021 11:15","May 14, 2021 13:35",,2h 20m,140
+use case diagram,Diseinua,"May 14, 2021 0:00","May 14, 2021 1:00",,1h 0m,60
+bilera,Jarraipen eta Kontrola,"May 13, 2021 10:00","May 13, 2021 12:00",,2h 0m,120
+refactoring,Aplikazioa,"May 12, 2021 22:40","May 13, 2021 0:10",,1h 30m,90
+iterazioen banaketa + refactor,Aplikazioa,"May 12, 2021 15:00","May 12, 2021 17:10",,2h 10m,130
+memoria → garapena pentsatu,Dokumentazio,"May 12, 2021 11:30","May 12, 2021 13:45",,2h 15m,135
+use case diagram,Diseinua,"May 12, 2021 10:30","May 12, 2021 11:30",,1h 0m,60
+migration azken saiakera,Aplikazioa,"May 12, 2021 10:00","May 12, 2021 10:30",,30m,30
+dbrecover,Aplikazioa,"May 11, 2021 23:15","May 12, 2021 0:30",,1h 15m,75
+datubase konponketak,Aplikazioa,"May 11, 2021 18:30","May 11, 2021 19:10",,40m,40
+domeinu diagrama,Dokumentazio,"May 11, 2021 16:50","May 11, 2021 18:30",,1h 40m,100
+refactoring,Aplikazioa,"May 11, 2021 11:55","May 11, 2021 13:30",,1h 35m,95
+memoria,Dokumentazio,"May 11, 2021 10:55","May 11, 2021 11:55",,1h 0m,60
+zuzenketak,Aplikazioa,"May 10, 2021 15:55","May 10, 2021 17:40",,1h 45m,105
+zuzenketak,Aplikazioa,"May 10, 2021 11:35","May 10, 2021 14:00",,2h 25m,145
+zuzenketak,Aplikazioa,"May 9, 2021 19:15","May 9, 2021 21:00",,1h 45m,105
+zuzenketak,Aplikazioa,"May 9, 2021 15:10","May 9, 2021 16:45",,1h 35m,95
+zuzenketak,Aplikazioa,"May 9, 2021 12:55","May 9, 2021 14:00",,1h 5m,65
+bilera,Jarraipen eta Kontrola,"May 4, 2021 10:45","May 4, 2021 11:45",,1h 0m,60
+multilevel,Aplikazioa,"May 3, 2021 22:15","May 3, 2021 23:15",,1h 0m,60
+multilevel,Aplikazioa,"May 3, 2021 15:15","May 3, 2021 17:00",,1h 45m,105
+multilevel,Aplikazioa,"May 3, 2021 11:00","May 3, 2021 12:40",,1h 40m,100
+multilevel,Aplikazioa,"May 2, 2021 16:15","May 2, 2021 19:15",,3h 0m,180
+multilevel,Aplikazioa,"May 2, 2021 11:30","May 2, 2021 13:30",,2h 0m,120
+multilevel,Aplikazioa,"May 1, 2021 20:20","May 1, 2021 22:30",,2h 10m,130
+multilevel,Aplikazioa,"May 1, 2021 18:25","May 1, 2021 19:10",,45m,45
+multilevel,Aplikazioa,"May 1, 2021 16:00","May 1, 2021 17:40",,1h 40m,100
+beste solaruak tolatlng,Aplikazioa,"May 1, 2021 12:10","May 1, 2021 14:15",,2h 5m,125
+other robots install + fixes,Aplikazioa,"April 30, 2021 19:45","April 30, 2021 21:30",,1h 45m,105
+multilevel labels,Aplikazioa,"April 29, 2021 19:20","April 29, 2021 20:35",,1h 15m,75
+multifloor start,Aplikazioa,"April 28, 2021 16:15","April 28, 2021 17:15",,1h 0m,60
+zuzenketak,Aplikazioa,"April 25, 2021 17:50","April 25, 2021 19:50",,2h 0m,120
+toast,Aplikazioa,"April 25, 2021 12:05","April 25, 2021 13:35",,1h 30m,90
+zuzenketak: publishRoute,Aplikazioa,"April 24, 2021 21:05","April 24, 2021 23:15",,2h 10m,130
+zuzenketak: exposedDropdown,Aplikazioa,"April 24, 2021 12:00","April 24, 2021 13:30",,1h 30m,90
+exposedDropdown,Aplikazioa,"April 23, 2021 21:00","April 23, 2021 22:25",,1h 25m,85
+zuzenketak,Aplikazioa,"April 23, 2021 18:30","April 23, 2021 19:40",,1h 10m,70
+"list error, point conversion",Aplikazioa,"April 19, 2021 20:30","April 19, 2021 23:45",45,3h 15m,150
+bilera,Jarraipen eta Kontrola,"April 19, 2021 12:20","April 19, 2021 14:40",,2h 20m,140
+db,Aplikazioa,"April 18, 2021 16:45","April 18, 2021 19:00",,2h 15m,135
+db,Aplikazioa,"April 18, 2021 11:15","April 18, 2021 13:50",,2h 35m,155
+database,Aplikazioa,"April 17, 2021 12:10","April 17, 2021 15:15",,3h 5m,185
+juego logica,Aplikazioa,"April 16, 2021 16:15","April 16, 2021 17:35",,1h 20m,80
+"shutdown, threading",Aplikazioa,"April 15, 2021 18:20","April 15, 2021 19:20",,1h 0m,60
+,,"April 14, 2021 19:05","April 14, 2021 20:00",,55m,55
+cancelrequest,Aplikazioa,"April 13, 2021 23:55","April 14, 2021 1:00",,1h 5m,65
+"position observer, cancel",Aplikazioa,"April 13, 2021 20:20","April 13, 2021 22:20",,2h 0m,120
+gui,Aplikazioa,"April 12, 2021 21:00","April 12, 2021 22:00",,1h 0m,60
+design,Aplikazioa,"April 12, 2021 15:05","April 12, 2021 17:15",,2h 10m,130
+alerts,Aplikazioa,"April 11, 2021 15:50","April 11, 2021 18:25",,2h 35m,155
+"camera btn, alert",Aplikazioa,"April 11, 2021 11:20","April 11, 2021 13:30",,2h 10m,130
+other tiles,Aplikazioa,"April 11, 2021 0:25","April 11, 2021 1:50",,1h 25m,85
+mvvm livedata,Aplikazioa,"April 10, 2021 17:05","April 10, 2021 21:40",50,4h 35m,225
+mvvm pattern,Aplikazioa,"April 10, 2021 11:30","April 10, 2021 13:40",,2h 10m,130
+mvvm implementation,Aplikazioa,"April 9, 2021 23:05","April 10, 2021 2:10",,3h 5m,185
+map position correction,Aplikazioa,"April 9, 2021 15:05","April 9, 2021 16:35",,1h 30m,90
+marker positions adjust,Aplikazioa,"April 8, 2021 23:05","April 9, 2021 0:25",,1h 20m,80
+map markers,Aplikazioa,"April 8, 2021 15:40","April 8, 2021 17:45",,2h 5m,125
+maps,Aplikazioa,"April 8, 2021 11:05","April 8, 2021 13:00",,1h 55m,115
+map transformation,Aplikazioa,"April 7, 2021 22:50","April 8, 2021 0:30",,1h 40m,100
+map transformation,Aplikazioa,"April 7, 2021 16:00","April 7, 2021 18:00",,2h 0m,120
+static qnode maps,Aplikazioa,"April 7, 2021 12:05","April 7, 2021 13:40",,1h 35m,95
+android support,Aplikazioa,"April 7, 2021 11:05","April 7, 2021 12:05",,1h 0m,60
+android fragment,Aplikazioa,"April 6, 2021 21:45","April 6, 2021 23:00",,1h 15m,75
+rosactivity fragment,Aplikazioa,"April 6, 2021 16:40","April 6, 2021 17:30",,50m,50
+"Activity, Intent",Aplikazioa,"April 6, 2021 11:20","April 6, 2021 13:55",,2h 35m,155
+map marker,Aplikazioa,"April 6, 2021 0:10","April 6, 2021 1:45",,1h 35m,95
+map -> imageview,Aplikazioa,"April 5, 2021 10:20","April 5, 2021 14:35",20,4h 15m,235
+map tiles,Aplikazioa,"April 5, 2021 0:05","April 5, 2021 2:45",,2h 40m,160
+Mapa,Aplikazioa,"April 4, 2021 17:50","April 4, 2021 20:10",,2h 20m,140
+bilera,Jarraipen eta Kontrola,"March 30, 2021 17:00","March 30, 2021 19:00",,2h 0m,120
+double listview,Aplikazioa,"March 29, 2021 13:00","March 29, 2021 13:30",,30m,30
+ibilbide osoa,Aplikazioa,"March 28, 2021 13:15","March 28, 2021 15:55",35,2h 40m,125
+xmlparser,Aplikazioa,"March 27, 2021 20:50","March 27, 2021 21:50",,1h 0m,60
+listview refine,Aplikazioa,"March 27, 2021 18:00","March 27, 2021 20:00",,2h 0m,120
+listview,Aplikazioa,"March 26, 2021 16:55","March 26, 2021 18:55",,2h 0m,120
+listener (viewmodel),Aplikazioa,"March 25, 2021 22:20","March 25, 2021 23:50",,1h 30m,90
+Qnode listener + costmap,Aplikazioa,"March 25, 2021 14:30","March 25, 2021 17:00",,2h 30m,150
+Qnode,Aplikazioa,"March 24, 2021 19:30","March 24, 2021 20:30",,1h 0m,60
+publish btn,Aplikazioa,"March 24, 2021 17:10","March 24, 2021 18:55",,1h 45m,105
+app hasiera,Aplikazioa,"March 23, 2021 22:55","March 24, 2021 0:45",,1h 50m,110
+app sortu + email,Aplikazioa,"March 23, 2021 19:45","March 23, 2021 21:10",,1h 25m,85
+android threading,Formakuntza,"March 23, 2021 0:00","March 23, 2021 0:40",,40m,40
+multilevel msgs,Formakuntza,"March 22, 2021 16:10","March 22, 2021 18:20",,2h 10m,130
+multilevel msgs,Formakuntza,"March 21, 2021 16:35","March 21, 2021 18:00",,1h 25m,85
+multilevel msgs,Formakuntza,"March 21, 2021 11:55","March 21, 2021 14:00",,2h 5m,125
+multilevel msgs,Formakuntza,"March 20, 2021 23:15","March 21, 2021 0:20",,1h 5m,65
+multilevel messages,Formakuntza,"March 20, 2021 19:20","March 20, 2021 20:30",,1h 10m,70
+multilevel messages,Formakuntza,"March 20, 2021 11:45","March 20, 2021 14:40",,2h 55m,175
+start navigation,Formakuntza,"March 19, 2021 16:05","March 19, 2021 17:15",,1h 10m,70
+kokalekuak,Formakuntza,"March 19, 2021 12:40","March 19, 2021 14:50",,2h 10m,130
+bilera ekaitzen bulego,Jarraipen eta Kontrola,"March 17, 2021 12:30","March 17, 2021 14:30",,2h 0m,120
+listener (subscriber),Formakuntza,"March 16, 2021 23:10","March 17, 2021 0:10",,1h 0m,60
+rostopic izena,Formakuntza,"March 16, 2021 20:40","March 16, 2021 22:30",,1h 50m,110
+textview,Formakuntza,"March 15, 2021 16:30","March 15, 2021 18:30",,2h 0m,120
+pubsub nodes,Formakuntza,"March 14, 2021 23:00","March 15, 2021 0:10",,1h 10m,70
+movement,Formakuntza,"March 14, 2021 16:25","March 14, 2021 18:40",,2h 15m,135
+messages,Formakuntza,"March 13, 2021 23:35","March 14, 2021 0:45",,1h 10m,70
+messages,Formakuntza,"March 13, 2021 16:40","March 13, 2021 18:30",,1h 50m,110
+erabilpenkasu,Diseinua,"March 13, 2021 12:45","March 13, 2021 13:20",,35m,35
+kudeaketa plana bukatu,plangintza,"March 10, 2021 16:20","March 10, 2021 17:10",,50m,50
+informazio-sistema,plangintza,"March 9, 2021 23:15","March 9, 2021 23:50",,35m,35
+"kalitatea, informazio-sistema",plangintza,"March 8, 2021 19:20","March 8, 2021 20:40",,1h 20m,80
+kalitatea,plangintza,"March 8, 2021 12:20","March 8, 2021 13:55",,1h 35m,95
+kalitatea,plangintza,"March 7, 2021 23:35","March 8, 2021 0:55",,1h 20m,80
+arriskuak,plangintza,"March 7, 2021 19:05","March 7, 2021 20:30",,1h 25m,85
+arriskuak,plangintza,"March 7, 2021 15:45","March 7, 2021 16:20",,35m,35
+arriskuak,plangintza,"March 7, 2021 12:40","March 7, 2021 13:50",,1h 10m,70
+arriskuak,plangintza,"March 6, 2021 19:40","March 6, 2021 21:05",,1h 25m,85
+arriskuak,plangintza,"March 6, 2021 16:30","March 6, 2021 17:40",,1h 10m,70
+kudeaketa,plangintza,"March 6, 2021 12:25","March 6, 2021 13:25",,1h 0m,60
+"memoria, besteak irakurri",plangintza,"March 5, 2021 23:40","March 6, 2021 0:40",,1h 0m,60
+helburuak,plangintza,"March 5, 2021 19:50","March 5, 2021 20:35",,45m,45
+"egutegia, kudeaketa",plangintza,"March 4, 2021 17:45","March 4, 2021 20:30",20,2h 45m,145
+staruml watermark,,"March 2, 2021 23:20","March 3, 2021 0:40",,1h 20m,80
+kudeaketa,plangintza,"March 1, 2021 16:50","March 1, 2021 20:10",30,3h 20m,170
+arriskuen kudeaketa,plangintza,"February 28, 2021 17:50","February 28, 2021 19:15",,1h 25m,85
+"helburuak, teknologiak",plangintza,"February 22, 2021 18:30","February 22, 2021 19:00",,30m,30
+"gantt, helburuak",plangintza,"February 21, 2021 17:30","February 21, 2021 19:45",,2h 15m,135
+gantt,plangintza,"February 19, 2021 20:00",,,h 0m,0
+gantt,plangintza,"February 19, 2021 12:45","February 19, 2021 13:35",,50m,50
+"atazak, gantt",plangintza,"February 18, 2021 16:15","February 18, 2021 17:15",,1h 0m,60
+Atazak + Gantt,plangintza,"February 15, 2021 16:15","February 15, 2021 18:15",,2h 0m,120
+2.3.1 LDE osatu,plangintza,"February 14, 2021 17:30","February 14, 2021 20:15",20,2h 45m,145
+egitura + LDE,plangintza,"February 13, 2021 20:15","February 13, 2021 21:55",,1h 40m,100
+Prototipoa sortu,Aplikazioa,"February 11, 2021 15:30","February 11, 2021 18:40",20,3h 10m,170
+Beste GrALak begiratu,Formakuntza,"February 10, 2021 18:15","February 10, 2021 20:30",10,2h 15m,125
+RosAndroid IPs,Formakuntza,"February 8, 2021 20:00","February 8, 2021 21:00",,1h 0m,60
+Bilera,Jarraipen eta Kontrola,"February 8, 2021 17:40","February 8, 2021 19:40",,2h 0m,120
+RosAndroid,Formakuntza,"February 7, 2021 18:10","February 7, 2021 20:30",35,2h 20m,105
+RosAndroid,Formakuntza,"February 6, 2021 16:35","February 6, 2021 19:45",,3h 10m,190
+RosAndroid debug,Formakuntza,"February 6, 2021 12:35","February 6, 2021 13:35",,1h 0m,60
+RosAndroid + memoria,Formakuntza,"February 5, 2021 17:40","February 5, 2021 19:30",,1h 50m,110
+RosAndroid debug,Formakuntza,"February 4, 2021 17:30","February 4, 2021 18:45",,1h 15m,75
+RosAndroid probak,Formakuntza,"February 2, 2021 20:00","February 2, 2021 20:45",,45m,45
+RosAndroid,Formakuntza,"February 1, 2021 17:25","February 1, 2021 19:40",10,2h 15m,125
+Rosjava + RosAndroid,Formakuntza,"January 31, 2021 18:50","January 31, 2021 19:45",10,55m,45
+Rosjava,Formakuntza,"January 30, 2021 17:30","January 30, 2021 20:00",20,2h 30m,130
+Rosjava,Formakuntza,"January 27, 2021 18:30","January 27, 2021 20:30",,2h 0m,120
+Bilera,,"December 12, 2020 0:00","December 12, 2020 1:00",,1h 0m,60
+bilera,,"September 30, 2020","September 30, 2020 2:30",,2h 30m,150
